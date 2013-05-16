@@ -15,15 +15,15 @@
 
 
 <div class="menu-full menu-detailed menu-padded">
-    <h1 class="light menu-first">Tourn/Site Info</h1> 
+    <h1 class="light menu-first">Mobile Main Menu</h1> 
     <ol> 
         <li>	
-            <a href="http://www.usyvl.org"> 
-            Find Tourn Info
+            <a href="./schedules.php"> 
+            Game Schedules
             </a></li> 
         <li>	
             <a href="http://www.usyvl.org"> 
-            Find Site Info
+            USYVL main website 
             </a></li> 
     </ol>
 </div>
