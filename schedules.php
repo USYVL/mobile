@@ -24,7 +24,7 @@ function topmenu($label = ""){
     
 }
 
-
+// Some sample data to test dynamically building the mobile pages...
 $statearray = array(
     'ca' => "California",
     'wa' => "Washington",
