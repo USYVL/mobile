@@ -70,6 +70,7 @@ class mwfMobileSite {
     }
     function dispPrograms(){
         $sdb = $GLOBALS['dbh']['sdb'];
+        $state = $_GET['state'];
         
         $b = "";
         $b .= $this->topmenu("Select Program");
