@@ -59,8 +59,8 @@ $s_key = ( isset($_SESSION['s_key']) ) ?  "{$_SESSION['s_key']}" : "unset" ;
 ///$pltable->addCol("solution","text","","","");
 ///$pldb->addTable($pltable);
 
-$sdb = new usyvlDbDesc('sdb','sqlite:io/db/sched.sqlite3','Scheduling Database',$logdb);
-$evtable = new usyvlDbTable("ev");                                     // should probably add a u_id
+$sdb = new dbMgmt('sdb','sqlite:io/db/sched.sqlite3','Scheduling Database',$logdb);
+$evtable = new dbMgmtTable("ev");                                     // should probably add a u_id
 $evtable->addCol("evid","integer","primary key","","");
 $evtable->addCol("season","text","","","");
 $evtable->addCol("program","text","","","");

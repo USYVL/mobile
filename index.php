@@ -32,7 +32,7 @@ class mwfMobileSite {
     function dispMain(){
         $b = "";
         $b .= $this->topmenu("Main Menu");
-        $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=select\">Get Your Schedule</a></li>\n";
+        $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=states\">Get Your Schedule</a></li>\n";
         $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=auto\">Auto Mode</a></li>\n";
         $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=auto\">Score Keeper</a></li>\n";
         $b .= "</ol>\n";
@@ -51,25 +51,101 @@ class mwfMobileSite {
         $b .= "</div>\n";
         return "$b";
     }
-    function dispSelect(){
+    function dispStates(){
+        $sdb = $GLOBALS['dbh']['sdb'];
+        
         $b = "";
         $b .= $this->topmenu("Select State");
         $b .= "<ul>\n";
-        $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=state\">Select State<a></li>\n";
+        $states = $sdb->fetchList("distinct state from ev");
+        foreach( $states as $state){
+           $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=programs&state=$state\">$state</a></li>\n";
+        }
+        
         $b .= "</ul>\n";
         return "$b";
     }
-    function dispState(){
+    function dispPrograms(){
+        $sdb = $GLOBALS['dbh']['sdb'];
+        
         $b = "";
-        $b .= $this->topmenu("Locate your USYVL Program/Site");
+        $b .= $this->topmenu("Select Program");
         $b .= "<ul>\n";
-        $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=state\">Select State<a></li>\n";
+        $programs = $sdb->fetchList("distinct program from ev","state='" . $_GET['state'] . "'");
+        foreach( $programs as $program){
+           $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=divisions&state=$state&program=$program\">$program</a></li>\n";
+        }
+        
         $b .= "</ul>\n";
-        return "";
+        return "$b";
+    }
+    function dispDivisions(){
+        $sdb = $GLOBALS['dbh']['sdb'];
+        $state = $_GET['state'];
+        $program = $_GET['program'];
+        
+        $b = "";
+        $b .= $this->topmenu("Select Age Division");
+        $b .= "<ul>\n";
+        $divisions = $sdb->fetchList("distinct div from tm","program='" . $_GET['program'] . "'");
+        foreach( $divisions as $division){
+           $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=teams&division=$division&state=$state&program=$program\">$division</a></li>\n";
+        }
+        
+        $b .= "</ul>\n";
+        return "$b";
+    }
+    function dispTeams(){
+        $sdb = $GLOBALS['dbh']['sdb'];
+        $state = $_GET['state'];
+        $program = $_GET['program'];
+        $division = $_GET['division'];
+        
+        $b = "";
+        $b .= $this->topmenu("Select Team");
+        $b .= "<ul>\n";
+        //$teams = $sdb->fetchList("distinct name from tm","program='" . $_GET['program'] . "' and div='" . $division . "'");
+        $data = $sdb->getKeyedHash('tmid',"select * from tm where program='" . $_GET['program'] . "' and div='" . $division . "'");
+        foreach( $data as $k => $d){
+            $team = $d['name'];
+            $tmid = $k;
+           $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=sched&tmid=$tmid&team=$team&division=$division&state=$state&program=$program\">$team</a></li>\n";
+        }
+        
+        $b .= "</ul>\n";
+        return "$b";
+    }
+    function dispSched(){
+        $sdb = $GLOBALS['dbh']['sdb'];
+        $state = $_GET['state'];
+        $program = $_GET['program'];
+        $division = $_GET['division'];
+        $team = $_GET['team'];
+        $tmid = $_GET['tmid'];
+        
+        $b = "";
+        $b .= $this->topmenu("$team Schedule");
+        $b .= "<ul>\n";
+        
+        
+        // need to get team id
+        $data = $sdb->getKeyedHash('gmid',"select * from gm left join ev on gm.evid = ev.evid where tmid1 = $tmid or tmid2 = $tmid order by ds");
+        foreach( $data as $d){
+            $evnm = $d['name'];
+            $date = $d['ds'];
+            $court = $d['court'];
+            $bt = $d['time_beg'];
+            $et = $d['time_end'];
+            $b .= "<li>$date - $bt - $et - Ct$court - $evnm</li>\n";
+            //$b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=sched&team=$team&division=$division&state=$state&program=$program\">$team</a></li>\n";
+        }
+        
+        $b .= "</ul>\n";
+        return "$b";
     }
     function display(){
         $b = "";
-        $b .= "Calling display(mode: " . $this->mode . "):<br />";
+        //$b .= "Calling display(mode: " . $this->mode . "):<br />";
 
         $content['errs'] .= "Mode: " . $this->mode . "\n";
         
@@ -80,13 +156,20 @@ class mwfMobileSite {
             case "select" :
                 $b .= $this->dispSelect();
                 break;
-            case "state" :
+            case "states" :
+                $b .= $this->dispStates();
                 break;
-            case "program" :
+            case "programs" :
+                $b .= $this->dispPrograms();
                 break;
-            case "division" :
+            case "divisions" :
+                $b .= $this->dispDivisions();
                 break;
-            case "team" :
+            case "teams" :
+                $b .= $this->dispTeams();
+                break;
+            case "sched" :
+                $b .= $this->dispSched();
                 break;
             default :
                 break;

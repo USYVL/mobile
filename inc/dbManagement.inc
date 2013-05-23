@@ -1,6 +1,7 @@
 <?php
 require_once("inc/csvUtils.inc");
-class usyvlDbDesc {
+require_once("inc/printUtils.inc");
+class dbMgmt {
     function __construct($key,$dsn,$desc,&$log = null){
         $this->db = $key;
         $this->dsn = $dsn;
@@ -34,6 +35,10 @@ class usyvlDbDesc {
     /////    $GLOBALS['dbh'][$db] =& $this;
     /////    
     /////}
+    function prepare($pquery){
+            if ( ! $this->initDB() )  return false; 
+            return $this->dbh->prepare($pquery);
+    }
     function isWritable(){
          return is_writable($this->path);
     }
@@ -43,24 +48,24 @@ class usyvlDbDesc {
     }
     function initDB(){
         // this makes the (possibly) mistaken assumption that all tables are created at once...
+        // want to create dbs as needed
+        // May need to revisit the order of the logic a bit here.  Made some fixes in 2012-12
+        // but more may still be needed.
         if( ! file_exists($this->path)){
             //touch($this->path);
             // loop over tables, creating them
-            print "file doesn't exist, need to initialize<br>\n";
+            dprint("Database not found",0,0,"Initializing Database: $this->path");
             $this->tablesCreated = false;
         }
-        //else {
-        //  $this->tablesCreated = true;
-        //}
-        if( ! file_exists($this->path)){
-            dprint("usyvlDbDesc",0,0,"$this->path does not exist");
+        else {
+            if( ! is_writable($this->path)){
+                dprint("dbMgmt",0,0,"Database $this->path is not writable");
+            }
         }
         
-        if( ! is_writable($this->path)){
-            dprint("usyvlDbDesc",0,0,"$this->path is not writable");
-        }
+        // this evaluates to false if the above is not true
         if( ! is_writable(dirname($this->path))){
-            dprint("usyvlDbDesc",0,0,"directory: " . dirname($this->path) . " is not writable for path $this->path");
+            dprint("dbMgmt",0,0,"directory: " . dirname($this->path) . " is not writable for path $this->path");
         }
         
         if( ! isset($this->dbh)){
@@ -73,7 +78,7 @@ class usyvlDbDesc {
         
         //$this->createTables();
         if( ! isset($this->tables) || ! is_array($this->tables)){
-            dprint("usyvlDbDesc::initDB()",0,0,"problem with table array, initiating backtrace");
+            dprint("dbMgmt::initDB()",0,0,"problem with table array, initiating backtrace");
             $bt = debug_backtrace();
             print_pre($bt);
         }
@@ -158,7 +163,7 @@ class usyvlDbDesc {
     ////////////////////////////////////////////////////////////////////////////
     function resetTable($which){
         if ( isset( $this->tables[$which])){
-            $this->query("drop table $which");
+            $this->query("drop table if exists $which");
             $this->query($this->tables[$which]->createTable());
         }
     }
@@ -406,9 +411,97 @@ class usyvlDbDesc {
         
         //$this->mesgs .= "qstr: $qstr<br>\n";
     }
+    ////////////////////////////////////////////////////////////////////////////
+    function fetchVal($select,$where = ""){
+        //print_pre($dbh);
+        
+        $qstr = "select $select";
+        if( $where != "" ) $qstr .= " where $where";
+        
+        //print "fetchVal: qstr: $qstr<br>\n";
+        $result = $this->query("$qstr");
+        $r = $result->fetchAll(PDO::FETCH_COLUMN);
+        return $r[0];
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+    function updateVal($table,$field,$value,$where = ""){
+        $qstr = "update $table set $field='$value'";
+        if( $where != "" ) $qstr .= "where $where";
+        else return false;
+        
+        $this->query($qstr);
+        return $result;
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+    function fetchList($select,$where = "",$order = ""){
+        if( ! is_object($this)) {
+            print_pre(debug_backtrace(),"fetchList: debug_backtrace");
+        }
+        
+        
+        $qstr = "select $select";
+        if( $where != "" ) $qstr .= " where $where";
+        if( $order != "" ) $qstr .= " order by $order";
+        
+        //print "fetchVal: qstr: $qstr<br>\n";
+        $result = $this->query("$qstr");
+        //print_pre($result,"dbh");
+        $r = $result->fetchAll(PDO::FETCH_COLUMN);
+        //print_pre($r,"result fetchAll");
+        //print_pre($dbh,"dbh");
+        return $r;
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+    function getKeyedHashSingle($key,$val,$qstr){
+        $result = $this->query("$qstr");
+        $r = $result->fetchAll(PDO::FETCH_ASSOC);
+        //print_pre($r);
+        
+        foreach($r as $row){
+            $hash[$row[$key]] = $row[$val];
+        }
+        return $hash;
+    }
+    ////////////////////////////////////////////////////////////////////////////
+    function getKeyedHash($key = "",$qstr = ""){
+        // the check below is redundant
+        //if( ! is_object($dbh)) {
+        //    print_pre(debug_backtrace(),"dbh not an object: triggering debug backtrace in getKeyedHash");
+        //}
+        $hash = array();
+        $result = $this->query("$qstr");
+        $r = $result->fetchAll(PDO::FETCH_ASSOC);
+        //print_pre($r,"query result for: $qstr");
+        //print_pre($dbh,"dbhandle");
+        
+        // check if key SHOULD be an array
+        // this pre-supposes that a given db key should NOT have a comma in it.  I think this is a safe assumption
+        if(! is_array($key)){
+            if( preg_match("/,/",$key)) $key = explode(",",$key);
+        }
+        
+        if( $key == "" ) return $r;
+        
+        foreach($r as $row){
+            //print "getKeyedHash(): processing row<br>\n";
+            // if key is an array, create a compound key for the hash
+            if( is_array($key)) {
+                $ckey_elem = array();
+                foreach( $key as $k){
+                    //print "key: $k<br>\n";
+                    $ckey_elem[] = $row[$k];
+                }
+                $ckey = implode(",",$ckey_elem);
+            }
+            else $ckey = $row[$key];
+            
+            $hash[$ckey] = $row;
+        }
+        return $hash;
+    }
 }
 ////////////////////////////////////////////////////////////////////////////////
-class usyvlDbTable {
+class dbMgmtTable {
     function __construct($tablename){
         $this->name = $tablename;
     }
