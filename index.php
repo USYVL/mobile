@@ -147,6 +147,7 @@ class mwfMobileSite {
         return "$b";
     }
     function display(){
+        global $content;
         $b = "";
         //$b .= "Calling display(mode: " . $this->mode . "):<br />";
 
