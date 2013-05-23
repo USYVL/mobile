@@ -6,7 +6,7 @@ define('DEBUGLEVEL',0);
 
 $content['errs'] = "";
 $content['title'] = "";
-$$content['body'] = "";
+$content['body'] = "";
 
 
 class mwfMobileSite {
