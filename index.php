@@ -41,14 +41,15 @@ class mwfMobileSite {
         $b .= "</ol>\n";
 
 
+        $b .= "<br />\n";
         $b .= "<div class=\"content padded\">\n";
-        $b .= "<h1 class=\"light\">My Content</h1>\n";
+        $b .= "<h1 class=\"light\">About</h1>\n";
         $b .= "  <div>\n";
         $b .= "    <p>\n";
-        $b .= "    My content paragraph 1.\n";
+        $b .= "    This is a very preliminary version of the mobile site.\n";
         $b .= "    </p>\n";
         $b .= "    <p>\n";
-        $b .= "    My content paragraph 2.\n";
+        $b .= "    Its designed to allow mobile access to schedules during the course of the season.\n";
         $b .= "    </p>\n";
         $b .= "  </div>\n";
         $b .= "</div>\n";
