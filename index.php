@@ -152,7 +152,7 @@ class mwfMobileSite {
         $b = "";
         //$b .= "Calling display(mode: " . $this->mode . "):<br />";
 
-        $content['errs'] .= "Mode: " . $this->mode . "\n";
+        //$content['errs'] .= "Mode: " . $this->mode . "\n";
         
         switch ($this->mode){
             case "" :
@@ -204,8 +204,7 @@ $ms->processGET();
 
 $content['title'] = "Fake Title";
 $content['body'] .= $ms->display();
-//$content['body'] .= "Fake Content";
-$content['errs'] .= "Fake Error\n";
+$content['errs'] .= "";
 
 ob_start();
 include("tpl/usyvl.tpl");
