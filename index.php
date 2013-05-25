@@ -12,36 +12,24 @@ $content['body'] = "";
 class mwfMobileSite {
     function __construct(){
         $this->mode = "";
+        $this->title = "Main Menu";
         $this->processGET();
-        
-        
-        ///$this->b_foot .= $this->button("./","Return to Main Menu");
-        ///$this->b_foot .= $this->button("http://www.usyvl.org","USYVL Home");
-        
-        ////$this->b_foot .= "<div id=\"footer\"> \n";
-        ////$this->b_foot .= "    <p>United States Youth Volleyball League &copy; 2013 USYVL<br> \n";
-        ////$this->b_foot .= "    <a href=\"http://www.usyvl.org/help\">Help</a> | <a href=\"http://www.usyvl.org\">View Full Site</a></p> \n";
-        ////$this->b_foot .= "</div>\n";
-        
-       
     }
     function processGET(){
         if( isset($_GET['mode'])) $this->mode = $_GET['mode'];
-    }
-    function beg(){
-    }
-    function end(){
     }
     function dispMain(){
         $b = "";
         $b .= $this->topmenu("Main Menu");
         $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=states\">Get Your Schedule</a></li>\n";
         $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=auto\">Auto Mode</a></li>\n";
-        $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=auto\">Score Keeper</a></li>\n";
+        $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=score\">Score Keeper</a></li>\n";
         $b .= "</ol>\n";
+        $b .= "</div> <!-- close top menu div -->\n\n";
 
 
         $b .= "<br />\n";
+        $b .= "<div class=\"light padded\"><!-- test div -->\n";
         $b .= "<div class=\"content padded\">\n";
         $b .= "<h1 class=\"light\">About</h1>\n";
         $b .= "  <div>\n";
@@ -53,15 +41,17 @@ class mwfMobileSite {
         $b .= "    </p>\n";
         $b .= "  </div>\n";
         $b .= "</div>\n";
+        $b .= "</div> <!-- close of test div -->\n";
         return "$b";
     }
     function dispStates(){
         $sdb = $GLOBALS['dbh']['sdb'];
+        $this->title = "USYVL Mobile - Select State";
         
         $b = "";
         $b .= $this->topmenu("Select State");
         $b .= "<ul>\n";
-        $states = $sdb->fetchList("distinct state from ev");
+        $states = $sdb->fetchList("distinct evstate from ev");
         foreach( $states as $state){
            $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=programs&state=$state\">$state</a></li>\n";
         }
@@ -72,11 +62,12 @@ class mwfMobileSite {
     function dispPrograms(){
         $sdb = $GLOBALS['dbh']['sdb'];
         $state = $_GET['state'];
+        $this->title = "USYVL Mobile - Select Program from $state";
         
         $b = "";
         $b .= $this->topmenu("Select Program");
         $b .= "<ul>\n";
-        $programs = $sdb->fetchList("distinct program from ev","state='" . $_GET['state'] . "'");
+        $programs = $sdb->fetchList("distinct evprogram from ev","evstate='" . $_GET['state'] . "'");
         foreach( $programs as $program){
            $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=divisions&state=$state&program=$program\">$program</a></li>\n";
         }
@@ -88,11 +79,12 @@ class mwfMobileSite {
         $sdb = $GLOBALS['dbh']['sdb'];
         $state = $_GET['state'];
         $program = $_GET['program'];
+        $this->title = "USYVL Mobile - Select Division from $state Program $program";
         
         $b = "";
         $b .= $this->topmenu("Select Age Division");
         $b .= "<ul>\n";
-        $divisions = $sdb->fetchList("distinct div from tm","program='" . $_GET['program'] . "'");
+        $divisions = $sdb->fetchList("distinct tmdiv from tm","tmprogram='" . $_GET['program'] . "'");
         foreach( $divisions as $division){
            $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=teams&division=$division&state=$state&program=$program\">$division</a></li>\n";
         }
@@ -105,14 +97,15 @@ class mwfMobileSite {
         $state = $_GET['state'];
         $program = $_GET['program'];
         $division = $_GET['division'];
+        $this->title = "USYVL Mobile - Select Team in $division Division from $state Program $program";
         
         $b = "";
         $b .= $this->topmenu("Select Team");
         $b .= "<ul>\n";
         //$teams = $sdb->fetchList("distinct name from tm","program='" . $_GET['program'] . "' and div='" . $division . "'");
-        $data = $sdb->getKeyedHash('tmid',"select * from tm where program='" . $_GET['program'] . "' and div='" . $division . "'");
+        $data = $sdb->getKeyedHash('tmid',"select * from tm where tmprogram='" . $_GET['program'] . "' and tmdiv='" . $division . "'");
         foreach( $data as $k => $d){
-            $team = $d['name'];
+            $team = $d['tmname'];
             $tmid = $k;
            $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=sched&tmid=$tmid&team=$team&division=$division&state=$state&program=$program\">$team</a></li>\n";
         }
@@ -127,21 +120,34 @@ class mwfMobileSite {
         $division = $_GET['division'];
         $team = $_GET['team'];
         $tmid = $_GET['tmid'];
+        $this->title = "USYVL Mobile - $team Schedule";
         
         $b = "";
         $b .= $this->topmenu("$team Schedule");
         $b .= "<ul>\n";
         
+        // This first part deals with practices that are NOT in the sched db (at this time)..
+        // select * from ev left outer join tm on ev.program = tm.program where ev.name like '%Practice%' and tm.tmid = '231';
+        //$prac = $sdb->getKeyedHash('evid',"select * from ev left outer join tm on evprogram = tmprogram where evname like '%Practice%' and tmid = $tmid");
+        //foreach( $prac as $d){
+        //    $date = $d['evds'];
+        //    $court = $d['evcourt'];
+        //    $bt = $d['evtime_beg'];
+        //    $et = $d['evtime_end'];
+        //    $b .= "<li>$date - $bt - $et - Ct$court - Practice</li>\n";
+        //}
         
         // need to get team id
-        $data = $sdb->getKeyedHash('gmid',"select * from gm left join ev on gm.evid = ev.evid where tmid1 = $tmid or tmid2 = $tmid order by ds");
+        $data = $sdb->getKeyedHash('gmid',"select * from gm left join ev on gm.evid = ev.evid where tmid1 = $tmid or tmid2 = $tmid order by evds");
         foreach( $data as $d){
-            $evnm = $d['name'];
-            $date = $d['ds'];
+            $evnm = $d['evname'];
+            $date = $d['evds'];
             $court = $d['court'];
-            $bt = $d['time_beg'];
-            $et = $d['time_end'];
-            $b .= "<li>$date - $bt - $et - Ct$court - $evnm</li>\n";
+            //$bt = $d['evtime_beg'];
+            //$et = $d['evtime_end'];
+            $time = $d['time'];
+            // depending on type of event, court may be specified in one of two locations...
+            $b .= "<li>$date - $time - Ct$court - $evnm</li>\n";
             //$b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=sched&team=$team&division=$division&state=$state&program=$program\">$team</a></li>\n";
         }
         
@@ -156,9 +162,6 @@ class mwfMobileSite {
         //$content['errs'] .= "Mode: " . $this->mode . "\n";
         
         switch ($this->mode){
-            case "" :
-                $b .= $this->dispMain();
-                break;
             case "select" :
                 $b .= $this->dispSelect();
                 break;
@@ -178,6 +181,7 @@ class mwfMobileSite {
                 $b .= $this->dispSched();
                 break;
             default :
+                $b .= $this->dispMain();
                 break;
         }
                 
@@ -198,13 +202,16 @@ class mwfMobileSite {
         $b .= "<a href=\"" . $href . "\" class=\"button-full button-padded\">$label</a>\n";
         return $b;
     }
+    function getTitle(){
+        return $this->title;
+    }
 }
 
 $ms = new mwfMobileSite();
 $ms->processGET();
 
-$content['title'] = "Fake Title";
 $content['body'] .= $ms->display();
+$content['title'] = $ms->getTitle();  // title is not set till after display is run...
 $content['errs'] .= "";
 
 ob_start();
