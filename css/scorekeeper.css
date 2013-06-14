@@ -1,0 +1,46 @@
+#skwrapper {
+    display: inline;
+}
+.score {
+    font-size: 8em;
+    font-family: arial,helvetica, sans-serif;
+    font-weight: bold;
+}
+.decrement {
+    font-size: 1.2em;
+    font-family: arial,helvetica, sans-serif;
+    font-weight: bold;
+    text-align: center;
+}
+.team_label {
+    font-size: 1.8em;
+    font-family: arial,helvetica, sans-serif;
+    font-weight: bold;
+    text-align: center;
+}
+#hometeam {
+    background-color: blue;
+    width: 100%;
+}
+
+#awayteam {
+    background-color: red;
+    width: 100%;
+}
+#c1_wrapper {
+    width: 50%;
+    float: left;
+}
+
+#c2_wrapper {
+    float: right;
+    width: 50%;
+}
+.section_style {
+    margin: 8px;
+    border-radius: 8px;
+    border: 5px solid black;
+}
+.clear {
+    clear: both;
+}

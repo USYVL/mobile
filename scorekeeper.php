@@ -8,7 +8,7 @@ $content['errs'] = "";
 $content['title'] = "";
 $content['body'] = "";
 
-
+/***
 class mwfMobileSite {
     function __construct(){
         $this->mode = "";
@@ -23,7 +23,7 @@ class mwfMobileSite {
         $b .= $this->topmenu("Main Menu");
         $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=states\">Get Your Schedule</a></li>\n";
         $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=auto\">Auto Mode</a></li>\n";
-        $b .= "  <li><a href=\"./scorekeeper.php\">Score Keeper</a></li>\n";
+        $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=score\">Score Keeper</a></li>\n";
         $b .= "</ol>\n";
         $b .= "</div> <!-- close top menu div -->\n\n";
 
@@ -215,15 +215,46 @@ class mwfMobileSite {
     }
 }
 
-$ms = new mwfMobileSite();
-$ms->processGET();
+**/
 
-$content['body'] .= $ms->display();
-$content['title'] = $ms->getTitle();  // title is not set till after display is run...
+//$ms = new mwfMobileSite();
+//$ms->processGET();
+$b .= '<div id="skwrapper">';
+$htb = '
+
+  <div id="c1_wrapper">
+    <div class="section_style">
+      <p class="team_label">Home</p>
+      <button id="hometeam" class="score">25</button>
+      <button id="hometeam_minus" class="decrement">decrement</button>  
+    </div>
+  </div>
+  ';
+  
+  
+$atb .= '<div id="c2_wrapper">
+    <div class="section_style">
+      <p class="team_label">Visitor</p>
+      <button id="awayteam" class="score">25</button>  
+      <button id="awayteam_minus" class="decrement">decrement</button>  
+    </div>
+  </div>
+';
+
+$b .= "$htb";
+$b .= "$atb";
+
+$b .= '</div><!-- close skwrapper -->
+<div class="clear">
+</div>
+';
+
+$content['body'] .= "$b";
+$content['title'] = "ScoreKeeper";  // title is not set till after display is run...
 $content['errs'] .= "";
 
 //ob_start();
-include("tpl/usyvl.tpl");
+include("tpl/scorekeeper.tpl");
 //print ob_get_clean();
 
 
