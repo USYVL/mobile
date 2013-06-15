@@ -2,11 +2,22 @@
     display: inline;
 }
 .score {
-    font-size: 8em;
+    font-size: 6em;
     font-family: arial,helvetica, sans-serif;
     font-weight: bold;
+    padding: 0;
+    margin: 0;
+    width: 40px;
+    border-radius:8px;
 }
 .decrement {
+    font-size: 1.2em;
+    font-family: arial,helvetica, sans-serif;
+    font-weight: bold;
+    text-align: center;
+    /* line-height: .5em; */
+}
+.service {
     font-size: 1.2em;
     font-family: arial,helvetica, sans-serif;
     font-weight: bold;
@@ -18,23 +29,50 @@
     font-weight: bold;
     text-align: center;
 }
-#hometeam {
+#winner {
+    width: 100%;
+    text-align: center;
+    font-size: 1.8em;
+    font-family: arial,helvetica, sans-serif;
+    font-weight: bold;
+    background-color: green;
+    color: blue;
+}
+.sideChangeAlert {
+    color: white;
+    background-color: red;
+}
+
+#tmA {
     background-color: blue;
     width: 100%;
 }
 
-#awayteam {
+#tmB {
     background-color: red;
     width: 100%;
 }
 #c1_wrapper {
     width: 50%;
-    float: left;
 }
 
 #c2_wrapper {
-    float: right;
     width: 50%;
+}
+#switch_sides {
+    width: 100%;
+    font-size:1.2em;
+}
+#toggle_serve {
+    width: 100%;
+    font-size:1.2em;
+}
+#scoreType {
+    width: 100%;
+    font-size:1.2em;
+}
+.controls {
+    display: inline;
 }
 .section_style {
     margin: 8px;
@@ -43,4 +81,13 @@
 }
 .clear {
     clear: both;
+}
+.rfloat {
+    float: right;
+}
+.lfloat {
+    float: left;
+}
+.hide {
+    display: none;
 }
