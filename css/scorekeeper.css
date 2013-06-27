@@ -59,17 +59,49 @@
 #c2_wrapper {
     width: 50%;
 }
+
+.short {
+    line-height: 75%;
+}
+/*
+
+.short:hover {
+    background: #fff ;
+    background-color: #fff ;
+}
+
+a.button-full:hover, a.button-full:focus, a.button-full:active, div.button-full a:hover, div.button-full a:focus, div.button-full a:active, a.button-full.button-light:hover, a.button-full.button-light:focus, a.button-full.button-light:active, div.button-full a.button-light:hover, div.button-full a.button-light:focus, div.button-full a.button-light:active {
+    background-color: #fff;
+    background: #fff ;
+    background-color: #fff ;
+}
+a.button-full:hover, a.button-full:focus, a.button-full:active, div.button-full a:hover, div.button-full a:focus, div.button-full a:active, a.button-full.button-light:hover, a.button-full.button-light:focus, a.button-full.button-light:active, div.button-full a.button-light:hover, div.button-full a.button-light:focus, div.button-full a.button-light:active {
+    background-color: #fff;
+    background: #fff ;
+    background-color: #fff ;
+}
+*/
 #switch_sides {
-    width: 100%;
-    font-size:1.2em;
+    /* width: 100%; */
+    /* font-size:1.2em; */
+}
+#switch_sides:hover {
+    /* width: 100%; */
+    /* font-size:1.2em; */
+    background-color: #fff;
+    background: #fff ;
+    background-color: #fff ;
 }
 #toggle_serve {
-    width: 100%;
+    /* width: 100%;
     font-size:1.2em;
+    */
 }
 #scoreType {
+    /*
     width: 100%;
     font-size:1.2em;
+    */
 }
 .controls {
     display: inline;
@@ -91,3 +123,4 @@
 .hide {
     display: none;
 }
+

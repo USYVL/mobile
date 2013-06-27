@@ -3,8 +3,9 @@
 
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="http://mwf.library.ucsb.edu/assets/css.php" type="text/css">
-<script type="text/javascript" src="http://mwf.library.ucsb.edu/assets/js.php?standard_libs=geolocation"></script>
+<!-- <link rel="stylesheet" href="http://mwf.library.ucsb.edu/assets/css.php" type="text/css"> -->
+<link rel="stylesheet" href="http://mwf.usyvl.org/assets/css.php" type="text/css">
+<script type="text/javascript" src="http://mwf.usyvl.org/assets/js.php?standard_libs=geolocation"></script>
 <meta name="viewport" content="height=device-height,width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title><?php  print $content['title']; ?></title>
 
@@ -18,7 +19,7 @@
 
 <h1 id="header"> 
     <a href="http://www.usyvl.org"> 
-        <img src="http://mwf.library.ucsb.edu/assets/img/ucsb-header.png" alt="UCSB" width="75" height="35">
+        <img src="http://mwf.usyvl.org/assets/img/header-usyvl.png" alt="USYVL" width="50" height="35">
     </a> 
     <span>USYVL Mobile</span> 
 </h1>

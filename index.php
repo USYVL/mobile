@@ -23,7 +23,7 @@ class mwfMobileSite {
         $b .= $this->topmenu("Main Menu");
         $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=states\">Get Your Schedule</a></li>\n";
         $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=auto\">Auto Mode</a></li>\n";
-        $b .= "  <li><a href=\"./scorekeeper.php\">Score Keeper</a></li>\n";
+        $b .= "  <li><a href=\"./scorekeeper.php?team_a=Team C&team_b=Team D\">Score Keeper</a></li>\n";
         $b .= "</ol>\n";
         $b .= "</div> <!-- close top menu div -->\n\n";
 
@@ -154,6 +154,13 @@ class mwfMobileSite {
             $b .= "$date - $time<br />";
             $b .= "$evnm<br />\n";
             $b .= "$evloc - Court $court\n";
+            if( $d['tmid1'] != "" and $d['tmid2'] != "" ){
+                // need to get the other teams name
+                // this team could be either tmid1 or tmid2
+                $othertmid = ( $d['tmid1'] == $tmid ) ? $d['tmid2'] : $d['tmid1'];
+                $othertmname = $sdb->fetchVal('tmname from tm',"tmid=$othertmid");
+                $b .= "<br /><a href=\"scorekeeper.php?team_a=$team&team_b=$othertmname\">Scorekeep This Game</a>\n";
+            }
             $b .= "</p>\n";
             //$b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=sched&team=$team&division=$division&state=$state&program=$program\">$team</a></li>\n";
         }

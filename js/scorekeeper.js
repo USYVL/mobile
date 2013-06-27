@@ -25,12 +25,16 @@ $(function() {
         var $serve = $('#toggle_serve');
         var tmAscore = parseInt($tmA.html());
         var tmBscore = parseInt($tmB.html());
-        var tmAcons = 0;
-        var tmBcons = 0;
+        var consServes = new Array();
+        consServes["a"] = 0;
+        consServes["b"] = 0;
+        
+        //var tmAcons = 0;
+        //var tmBcons = 0;
         var notes = "";
         
         function updateNotes(){
-            notes="Scoring Type: "+scoreType+"<br />\n";
+            notes="<p>Scoring Type: "+scoreType+"<br />\n";
             notes+="Score Max: "+scoreMax+"<br />\n";
             notes+="Score Cap: "+scoreCap+"<br />\n";
             notes+="Win By Two: ";
@@ -38,6 +42,7 @@ $(function() {
             notes+="<br />\n";
             notes+="Side Change On: "+switchOn.toString()+"<br />\n";
             notes+="Side Change At: "+switchAt.toString()+"<br />\n";
+            notes+="</p>\n";
             $('#notes').html(notes);
         }
         updateNotes();
@@ -49,11 +54,15 @@ $(function() {
                 servStatus='#tmA_service';
                 
                 var iServed = $(servStatus).isVisible();
-                if( iServed) tmAcons++;
-                else         {
-                    tmAcons=0;
-                    //tmBcons++;  // pretty sure this breaks doublemax
-                }
+                serviceTracker(iServed,'a','b');
+                ///if( iServed){
+                ///    consServes["a"]++;
+                ///    consServes["b"]=0;
+                ///}
+                ///else         {
+                ///    consServes["a"]=0;
+                ///    consServes["b"]++;  // pretty sure this breaks doublemax
+                ///}
                 
                 //var tmAscore = parseInt($tmA.html()) + 1;
                 if( scoreType == "SideOut") {
@@ -63,23 +72,28 @@ $(function() {
             
                 $tmA.html(tmAscore.toString());
                 checkControls(tmAscore,tmBscore);
-                checkService(servStatus,tmAcons,tmBcons);
+                updateServiceIndicator(servStatus,consServes["a"],consServes["b"]);
                 //if ($('#tmB_service').isVisible()){
                 //    serviceChange();
                 //}
-                checkScore(tmAscore,tmBscore);
+                checkForWinner(tmAscore,tmBscore);
                 checkSideChange(tmAscore,tmBscore);
         });
         $tmB.click(function(){
                 if( gameOver ) return;
+                
                 servStatus='#tmB_service';
                 var iServed = $(servStatus).isVisible();
+                serviceTracker(iServed,'b','a');
                 
-                if( iServed) tmBcons++;
-                else         {
-                    tmBcons=0;
-                    //tmAcons++;  // pretty sure this breaks doublemax
-                }
+                ///if( iServed){
+                ///    consServes["b"]++;
+                ///    consServes["a"]=0;  // pretty sure this breaks doublemax
+                ///}
+                ///else         {
+                ///    consServes["b"]=0;
+                ///    consServes["a"]++;  // pretty sure this breaks doublemax
+                ///}
                 
                 if( scoreType == "SideOut") {
                     if(  iServed ) tmBscore++;
@@ -89,8 +103,8 @@ $(function() {
                 //var tmBscore = parseInt($tmB.html()) + 1;
                 $tmB.html(tmBscore.toString());
                 checkControls(tmAscore,tmBscore);
-                checkService(servStatus,tmBcons,tmAcons);
-                checkScore(tmAscore,tmBscore);
+                updateServiceIndicator(servStatus,consServes["b"],consServes["a"]);
+                checkForWinner(tmAscore,tmBscore);
                 checkSideChange(tmAscore,tmBscore);
                 //if ($('#tmA_service').isVisible()){
                 //    serviceChange();
@@ -136,6 +150,16 @@ $(function() {
         // get scores and see if there is a winner
         //$tmAscore = parseInt($tmA.html());
         //$tmBscore = parseInt($tmB.html());
+        function serviceTracker(served,y,n){
+            if( served){
+                consServes[y]++;
+                consServes[n]=0;  // pretty sure this breaks doublemax
+            }
+            else         {
+                consServes[y]=0;
+                consServes[n]++;  // pretty sure this breaks doublemax
+            }
+        }
         
         function checkControls(a,b) {
             if( a == 0 && b == 0){
@@ -147,7 +171,7 @@ $(function() {
                 $('#scoreType').hide();
             }
         }
-        function checkScore(a,b){
+        function checkForWinner(a,b){
             if( a >= scoreMax || b >= scoreMax ){
                 if( a >= scoreCap || b >= scoreCap && winByTwo ){
                     winByTwo = false;
@@ -184,7 +208,7 @@ $(function() {
         //  sideout - points only awarded if serving, winner of rally serves
         
         // This function currently does rally scoring
-        function checkService(which,cons1,cons2){
+        function updateServiceIndicator(which,cons1,cons2){
             switch(scoreType)
             {
             case "Rally":
@@ -194,14 +218,13 @@ $(function() {
                 doubleMaxService(which,cons1);
                 break;
             case "HotPotato":
-                hotPotatoService(which);
+                hotPotatoService(which,cons1,cons2);
                 break;
             case "SideOut":
                 sideOutService(which);
                 break;
             default:
                 doubleMaxService(which,cons1);
-                
             }
         }
         function rallyService(which){
@@ -209,16 +232,13 @@ $(function() {
                 serviceChange();
             }
         }
-        function hotPotatoService(which){
+        function hotPotatoService(which,cons1,cons2){
             // uses the globals, not super elegant
             if( cons1>=2 || cons2>=2 ){
                 serviceChange();
-                tmAcons=0;
-                tmBcons=0;
+                consServes["a"]=0;
+                consServes["b"]=0;
             }
-                //if( cons2>=2 ) serviceChange();
-            //}
-            //else serviceChange();
         }
         function checkSideChange(a,b){
             if(switchOn>0){
@@ -269,6 +289,51 @@ $(function() {
         $.fn.isVisible = function() {
             return $.expr.filters.visible(this[0]);
         };
+            
+        ///$('#play-whistle').click(function(){  
+        ///        $('#whistle').setAttribute('autoplay','autoplay');
+        ///});    
+        
+        var whistleSingle = document.createElement('audio');
+        whistleSingle.setAttribute('src', 'media/whistle-single.mp3');
+        whistleSingle.setAttribute('src', 'media/whistle-single.wav');
+        //whistleSingle.setAttribute('autoplay', 'autoplay');
+        //whistleSingle.load()
+        $.get();
+        whistleSingle.addEventListener("load", function() {
+                whistleSingle.play();
+        }, true);
+        
+        var whistleDouble = document.createElement('audio');
+        whistleDouble.setAttribute('src', 'media/whistle-double.mp3');
+        whistleDouble.setAttribute('src', 'media/whistle-double.wav');
+        //whistleDouble.setAttribute('autoplay', 'autoplay');
+        //whistleDouble.load()
+        $.get();
+        whistleDouble.addEventListener("load", function() {
+                whistleDouble.play();
+        }, true);
+        
+        
+        
+        
+        $('#play-single').click(function() {
+                whistleSingle.play();
+        });
+        $('#play-double').click(function() {
+                whistleDouble.play();
+        });
+        
+        
+        //$('.play').click(function() {
+        //        whistleSingle.play();
+        //});
+        
+        
+        //$('.pause').click(function() {
+        //        whistleSingle.pause();
+        //});
+
         
 });
 
