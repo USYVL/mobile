@@ -84,7 +84,7 @@ class mwfMobileSite {
         $b = "";
         $b .= $this->topmenu("Select Age Division");
         $b .= "<ul>\n";
-        $divisions = $sdb->fetchList("distinct tmdiv from tm","tmprogram='" . $_GET['program'] . "'");
+        $divisions = $sdb->fetchList("distinct tmdiv from tm left join so on tmdiv=so_div","tmprogram='" . $_GET['program'] . "' order by so_order");
         foreach( $divisions as $division){
            $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=teams&division=$division&state=$state&program=$program\">$division</a></li>\n";
         }
