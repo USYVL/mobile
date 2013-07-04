@@ -1,5 +1,7 @@
-if ($()) {
+if (! $()) {
     //alert("Hi There");
+    // ideally this should agree with the version used in the tpl file
+    document.write('<script src="js/jquery-1.10.2.min.js"><\/script>');
 }
 
 // allowed scoreTypes
@@ -22,10 +24,11 @@ $(function() {
         var $tmB = $('#tmB');
         var $tmAminus = $('#tmA_minus');
         var $tmBminus = $('#tmB_minus');
-        var $serve = $('#toggle_serve');
+        var $toggleServe = $('#toggle_serve');
         var tmAscore = parseInt($tmA.html());
         var tmBscore = parseInt($tmB.html());
         var consServes = new Array();
+        var iServed = false;
         consServes["a"] = 0;
         consServes["b"] = 0;
         
@@ -53,16 +56,8 @@ $(function() {
                 if( gameOver ) return;
                 servStatus='#tmA_service';
                 
-                var iServed = $(servStatus).isVisible();
+                iServed = $(servStatus).isVisible();
                 serviceTracker(iServed,'a','b');
-                ///if( iServed){
-                ///    consServes["a"]++;
-                ///    consServes["b"]=0;
-                ///}
-                ///else         {
-                ///    consServes["a"]=0;
-                ///    consServes["b"]++;  // pretty sure this breaks doublemax
-                ///}
                 
                 //var tmAscore = parseInt($tmA.html()) + 1;
                 if( scoreType == "SideOut") {
@@ -72,7 +67,7 @@ $(function() {
             
                 $tmA.html(tmAscore.toString());
                 checkControls(tmAscore,tmBscore);
-                updateServiceIndicator(servStatus,consServes["a"],consServes["b"]);
+                updateServiceIndicator(servStatus,consServes['a'],consServes['b']);
                 //if ($('#tmB_service').isVisible()){
                 //    serviceChange();
                 //}
@@ -83,17 +78,12 @@ $(function() {
                 if( gameOver ) return;
                 
                 servStatus='#tmB_service';
-                var iServed = $(servStatus).isVisible();
+                iServed = $(servStatus).isVisible();
+                //if( iServed ) {
+                //    alert("team B served");
+                //}
                 serviceTracker(iServed,'b','a');
                 
-                ///if( iServed){
-                ///    consServes["b"]++;
-                ///    consServes["a"]=0;  // pretty sure this breaks doublemax
-                ///}
-                ///else         {
-                ///    consServes["b"]=0;
-                ///    consServes["a"]++;  // pretty sure this breaks doublemax
-                ///}
                 
                 if( scoreType == "SideOut") {
                     if(  iServed ) tmBscore++;
@@ -103,7 +93,7 @@ $(function() {
                 //var tmBscore = parseInt($tmB.html()) + 1;
                 $tmB.html(tmBscore.toString());
                 checkControls(tmAscore,tmBscore);
-                updateServiceIndicator(servStatus,consServes["b"],consServes["a"]);
+                updateServiceIndicator(servStatus,consServes['b'],consServes['a']);
                 checkForWinner(tmAscore,tmBscore);
                 checkSideChange(tmAscore,tmBscore);
                 //if ($('#tmA_service').isVisible()){
@@ -147,27 +137,14 @@ $(function() {
                 $('#c2_wrapper').toggleClass('rfloat');
         });
         
-        // get scores and see if there is a winner
-        //$tmAscore = parseInt($tmA.html());
-        //$tmBscore = parseInt($tmB.html());
-        function serviceTracker(served,y,n){
-            if( served){
-                consServes[y]++;
-                consServes[n]=0;  // pretty sure this breaks doublemax
-            }
-            else         {
-                consServes[y]=0;
-                consServes[n]++;  // pretty sure this breaks doublemax
-            }
-        }
         
         function checkControls(a,b) {
             if( a == 0 && b == 0){
-                $serve.show();
+                $toggleServe.show();
                 $('#scoreType').show();
             }
             else {
-                $serve.hide();
+                $toggleServe.hide();
                 $('#scoreType').hide();
             }
         }
@@ -200,6 +177,19 @@ $(function() {
             $('#winner').html(name+" Wins!");
         }
         
+        // get scores and see if there is a winner
+        //$tmAscore = parseInt($tmA.html());
+        //$tmBscore = parseInt($tmB.html());
+        function serviceTracker(served,y,n){
+            if( served){
+                consServes[y]++;
+                consServes[n]=0;  // pretty sure this breaks doublemax
+            }
+            else         {
+                consServes[y]=0;
+                consServes[n]++;  // pretty sure this breaks doublemax
+            }
+        }
         // check to see if service needs to change
         // the choice of when to switch depends on what type of scoring is used
         //  hot-potato - two serves regardless of results
@@ -209,8 +199,7 @@ $(function() {
         
         // This function currently does rally scoring
         function updateServiceIndicator(which,cons1,cons2){
-            switch(scoreType)
-            {
+            switch(scoreType){
             case "Rally":
                 rallyService(which);
                 break;
@@ -225,19 +214,6 @@ $(function() {
                 break;
             default:
                 doubleMaxService(which,cons1);
-            }
-        }
-        function rallyService(which){
-            if (! $(which).isVisible()){
-                serviceChange();
-            }
-        }
-        function hotPotatoService(which,cons1,cons2){
-            // uses the globals, not super elegant
-            if( cons1>=2 || cons2>=2 ){
-                serviceChange();
-                consServes["a"]=0;
-                consServes["b"]=0;
             }
         }
         function checkSideChange(a,b){
@@ -267,8 +243,7 @@ $(function() {
         }
         
         // doubleMax is a modified rally scoring.
-        // point is awarded to winner of each rally
-        // but a team is allowed no more than 2 serves in a row
+        // point is awarded to winner of each rally but a team is allowed no more than 2 serves in a row
         // so even if the serving team wins the rally on its second serve, service goes to the other team
         function doubleMaxService(which,cons){
             if ($(which).isVisible()){
@@ -276,13 +251,30 @@ $(function() {
             }
             else serviceChange();
         }
+        function rallyService(which){
+            if (! $(which).isVisible()){
+                serviceChange();
+            }
+        }
+        function hotPotatoService(which,cons1,cons2){
+            // uses the globals, not super elegant
+            if( cons1>=2 || cons2>=2 ){
+                serviceChange();
+                consServes["a"]=0;
+                consServes["b"]=0;
+            }
+        }
         
         function serviceChange(){
             $('#tmA_service').toggle();
+            //$('#tmB_service').removeClass('hideservice');
+            //$('#tmB_service').toggleClass('hideservice');
             $('#tmB_service').toggle();
+            //$tmA.toggle();
+            //$tmB.toggle();
         }
         
-        $serve.click(function() {
+        $toggleServe.click(function() {
             serviceChange();
         });
         
@@ -290,10 +282,6 @@ $(function() {
             return $.expr.filters.visible(this[0]);
         };
             
-        ///$('#play-whistle').click(function(){  
-        ///        $('#whistle').setAttribute('autoplay','autoplay');
-        ///});    
-        
         var whistleSingle = document.createElement('audio');
         whistleSingle.setAttribute('src', 'media/whistle-single.mp3');
         whistleSingle.setAttribute('src', 'media/whistle-single.wav');
@@ -333,8 +321,26 @@ $(function() {
         //$('.pause').click(function() {
         //        whistleSingle.pause();
         //});
-
         
+        // Now unused code from the button clicks (A and B)
+                ///if( iServed){
+                ///    consServes["a"]++;
+                ///    consServes["b"]=0;
+                ///}
+                ///else         {
+                ///    consServes["a"]=0;
+                ///    consServes["b"]++;  // pretty sure this breaks doublemax
+                ///}
+
+                 ///if( iServed){
+                ///    consServes["b"]++;
+                ///    consServes["a"]=0;  // pretty sure this breaks doublemax
+                ///}
+                ///else         {
+                ///    consServes["b"]=0;
+                ///    consServes["a"]++;  // pretty sure this breaks doublemax
+                ///}
+       
 });
 
 $(function() {

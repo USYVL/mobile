@@ -18,7 +18,7 @@
 </div>
 
 <h1 id="header"> 
-    <a href="http://www.usyvl.org"> 
+    <a href="."> 
         <img src="http://mwf.usyvl.org/assets/img/header-usyvl.png" alt="USYVL" width="50" height="35">
     </a> 
     <span>USYVL Mobile</span> 

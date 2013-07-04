@@ -4,11 +4,17 @@ require_once("inc/usyvlDB.inc");
 
 define('DEBUGLEVEL',0);
 
+function sanitize($str){
+    $s = htmlspecialchars($str);
+    $s = str_replace(array("The","the"),"",$s);
+    $s = preg_replace("/\d+ *- */","",$s);
+    return $s;
+}
 
 // Should probably do some sanitizing of the names, shortening, maybe use jquery lib
 // to get the length set correctly.
-$team_a = ( isset($_GET['team_a'])) ? $_GET['team_a'] : "Team A";
-$team_b = ( isset($_GET['team_b'])) ? $_GET['team_b'] : "Team B";
+$team_a = ( isset($_GET['team_a'])) ? sanitize($_GET['team_a']) : sanitize("The A's");
+$team_b = ( isset($_GET['team_b'])) ? sanitize($_GET['team_b']) : sanitize("01 - The BB's");
 
 
 $content['errs'] = "";
@@ -34,7 +40,7 @@ $atb .= '<div id="c2_wrapper" class="rfloat">
     ';
 $atb .= "      <button id=\"tmB\" class=\"score\">0</button>  \n";
 $atb .= "        <button id=\"tmB_minus\" class=\"decrement\">-</button>  \n";
-$atb .= "        <span id=\"tmB_service\" class=\"service hide\">Serving</span>  \n";
+$atb .= "        <span id=\"tmB_service\" class=\"service hideservice\">Serving</span>  \n";
 $atb .= '<p id="tmBname" class="team_label">' . "$team_b</p>\n";
 $atb .= "    </div>\n";
 $atb .= "  </div>\n";
@@ -49,17 +55,18 @@ $b .= "</div><!-- close skwrapper -->\n";
 
 
 $b .= '<div id="winner"></div>';
+
+$b .= '<div class="button padded">' . "\n";
+$b .= '<a id="play-single" href="#">Whistle</a>' . "\n";
+$b .= '<a id="play-double" href="#">WhistleX2</a>' . "\n";
+$b .= '</div>' . "\n";
+
 $b .= '<a class="button padded short" id="switch_sides">Switch Sides</a>' . "\n";
 $b .= '<a class="button short" id="toggle_serve">Toggle Initial Service</a>' . "\n";
 $b .= '<a class="button short" id="scoreType">DoubleMax</a>' . "\n";
 //$b .= '<audio controls id="whistle"><source src="media/whistle-single.mp3" type="audio/mpeg"></audio>';
 //$b .= '<div class="play">Play</div>';
 
-
-$b .= '<div class="button padded">' . "\n";
-$b .= '<a id="play-single" href="#">Whistle</a>' . "\n";
-$b .= '<a id="play-double" href="#">WhistleX2</a>' . "\n";
-$b .= '</div>' . "\n";
 
 //$b .= '<div id="notes"></div>' . "\n";
 

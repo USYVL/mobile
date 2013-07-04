@@ -15,6 +15,7 @@ $mwf = "http://mwf.usyvl.org/assets";
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script type="text/javascript" src="js/qlib.js"></script>
 <link rel="stylesheet" href="css/scorekeeper.css" type="text/css"> 
 <script type="text/javascript" src="js/scorekeeper.js"></script>
 
@@ -38,7 +39,7 @@ $mwf = "http://mwf.usyvl.org/assets";
 </div>
 
 <h1 id="header"> 
-    <a href="http://m.usyvl.org"> 
+    <a href="."> 
         <img src="http://mwf.usyvl.org/assets/img/header-usyvl.png" alt="USYVL" width="50" height="35">
     </a> 
     <span>USYVL Mobile</span> 

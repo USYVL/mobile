@@ -120,7 +120,19 @@ a.button-full:hover, a.button-full:focus, a.button-full:active, div.button-full 
 .lfloat {
     float: left;
 }
+/* from some jquery issues, it looks like there must be a conflict with the hide class def here.
+It worked for some time, but then broke visibility goodies to where a jquery.toggle() did not work
+on elements that used it.  Just used the hideservice class below instead.  Fixed issues ... weird.
+*/
 .hide {
     display: none;
 }
+.hideservice {
+    display: none;
+}
+/*
+.showservice {
+    display: inline;
+}
+*/
 
