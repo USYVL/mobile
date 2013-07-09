@@ -3,8 +3,8 @@
 
 <?php
 // set which mwf we should be using, can work on autodetecting later...
-$mwf = "http://localhost/usryl/mwf/root/assets";
-$mwf = "http://localhost/usryl/mwf-local/root/assets";
+$mwf = "http://localhost/usyvl/mwf/root/assets";
+$mwf = "http://localhost/usyvl/mwf-local/root/assets";
 $mwf = "http://mwf.usyvl.org/assets";
 ?>
 

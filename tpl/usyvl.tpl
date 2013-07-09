@@ -1,12 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<?php
+// set which mwf we should be using, can work on autodetecting later...
+$mwf = "http://localhost/usryl/mwf/root/assets";
+$mwf = "http://localhost/usyvl/mwf-local/root/assets";
+$mwf = "http://mwf.usyvl.org/assets";
+?>
+
 <head>
 <meta charset="utf-8">
-<!-- <link rel="stylesheet" href="http://mwf.library.ucsb.edu/assets/css.php" type="text/css"> -->
-<link rel="stylesheet" href="http://mwf.usyvl.org/assets/css.php" type="text/css">
+
+<!-- MWF 1.2 stuff
+-->
+<!--
+<link rel="stylesheet" href="http://mwf.library.ucsb.edu/assets/css.php" type="text/css"> 
 <script type="text/javascript" src="http://mwf.usyvl.org/assets/js.php?standard_libs=geolocation"></script>
 <meta name="viewport" content="height=device-height,width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+-->
+
+<!-- MWF 1.3 setup -->
+<link rel="stylesheet" type="text/css" href="<?php echo $mwf?>/css.php?lean" media="screen">
+<script type="text/javascript" src="<?php echo $mwf?>/js.php"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+
+<link rel="stylesheet" href="css/usyvl.css" type="text/css">
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script type="text/javascript" src="js/qlib.js"></script>
+
+
+
+
 <title><?php  print $content['title']; ?></title>
 
 </head>

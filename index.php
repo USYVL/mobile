@@ -21,27 +21,64 @@ class mwfMobileSite {
     function dispMain(){
         $b = "";
         $b .= $this->topmenu("Main Menu");
+        $b .= "<ul>\n";
         $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=states\">Get Your Schedule</a></li>\n";
         $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=auto\">Auto Mode</a></li>\n";
         $b .= "  <li><a href=\"./scorekeeper.php?team_a=Team C&team_b=Team D\">Score Keeper</a></li>\n";
-        $b .= "</ol>\n";
+        $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=credits\">Credits</a></li>\n";
+        $b .= "</ul>\n";
         $b .= "</div> <!-- close top menu div -->\n\n";
 
 
         //$b .= "<br />\n";
         //$b .= "<div class=\"light padded\"><!-- test div -->\n";
-        $b .= "<div class=\"content-padded content-full\">\n";
+        $b .= "<div class=\"content content-full\">\n";
         $b .= "<h2 class=\"light\">Content</h2>\n";
         //$b .= "  <div>\n";
         $b .= "    <p>\n";
-        $b .= "    This is a very preliminary version of the mobile site.\n";
-        $b .= "    </p>\n";
-        $b .= "    <p>\n";
-        $b .= "    Its designed to allow mobile access to schedules during the course of the season.\n";
+        $b .= "    This is a very preliminary version of the mobile site";
+        $b .= "    designed to allow mobile access to schedules during the course of the season.\n";
+        $b .= "It is still very much under development.\n";
         $b .= "    </p>\n";
         //$b .= "  </div>\n";
         $b .= "</div>\n";
         //$b .= "</div> <!-- close of test div -->\n";
+        return "$b";
+    }
+    function dispCredits(){
+        $this->title = "USYVL Mobile - Credits";
+        
+        $b = "";
+        //$b .= $this->topmenu("Credits");
+        $b .= "<div class=\"content\">\n";
+        $b .= "<h2 class=\"light\">Tech</h2>\n";
+        $b .= "<p class=\"credits\">\n";
+        $b .= "HTML 5\n";
+        $b .= "</p>\n";
+        $b .= "<p class=\"credits\">\n";
+        $b .= "CSS 3\n";
+        $b .= "</p>\n";
+        $b .= "<p class=\"credits\">\n";
+        $b .= "Mobile Web Framework (MWF) 1.3\n";
+        $b .= "</p>\n";
+        $b .= "<p class=\"credits\">\n";
+        $b .= "jQuery 1.10.x\n";
+        $b .= "</p>\n";
+        $b .= "</div>\n";
+        
+        $b .= "<div class=\"content\">\n";
+        $b .= "<h2 class=\"light\">Author</h2>\n";
+        $b .= "<p class=\"credits author\">\n";
+        $b .= "Created for USYVL by Aaron Martin\n";
+        $b .= "</p>\n";
+        $b .= "</div>\n";
+
+        $b .= "<div class=\"content\">\n";
+        $b .= "<h2 class=\"light\">Art/Graphics</h2>\n";
+        $b .= "<p class=\"credits\">\n";
+        $b .= "Provided by USYVL";
+        $b .= "</p>\n";
+        $b .= "</div>\n";
         return "$b";
     }
     function dispStates(){
@@ -50,13 +87,14 @@ class mwfMobileSite {
         
         $b = "";
         $b .= $this->topmenu("Select State");
-        $b .= "<ul>\n";
+        $b .= "<ol>\n";
         $states = $sdb->fetchList("distinct evstate from ev");
         foreach( $states as $state){
            $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=programs&state=$state\">$state</a></li>\n";
         }
         
-        $b .= "</ul>\n";
+        $b .= "</ol>\n";
+        $b .= "</div>\n";
         return "$b";
     }
     function dispPrograms(){
@@ -66,13 +104,14 @@ class mwfMobileSite {
         
         $b = "";
         $b .= $this->topmenu("Select Program");
-        $b .= "<ul>\n";
+        $b .= "<ol>\n";
         $programs = $sdb->fetchList("distinct evprogram from ev","evstate='" . $_GET['state'] . "'");
         foreach( $programs as $program){
            $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=divisions&state=$state&program=$program\">$program</a></li>\n";
         }
         
-        $b .= "</ul>\n";
+        $b .= "</ol>\n";
+        $b .= "</div>\n";
         return "$b";
     }
     function dispDivisions(){
@@ -83,13 +122,14 @@ class mwfMobileSite {
         
         $b = "";
         $b .= $this->topmenu("Select Age Division");
-        $b .= "<ul>\n";
+        $b .= "<ol>\n";
         $divisions = $sdb->fetchList("distinct tmdiv from tm left join so on tmdiv=so_div","tmprogram='" . $_GET['program'] . "' order by so_order");
         foreach( $divisions as $division){
            $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=teams&division=$division&state=$state&program=$program\">$division</a></li>\n";
         }
         
-        $b .= "</ul>\n";
+        $b .= "</ol>\n";
+        $b .= "</div>\n";
         return "$b";
     }
     function dispTeams(){
@@ -101,7 +141,7 @@ class mwfMobileSite {
         
         $b = "";
         $b .= $this->topmenu("Select Team");
-        $b .= "<ul>\n";
+        $b .= "<ol>\n";
         //$teams = $sdb->fetchList("distinct name from tm","program='" . $_GET['program'] . "' and div='" . $division . "'");
         $data = $sdb->getKeyedHash('tmid',"select * from tm where tmprogram='" . $_GET['program'] . "' and tmdiv='" . $division . "'");
         foreach( $data as $k => $d){
@@ -110,7 +150,8 @@ class mwfMobileSite {
            $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=sched&tmid=$tmid&team=$team&division=$division&state=$state&program=$program\">$team</a></li>\n";
         }
         
-        $b .= "</ul>\n";
+        $b .= "</ol>\n";
+        $b .= "</div>\n";
         return "$b";
     }
     function dispSched(){
@@ -124,7 +165,7 @@ class mwfMobileSite {
         
         $b = "";
         //$b .= $this->topmenu("$team Schedule");
-        $b .= "<div class=\"content-padded content-full\">\n";
+        $b .= "<div class=\"content content-full\">\n";
         $b .= "<h1>$team Schedule</h2>\n";
         //$b .= "<ul>\n";
         
@@ -149,8 +190,23 @@ class mwfMobileSite {
             //$bt = $d['evtime_beg'];
             //$et = $d['evtime_end'];
             $time = $d['time'];
+            // Want to determine type of entry for possible filtering later
+            // possibilities are: Practice, Home Game, Tournament
+            if( preg_match("/^Practice/",$evnm)){
+                $evtype = "practice";
+            }
+            elseif( preg_match("/^Intersite Game Day/",$evnm)){
+                $evtype = "tournament";
+            }
+            elseif( preg_match("/^Games/",$evnm)){
+                $evtype = "games";
+            }
+            else {
+                $evtype = "unknown";
+            }
+            
             // depending on type of event, court may be specified in one of two locations...
-            $b .= "<p>\n";
+            $b .= "<p class=\"$evtype\">\n";
             $b .= "$date - $time<br />";
             $b .= "$evnm<br />\n";
             $b .= "$evloc - Court $court\n";
@@ -194,6 +250,9 @@ class mwfMobileSite {
             case "sched" :
                 $b .= $this->dispSched();
                 break;
+            case "credits" :
+                $b .= $this->dispCredits();
+                break;
             default :
                 $b .= $this->dispMain();
                 break;
@@ -203,18 +262,19 @@ class mwfMobileSite {
         $b .= $this->button("./","Main Menu");
         return "$b";
     }
+    // This is an unbalanced function, opens a div
     function topmenu($label = ""){
         $b = "";
-        $b .=  "<div class=\"menu-full menu-detailed menu-padded\">\n";
+        $b .=  "<div class=\"menu\">\n";
         $b .=  "<h1 class=\"light menu-first\">$label</h1>\n"; 
-        $b .=  "<ol> \n";
+        //$b .=  "<ol> \n";
         //$b .=  "<ol> \n";
         return $b;
         
     }
     function button($href = "", $label = ""){
         $b = "";
-        $b .= "<a href=\"" . $href . "\" class=\"button-full button-padded\">$label</a>\n";
+        $b .= "<a href=\"" . $href . "\" class=\"button button-padded\">$label</a>\n";
         return $b;
     }
     function getTitle(){
