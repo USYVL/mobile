@@ -1,0 +1,18 @@
+.practice {
+    background-color: #ccf;
+}
+.games {
+    background-color: #cfc;
+}
+.tournament {
+    background-color: #fcf;
+}
+.unknown {
+    background-color: red;
+}
+.credits {
+    text-align: center;
+}
+.author {
+   font-size: 85%;
+}
