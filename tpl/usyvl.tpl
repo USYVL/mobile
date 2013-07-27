@@ -21,12 +21,13 @@ $mwf = "http://mwf.usyvl.org/assets";
 
 <!-- MWF 1.3 setup -->
 <link rel="stylesheet" type="text/css" href="<?php echo $mwf?>/css.php?lean" media="screen">
-<script type="text/javascript" src="<?php echo $mwf?>/js.php"></script>
+<script type="text/javascript" src="<?php echo $mwf?>/js.php?standard_libs=geolocation"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 
 <link rel="stylesheet" href="css/usyvl.css" type="text/css">
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 <script type="text/javascript" src="js/qlib.js"></script>
+<script type="text/javascript" src="js/index.js"></script>
 
 
 

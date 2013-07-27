@@ -4,6 +4,9 @@ if (! $()) {
     document.write('<script src="js/jquery-1.10.2.min.js"><\/script>');
 }
 
+//if (!window.jQuery) {
+//}
+// window.jQuery || document.write('<script src="Assets/jquery-1.8.3.min.js"></script>);
 // allowed scoreTypes
 // Rally
 // DoubleMax

@@ -1,6 +1,7 @@
 <?php
 require_once("inc/dbManagement.inc");
 require_once("inc/usyvlDB.inc");
+require_once("version.php");
 
 define('DEBUGLEVEL',0);
 
@@ -51,6 +52,14 @@ class mwfMobileSite {
         $b = "";
         //$b .= $this->topmenu("Credits");
         $b .= "<div class=\"content\">\n";
+        $b .= "<h2 class=\"light\">Version</h2>\n";
+        //$b .= "<h2 class=\"light\">Version: " .  $GLOBALS['version'] . "</h2>\n";
+        $b .= "<p class=\"credits author\">\n";
+        $b .= "Version: " . $GLOBALS['version'] . "\n";
+        $b .= "</p>\n";
+        $b .= "</div>\n";
+
+        $b .= "<div class=\"content\">\n";
         $b .= "<h2 class=\"light\">Tech</h2>\n";
         $b .= "<p class=\"credits\">\n";
         $b .= "HTML 5\n";
@@ -88,7 +97,7 @@ class mwfMobileSite {
         $b = "";
         $b .= $this->topmenu("Select State");
         $b .= "<ol>\n";
-        $states = $sdb->fetchList("distinct evstate from ev");
+        $states = $sdb->fetchList("distinct lcstate from lc");
         foreach( $states as $state){
            $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=programs&state=$state\">$state</a></li>\n";
         }
@@ -105,7 +114,7 @@ class mwfMobileSite {
         $b = "";
         $b .= $this->topmenu("Select Program");
         $b .= "<ol>\n";
-        $programs = $sdb->fetchList("distinct evprogram from ev","evstate='" . $_GET['state'] . "'");
+        $programs = $sdb->fetchList("distinct evprogram from ev left join lc on ev_lcid = lcid ","lcstate='" . $_GET['state'] . "'");
         foreach( $programs as $program){
            $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=divisions&state=$state&program=$program\">$program</a></li>\n";
         }
@@ -181,7 +190,7 @@ class mwfMobileSite {
         //}
         
         // need to get team id
-        $data = $sdb->getKeyedHash('gmid',"select * from gm left join ev on gm.evid = ev.evid where tmid1 = $tmid or tmid2 = $tmid order by evds");
+        $data = $sdb->getKeyedHash('gmid',"select * from gm left join ev on gm.evid = ev.evid left join lc on ev.ev_lcid = lcid where tmid1 = $tmid or tmid2 = $tmid order by evds");
         foreach( $data as $d){
             $evloc = $d['evlocation'];
             $evnm = $d['evname'];
@@ -253,6 +262,9 @@ class mwfMobileSite {
             case "credits" :
                 $b .= $this->dispCredits();
                 break;
+            case "auto" :
+                $b .= $this->dispAuto();
+                break;
             default :
                 $b .= $this->dispMain();
                 break;
@@ -261,6 +273,12 @@ class mwfMobileSite {
         $b .= $this->button("http://www.usyvl.org","USYVL Website");
         $b .= $this->button("./","Main Menu");
         return "$b";
+    }
+    function dispAuto(){
+        $b = "Location:";
+        $b .= "<div id=\"device_location\">NA</div>";
+        $b .= "<div id=\"site_proximity\">Nearest USYVL site: NA</div>";
+        return $b;
     }
     // This is an unbalanced function, opens a div
     function topmenu($label = ""){
