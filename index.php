@@ -192,7 +192,7 @@ class mwfMobileSite {
         // need to get team id
         $data = $sdb->getKeyedHash('gmid',"select * from gm left join ev on gm.evid = ev.evid left join lc on ev.ev_lcid = lcid where tmid1 = $tmid or tmid2 = $tmid order by evds");
         foreach( $data as $d){
-            $evloc = $d['evlocation'];
+            $evloc = $d['lclocation'];
             $evnm = $d['evname'];
             $date = $d['evds'];
             $court = $d['court'];
