@@ -20,10 +20,16 @@ class mwfMobileSite {
         if( isset($_GET['mode'])) $this->mode = $_GET['mode'];
     }
     function dispMain(){
+        $sdb = $GLOBALS['dbh']['sdb'];
+        $seasons = $sdb->fetchList("distinct evseason from ev");
+        
         $b = "";
         $b .= $this->topmenu("Main Menu");
         $b .= "<ul>\n";
-        $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=states\">Get Your Schedule</a></li>\n";
+        
+        foreach($seasons as $season){
+            $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=states&season=$season\">$season Schedules</a></li>\n";
+        }
         $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=auto\">Auto Mode</a></li>\n";
         $b .= "  <li><a href=\"./scorekeeper.php?team_a=Team C&team_b=Team D\">Score Keeper</a></li>\n";
         $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=credits\">Credits</a></li>\n";
@@ -92,14 +98,15 @@ class mwfMobileSite {
     }
     function dispStates(){
         $sdb = $GLOBALS['dbh']['sdb'];
-        $this->title = "USYVL Mobile - Select State";
+        $season = $_GET['season'];
+        $this->title = "USYVL Mobile - Select State $season";
         
         $b = "";
         $b .= $this->topmenu("Select State");
         $b .= "<ol>\n";
-        $states = $sdb->fetchList("distinct lcstate from lc");
+        $states = $sdb->fetchList("distinct lcstate from ev left join lc on ev_lcid = lcid where evseason='$season'");
         foreach( $states as $state){
-           $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=programs&state=$state\">$state</a></li>\n";
+           $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=programs&season=$season&state=$state\">$state</a></li>\n";
         }
         
         $b .= "</ol>\n";
@@ -109,14 +116,15 @@ class mwfMobileSite {
     function dispPrograms(){
         $sdb = $GLOBALS['dbh']['sdb'];
         $state = $_GET['state'];
-        $this->title = "USYVL Mobile - Select Program from $state";
+        $season = $_GET['season'];
+        $this->title = "USYVL Mobile - Select Program from $state for $season";
         
         $b = "";
         $b .= $this->topmenu("Select Program");
         $b .= "<ol>\n";
-        $programs = $sdb->fetchList("distinct evprogram from ev left join lc on ev_lcid = lcid ","lcstate='" . $_GET['state'] . "'");
+        $programs = $sdb->fetchList("distinct evprogram from ev left join lc on ev_lcid = lcid ","( lcstate='$state' and evseason='$season' )");
         foreach( $programs as $program){
-           $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=divisions&state=$state&program=$program\">$program</a></li>\n";
+           $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=divisions&season=$season&state=$state&program=$program\">$program</a></li>\n";
         }
         
         $b .= "</ol>\n";
@@ -127,14 +135,15 @@ class mwfMobileSite {
         $sdb = $GLOBALS['dbh']['sdb'];
         $state = $_GET['state'];
         $program = $_GET['program'];
-        $this->title = "USYVL Mobile - Select Division from $state Program $program";
+        $season = $_GET['season'];
+        $this->title = "USYVL Mobile - Select Division from $state Program $program for $season";
         
         $b = "";
         $b .= $this->topmenu("Select Age Division");
         $b .= "<ol>\n";
-        $divisions = $sdb->fetchList("distinct tmdiv from tm left join so on tmdiv=so_div","tmprogram='" . $_GET['program'] . "' order by so_order");
+        $divisions = $sdb->fetchList("distinct tmdiv from tm left join so on tmdiv=so_div","( tmprogram='$program' and tmseason='$season' ) order by so_order");
         foreach( $divisions as $division){
-           $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=teams&division=$division&state=$state&program=$program\">$division</a></li>\n";
+           $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=teams&division=$division&season=$season&state=$state&program=$program\">$division</a></li>\n";
         }
         
         $b .= "</ol>\n";
@@ -145,18 +154,19 @@ class mwfMobileSite {
         $sdb = $GLOBALS['dbh']['sdb'];
         $state = $_GET['state'];
         $program = $_GET['program'];
+        $season = $_GET['season'];
         $division = $_GET['division'];
-        $this->title = "USYVL Mobile - Select Team in $division Division from $state Program $program";
+        $this->title = "USYVL Mobile - Select Team in $division Division from $state Program $program for $season";
         
         $b = "";
         $b .= $this->topmenu("Select Team");
         $b .= "<ol>\n";
         //$teams = $sdb->fetchList("distinct name from tm","program='" . $_GET['program'] . "' and div='" . $division . "'");
-        $data = $sdb->getKeyedHash('tmid',"select * from tm where tmprogram='" . $_GET['program'] . "' and tmdiv='" . $division . "'");
+        $data = $sdb->getKeyedHash('tmid',"select * from tm where ( tmprogram='$program' and tmdiv='$division' and tmseason='$season' )");
         foreach( $data as $k => $d){
             $team = $d['tmname'];
             $tmid = $k;
-           $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=sched&tmid=$tmid&team=$team&division=$division&state=$state&program=$program\">$team</a></li>\n";
+           $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=sched&season=$season&tmid=$tmid&team=$team&division=$division&state=$state&program=$program\">$team</a></li>\n";
         }
         
         $b .= "</ol>\n";
@@ -166,11 +176,12 @@ class mwfMobileSite {
     function dispSched(){
         $sdb = $GLOBALS['dbh']['sdb'];
         $state = $_GET['state'];
+        $season = $_GET['season'];
         $program = $_GET['program'];
         $division = $_GET['division'];
         $team = $_GET['team'];
         $tmid = $_GET['tmid'];
-        $this->title = "USYVL Mobile - $team Schedule";
+        $this->title = "USYVL Mobile - $team Schedule for $season";
         
         $b = "";
         //$b .= $this->topmenu("$team Schedule");
@@ -190,7 +201,7 @@ class mwfMobileSite {
         //}
         
         // need to get team id
-        $data = $sdb->getKeyedHash('gmid',"select * from gm left join ev on gm.evid = ev.evid left join lc on ev.ev_lcid = lcid where tmid1 = $tmid or tmid2 = $tmid order by evds");
+        $data = $sdb->getKeyedHash('gmid',"select * from gm left join ev on gm.evid = ev.evid left join lc on ev.ev_lcid = lcid where ( ( tmid1=$tmid or tmid2=$tmid ) and evseason='$season' ) order by evds");
         foreach( $data as $d){
             $evloc = $d['lclocation'];
             $evnm = $d['evname'];
