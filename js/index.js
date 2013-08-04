@@ -9,17 +9,6 @@ $(function() {
             str="<strong>Latitude: </strong>"+pos['latitude']+"<br /><strong>Longitude: </strong>"+pos['longitude']+"<br /><strong>Accuracy: </strong>"+pos['accuracy'];
             $('#device_location').html(str);
             location=pos;  // reset location to results of lookup
-            //alert($str); 
-            
-            $.ajaxSetup ({  
-                    cache: false  
-            });  
-
-            
-            // immediately do an ajax call
-            var ajax_load = "<img src='img/load.gif' alt='loading...' />";  
-            var scriptUrl = "ajax/getDistanceAjax.php?lat="+pos['latitude']+"&lon="+pos['longitude'];
-            $('#proximal_events').html(ajax_load).load(scriptUrl);
         }
         
         validGeoLocation(location);
@@ -28,7 +17,15 @@ $(function() {
                 mwf.standard.geolocation.setTimeout(900000);  // make value valid for 15 minutes
                 mwf.standard.geolocation.getCurrentPosition(
                     function(pos) { 
-                        validGeoLocation(pos)
+                        validGeoLocation(pos);
+                        $.ajaxSetup ({  
+                                cache: false  
+                        });  
+                        
+                        // immediately do an ajax call
+                        var ajax_load = "<img src='img/load.gif' alt='loading...' />";  
+                        var scriptUrl = "ajax/getDistanceAjax.php?lat="+pos['latitude']+"&lon="+pos['longitude'];
+                        $('#proximal_events').html(ajax_load).load(scriptUrl);
                     }, 
                     function(err){ alert("Err:"+err.message); }
                     );
