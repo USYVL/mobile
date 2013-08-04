@@ -1,5 +1,5 @@
 <?php
-require_once("inc/dbManagement.inc");
+require_once(__DIR__ . "/../inc/dbManagement.inc");
 
 ////////////////////////////////////////////////////////////////////////////////
 // search for sqlite3 to find where season name addition should go....
@@ -25,7 +25,7 @@ require_once("inc/dbManagement.inc");
 
 $s_key = ( isset($_SESSION['s_key']) ) ?  "{$_SESSION['s_key']}" : "unset" ;
 
-$sdb = new dbMgmt('sdb','sqlite:io/db/sched.sqlite3','Scheduling Database',$logdb);
+$sdb = new dbMgmt('sdb','sqlite:' . __DIR__ . '/../io/db/sched.sqlite3','Scheduling Database',$logdb);
 $evtable = new dbMgmtTable("ev");                                     // should probably add a u_id
 $evtable->addCol("evid","integer","primary key","","");
 $evtable->addCol("season","text","","","");
