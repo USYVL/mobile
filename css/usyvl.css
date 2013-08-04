@@ -1,10 +1,10 @@
-.practice {
+.Practices {
     background-color: #ccf;
 }
-.games {
+.Games {
     background-color: #cfc;
 }
-.tournament {
+.Tournaments {
     background-color: #fcf;
 }
 .unknown {
@@ -19,6 +19,11 @@
 #device_location {
     background-color: #aaa;
 }
+#select-schedule-display-container {
+    /* width: 100%;  */
+    /* border-style: none; */
+}
 #select-schedule-display {
-    width: 100%;  // make select stretch across 
+    /* display: inline;  */
+    width: 30%;  
 }

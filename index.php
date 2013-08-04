@@ -266,6 +266,10 @@ class mwfMobileSite {
         $b .= "<p>\n";
         $b .= "Program: $program<br />\n";
         $b .= "Coach: $coach<br />\n";
+        $b .= "</p>\n";
+       
+        $b .= "<p id=\"select-schedule-display-container\">\n";
+        $b .= "Display: ";
         $b .= "<select id=\"select-schedule-display\">\n";
         $b .= "<option>All</option>\n";
         $b .= "<option>Practices</option>\n";
@@ -300,13 +304,13 @@ class mwfMobileSite {
             // Want to determine type of entry for possible filtering later
             // possibilities are: Practice, Home Game, Tournament
             if( preg_match("/^Practice/",$evnm)){
-                $evtype = "practice";
+                $evtype = "Practices";
             }
             elseif( preg_match("/^Intersite Game Day/",$evnm)){
-                $evtype = "tournament";
+                $evtype = "Tournaments";
             }
             elseif( preg_match("/^Games/",$evnm)){
-                $evtype = "games";
+                $evtype = "Games";
             }
             else {
                 $evtype = "unknown";

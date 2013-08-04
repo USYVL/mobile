@@ -25,5 +25,31 @@ $(function() {
                 
                 //alert("click of location");
         });
+        $('#select-schedule-display').change(function(){
+                //alert("Changing schedule display to: "+$('#select-schedule-display').val());
+                if( $('#select-schedule-display').val() == 'All' ){
+                    $('.Practices').css("display","block");
+                    $('.Games').css("display","block");
+                    $('.Tournaments').css("display","block");
+                }
+                if( $('#select-schedule-display').val() == 'Practices' ){
+                    $('.Practices').css("display","block");
+                    $('.Games').css("display","none");
+                    $('.Tournaments').css("display","none");
+                }
+                if( $('#select-schedule-display').val() == 'Games' ){
+                    $('.Practices').css("display","none");
+                    $('.Games').css("display","block");
+                    $('.Tournaments').css("display","none");
+                }
+                if( $('#select-schedule-display').val() == 'Tournaments' ){
+                    $('.Practices').css("display","none");
+                    $('.Games').css("display","none");
+                    $('.Tournaments').css("display","block");
+                }
+                // so this is close, but actually hides the one selected instead of hiding the others.
+                // Also need to activate the others when changing, so need some logic here.
+                //$("."+$('#select-schedule-display').val()).css("display","none");
+        });
 });
 
