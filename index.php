@@ -19,8 +19,72 @@ class mwfMobileSite {
     function processGET(){
         if( isset($_GET['mode'])) $this->mode = $_GET['mode'];
     }
+    ////////////////////////////////////////////////////////////////////////////
+    // Want to centralize the data collection/validation/storage since the chain
+    // is pretty well defined:
+    //   season
+    //   state
+    //   program
+    //   division
+    //   team
+    // 
+    // The overall chain leads to the display of a teams schedule for the entire 
+    // season. Each step requires all the other pieces.  Of course, the automode 
+    // will add the additional dimension of time.
+    //
+    // Debating on using the singular and plural forms of each chain element.
+    // ie: state and states, season and seasons
+    ////////////////////////////////////////////////////////////////////////////
+    function collectValidateDataChain($next){
+        // so, one thing to consider is whether I should try to figure out the 
+        // mode from what elements are available...  
+        // Interesting idea, but gets trickier if we end up having sequences that 
+        // dont fit this chain idea.
+        
+        // Was toying with a mask type idea though  0x07
+        // season 0x01
+        // state 0x02
+        // program 0x04
+        // division 0x08
+        
+        // thus 0x0f would indicate the presence of all of those, 0x07 only the first three
+        // but many of these values rely on the previous value (thus this idea of a chain)
+        // But at some point we need to think of time (date) and what where that fits in
+        // in the current scheme, we can pull the schedule for one team for that date,
+        // but will I want to pull data from multiple sites on a given date?????
+        
+        $this->chain = array('season','state','program','division','team');
+        $sdb = $GLOBALS['dbh']['sdb'];
+        
+        $this->chaindata['seasons'] = $sdb->fetchList("distinct evseason from ev");
+        $k = 'season';
+        if( isset($_GET[$k])){
+            $v = $_GET[$k];
+        }
+        // loop over chain elements, checking $_GET for values and verifying that
+        // they exist and are valid
+        // At some point in all this though, I need some handlers specific to the
+        // data I need to examine validate...
+        // Also, would be nice to use prepare for making the queries, would help
+        // secure things a bit..
+        foreach($this->chain as $chainelement){
+            $datakey = $chainelement . "s";
+            if( $next == $chainelement ) return $this->chaindata[$datakey];
+            if( isset($_GET[$chainelement])) {
+                $this->chainval[$chainelement] = $_GET[$chainelement];
+                
+                // need to validate the data now, hmmmm, we need this to lag by one
+                // ie: to validate state data, we need a season value set
+                // so we need to save previous loop entry
+            }
+            
+        }
+        
+    }
     function dispMain(){
         $sdb = $GLOBALS['dbh']['sdb'];
+        
+        $this->collectValidateDataChain('season');
         $seasons = $sdb->fetchList("distinct evseason from ev");
         
         $b = "";
@@ -141,7 +205,9 @@ class mwfMobileSite {
         $b = "";
         $b .= $this->topmenu("Select Age Division");
         $b .= "<ol>\n";
-        $divisions = $sdb->fetchList("distinct tmdiv from tm left join so on tmdiv=so_div","( tmprogram='$program' and tmseason='$season' ) order by so_order");
+        //$divisions = $sdb->fetchList("distinct tmdiv from tm left join so on tmdiv=so_div","( tmprogram='$program' and tmseason='$season' )","so_order");
+        //$divisions = $sdb->fetchList("distinct tmdiv from tm left join so on tmdiv=so_div","( tmprogram=? and tmseason=? )","so_order",array($program,$season));
+        $divisions = $sdb->fetchListNew("select distinct tmdiv from tm left join so on tmdiv=so_div where ( tmprogram=? and tmseason=? ) order by so_order",array($program,$season));
         foreach( $divisions as $division){
            $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=teams&division=$division&season=$season&state=$state&program=$program\">$division</a></li>\n";
         }
@@ -161,12 +227,20 @@ class mwfMobileSite {
         $b = "";
         $b .= $this->topmenu("Select Team");
         $b .= "<ol>\n";
+        
         //$teams = $sdb->fetchList("distinct name from tm","program='" . $_GET['program'] . "' and div='" . $division . "'");
-        $data = $sdb->getKeyedHash('tmid',"select * from tm where ( tmprogram='$program' and tmdiv='$division' and tmseason='$season' )");
+        //$stm = $sdb->prepare("select * from tm where ( tmprogram=? and tmdiv=? and tmseason=? )");
+        //$data = $sdb->getKeyedHash('tmid',$stm,array($program,$division,$season));
+        
+        //$stm = $sdb->prepare("select * from tm where ( tmprogram=? and tmdiv=? and tmseason=? )";
+        
+        $data = $sdb->getKeyedHash('tmid',"select * from tm where ( tmprogram=? and tmdiv=? and tmseason=? )",array($program,$division,$season));
+        
+        //$data = $sdb->getKeyedHash('tmid',"select * from tm where ( tmprogram='$program' and tmdiv='$division' and tmseason='$season' )");
         foreach( $data as $k => $d){
             $team = $d['tmname'];
             $tmid = $k;
-           $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=sched&season=$season&tmid=$tmid&team=$team&division=$division&state=$state&program=$program\">$team</a></li>\n";
+            $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=sched&season=$season&tmid=$tmid&team=$team&division=$division&state=$state&program=$program\">$team</a></li>\n";
         }
         
         $b .= "</ol>\n";
@@ -182,11 +256,23 @@ class mwfMobileSite {
         $team = $_GET['team'];
         $tmid = $_GET['tmid'];
         $this->title = "USYVL Mobile - $team Schedule for $season";
-        
+                
+        $coach = $sdb->fetchVal('distinct tmcoach from tm','tmid=?',array($tmid));
+
         $b = "";
         //$b .= $this->topmenu("$team Schedule");
         $b .= "<div class=\"content content-full\">\n";
         $b .= "<h1>$team Schedule</h2>\n";
+        $b .= "<p>\n";
+        $b .= "Program: $program<br />\n";
+        $b .= "Coach: $coach<br />\n";
+        $b .= "<select id=\"select-schedule-display\">\n";
+        $b .= "<option>All</option>\n";
+        $b .= "<option>Practices</option>\n";
+        $b .= "<option>Games</option>\n";
+        $b .= "<option>Tournaments</option>\n";
+        $b .= "</select>\n";
+        $b .= "</p>\n";
         //$b .= "<ul>\n";
         
         // This first part deals with practices that are NOT in the sched db (at this time)..
@@ -201,7 +287,8 @@ class mwfMobileSite {
         //}
         
         // need to get team id
-        $data = $sdb->getKeyedHash('gmid',"select * from gm left join ev on gm.evid = ev.evid left join lc on ev.ev_lcid = lcid where ( ( tmid1=$tmid or tmid2=$tmid ) and evseason='$season' ) order by evds");
+        //$data = $sdb->getKeyedHash('gmid',"select * from gm left join ev on gm.evid = ev.evid left join lc on ev.ev_lcid = lcid where ( ( tmid1=$tmid or tmid2=$tmid ) and evseason='$season' ) order by evds");
+        $data = $sdb->getKeyedHash('gmid',"select * from gm left join ev on gm.evid = ev.evid left join lc on ev.ev_lcid = lcid where ( ( tmid1=? or tmid2=? ) and evseason=? ) order by evds",array($tmid,$tmid,$season));
         foreach( $data as $d){
             $evloc = $d['lclocation'];
             $evnm = $d['evname'];
@@ -234,7 +321,7 @@ class mwfMobileSite {
                 // need to get the other teams name
                 // this team could be either tmid1 or tmid2
                 $othertmid = ( $d['tmid1'] == $tmid ) ? $d['tmid2'] : $d['tmid1'];
-                $othertmname = $sdb->fetchVal('tmname from tm',"tmid=$othertmid");
+                $othertmname = $sdb->fetchVal('tmname from tm',"tmid=?",array($othertmid));
                 $b .= "<br /><a href=\"scorekeeper.php?team_a=$team&team_b=$othertmname\">Scorekeep This Game</a>\n";
             }
             $b .= "</p>\n";
@@ -252,8 +339,8 @@ class mwfMobileSite {
         //$content['errs'] .= "Mode: " . $this->mode . "\n";
         
         switch ($this->mode){
-            case "select" :
-                $b .= $this->dispSelect();
+            case "seasons" :  // The top level 
+                $b .= $this->dispMain();
                 break;
             case "states" :
                 $b .= $this->dispStates();
@@ -267,6 +354,7 @@ class mwfMobileSite {
             case "teams" :
                 $b .= $this->dispTeams();
                 break;
+            // this entry is the culmination of the chain (so far)    
             case "sched" :
                 $b .= $this->dispSched();
                 break;

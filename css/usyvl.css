@@ -19,3 +19,6 @@
 #device_location {
     background-color: #aaa;
 }
+#select-schedule-display {
+    width: 100%;  // make select stretch across 
+}

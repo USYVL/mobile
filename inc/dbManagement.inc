@@ -11,6 +11,7 @@ class dbMgmt {
         $this->log = $log;
         $this->counter = 0;
         $this->mesgs = "";
+        $this->pdos = null; // pdo statement for queries
         
         
         $GLOBALS['dbh'][$key] =& $this;
@@ -35,17 +36,25 @@ class dbMgmt {
     /////    $GLOBALS['dbh'][$db] =& $this;
     /////    
     /////}
+    // Do not yet have an execute feed through, but I have to think how I want to use this anyway,
+    // I typically use methods such as fetchList, getKeyedHash as they return already polished php 
+    // structures, so have to consider setting up a prepared statement version of those, pFetchList()???
+    // pGetKeyedHash()?
+    ////////////////////////////////////////////////////////////////////////////
     function prepare($pquery){
             if ( ! $this->initDB() )  return false; 
             return $this->dbh->prepare($pquery);
     }
+    ////////////////////////////////////////////////////////////////////////////
     function isWritable(){
          return is_writable($this->path);
     }
+    ////////////////////////////////////////////////////////////////////////////
     function displayMesgs(){
         print $this->mesgs;
         $this->mesgs = "";
     }
+    ////////////////////////////////////////////////////////////////////////////
     function initDB(){
         // this makes the (possibly) mistaken assumption that all tables are created at once...
         // want to create dbs as needed
@@ -108,22 +117,75 @@ class dbMgmt {
         }
         return true;
     }
+    ////////////////////////////////////////////////////////////////////////////
     function addTable($table){
         $this->tables[$table->name] = $table;
         $this->tableCreated[$table->name] = false;
         
         // maybe should create tables here?
     }
-    function query($qstr){
+    ////////////////////////////////////////////////////////////////////////////
+    function query($qstr,$values = null){
         if ( ! $this->initDB() )  return false; 
-        //$this->counter++;
+        $error = "";
          
         //dprint("executing query on {$this->db} db",0,0,"$qstr");
-        $this->result = $this->dbh->query("$qstr");
+        // original method before refined the prepare/execute options
+        //$this->pdos = $this->dbh->query("$qstr");
         
         
-        if ($this->result == null) {
+        if( is_string($qstr) && is_null($values)){
+            //print "running straight query<br />";
+            if( ($this->pdos = $this->dbh->query("$qstr")) === false ){
+                $error .= "straight query failed<br />\n";
+            }
+        }
+        else if (  is_string($qstr) && ! is_null($values) ){
+            if( is_array($values)){
+                if( ($this->pdos = $this->dbh->prepare($qstr)) === false ){
+                    $error .= "prepare failed";
+                }
+                else {
+                    if( $this->pdos->execute($values) === false ){
+                        $error .= "execute failed";
+                    }
+                }
+            }
+            else {
+                $error .= "2nd argument should be an array or null<br />";
+                // error condition
+            }
+        }
+        else if ( is_object($qstr) && method_exists($qstr,'bindParam')){ // This means its a PDOStatement
+            $this->pdos = $qstr;
+            if( is_null($values)){  // Assume prepared PDOStatement, just execute
+                //print "executing with no values<br />\n";
+                $qstr->execute();
+            }
+            else if ( is_array($values)){
+                //print "executing with values<br />\n";
+                //print_pre($values,"executing with values");
+                if( $qstr->execute($values) === true ){
+                }
+                else {
+                    print_pre($qstr->errorInfo(),"error info",true);
+                }
+            }
+            else {
+                $error .= "2nd argument to getKeyedHash is not null or array<br />\n";
+            }
+        }
+        else {
+            $error .= "1st argument to getKeyedHash is not string or PDOStatement Object<br />\n";
+        }
+        
+        
+        // have had some issues with detecting errors, checking for null kind of worked, but 
+        // doesn't align perfectly with the docs
+        if ($this->pdos == null  || $error != "" ) {
+        //if ($error != "") {
                 //$error = $result->errorCode();
+                dprint(__FUNCTION__,0,0,"$error:");
                 dprint("error on query",0,0,"$qstr, debug_backtrace follows:");
                 $dbt = debug_backtrace();
                 $ei = $this->dbh->errorInfo();
@@ -149,7 +211,7 @@ class dbMgmt {
         }
         //print_r($result);
         //print "just printed result<br>\n";
-        return($this->result);
+        return($this->pdos);
     }
     ////////////////////////////////////////////////////////////////////////////
     function createTables(){
@@ -292,6 +354,7 @@ class dbMgmt {
         $r = $this->getTableDescriptionHash($table);
         $dbcols = array();
         
+        // go through the table schema description to determine the primary key of the table
         foreach($r as $v){
             if( $v['pk'] == 1 ) $primary_key = $v['name'];
             
@@ -307,40 +370,37 @@ class dbMgmt {
         $skippedcols = array_diff($dbcols,$datacols);
         $this->mesgs .= print_pre($skippedcols,"skipped columns",true);
         $this->mesgs .= print_pre($exportcols,"export columns",true);
+
+        // prepare a PDOStatement for doing multiple executes while looping through hash
+        $pq = "insert into $table (";
+        $pq .= implode(",",$exportcols);
+        $pq .= ") values (" . implode(",",array_fill(0,count($exportcols),"?")) . ")";
+        
+        $stm = $this->dbh->prepare($pq);
+        if( $stm === false ){
+            print "prepare set error code: " . $this->dbh->errorCode() . "<br>\n";
+            print "prepare set error info: " . print_r($this->dbh->errorInfo()) . "<br>\n";
+            print "prepared query: $pq <br>\n";
+            print "Prepare failed<br>\n";
+        }
+        else {
+            $this->mesgs .= "Prepare succeeded<br>\n";
+        }
         
         foreach($a as $row){
-            $out = array();
-            $pq = "insert into $table (";
-            $pq .= implode(",",$exportcols);
-            $pq .= ") values (" . implode(",",array_fill(0,count($exportcols),"?")) . ")";
-            
-            // just need a series of question marks here
-            
             $pqvals = array();
             foreach($exportcols as $col){
                 $pqvals[] = $row[$col];
             }
             
-            $stm = $this->dbh->prepare($pq);
-            
-            if( $stm === false ){
-                print "prepare set error code: " . $this->dbh->errorCode() . "<br>\n";
-                print "prepare set error info: " . print_r($this->dbh->errorInfo()) . "<br>\n";
-                print "prepared query: $pq <br>\n";
-                print "Prepare failed<br>\n";
-            }
-            else {
-                $this->mesgs .= "Prepare succeeded<br>\n";
-            }
-            
             if( $do_query ){
                 if( $stm->execute($pqvals) === true ){
                     $this->mesgs .= "statement execution succeeded<br>\n";
+                    // would use $stm->fetchAll() to actually get results
                 }
                 else {
                     $this->mesgs .= "statement execution failed<br>\n";
                     $this->mesgs .= print_pre($stm->errorInfo(),"error info",true);
-                    
                 }
             }
             else {
@@ -350,7 +410,7 @@ class dbMgmt {
             $this->mesgs .= "insertArrayOfHashes(): prepared query: $pq   : valstr: $pqvstr<br>\n";
         }
         
-        // return the rowid of this entry, (0 if it fails)...
+        // return the rowid of this entry, (0 if it fails), should be last primary key...
         return $this->getLastInserted($primary_key,$table);
         // should return last primary key....
     }
@@ -412,14 +472,14 @@ class dbMgmt {
         //$this->mesgs .= "qstr: $qstr<br>\n";
     }
     ////////////////////////////////////////////////////////////////////////////
-    function fetchVal($select,$where = ""){
+    function fetchVal($select,$where = "",$values = null){
         //print_pre($dbh);
         
         $qstr = "select $select";
         if( $where != "" ) $qstr .= " where $where";
         
         //print "fetchVal: qstr: $qstr<br>\n";
-        $result = $this->query("$qstr");
+        $result = $this->query("$qstr",$values);
         $r = $result->fetchAll(PDO::FETCH_COLUMN);
         return $r[0];
     }
@@ -433,22 +493,32 @@ class dbMgmt {
         return $result;
     }
     ////////////////////////////////////////////////////////////////////////////////
-    function fetchList($select,$where = "",$order = ""){
-        if( ! is_object($this)) {
-            print_pre(debug_backtrace(),"fetchList: debug_backtrace");
-        }
-        
+    // Pretty sure we expect $select to specify only one record
+    ////////////////////////////////////////////////////////////////////////////////
+    function fetchList($select,$where = "",$order = "",$values = null){
+        //if( ! is_object($this)) {
+        //    print_pre(debug_backtrace(),"fetchList: debug_backtrace");
+        //}
         
         $qstr = "select $select";
         if( $where != "" ) $qstr .= " where $where";
         if( $order != "" ) $qstr .= " order by $order";
         
         //print "fetchVal: qstr: $qstr<br>\n";
-        $result = $this->query("$qstr");
+        $result = $this->query("$qstr",$values);
         //print_pre($result,"dbh");
         $r = $result->fetchAll(PDO::FETCH_COLUMN);
         //print_pre($r,"result fetchAll");
         //print_pre($dbh,"dbh");
+        return $r;
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+    // newer version of above function that relies on the user assembling, but 
+    // more cleanly supports the newer prepare/execute query routine
+    ////////////////////////////////////////////////////////////////////////////////
+    function fetchListNew($qstr,$values = null){
+        $result = $this->query("$qstr",$values);
+        $r = $result->fetchAll(PDO::FETCH_COLUMN);
         return $r;
     }
     ////////////////////////////////////////////////////////////////////////////////
@@ -463,19 +533,75 @@ class dbMgmt {
         return $hash;
     }
     ////////////////////////////////////////////////////////////////////////////
-    function getKeyedHash($key = "",$qstr = ""){
-        // the check below is redundant
-        //if( ! is_object($dbh)) {
-        //    print_pre(debug_backtrace(),"dbh not an object: triggering debug backtrace in getKeyedHash");
-        //}
-        $hash = array();
-        $result = $this->query("$qstr");
-        $r = $result->fetchAll(PDO::FETCH_ASSOC);
-        //print_pre($r,"query result for: $qstr");
-        //print_pre($dbh,"dbhandle");
+    // want to create a prepared statement version of this, but I wonder if I 
+    // could get away with checking the type of $qstr...  It its a string then
+    // run a regular query, if its a prepared statement object ....
+    // the problem then becomes attaching the arguments to the execute
+    // so we may have to do the prepare and execute BEFORE handing off the PDOstatement
+    // object to this routine...  or allow another value (the data array) to be passed 
+    // in for the execute  $data = null
+    ////////////////////////////////////////////////////////////////////////////
+    // OK, so getKeyedHash now handles a couple possible usages:
+    //   key and basic query string
+    //   key and string for a prepare and an array of values for an execute
+    //   key and a PDOStatement object and an array of values for an execute or null if prebound
+    ////////////////////////////////////////////////////////////////////////////
+    function getKeyedHash($key = "",$qstr = "", $values = null ){
+        $hash = array();  // initialize output hash
+        //print_pre($values,"values passed into getKeyedHash() for qstr: $qstr");
+        $pdos = $this->query($qstr,$values);
+        $r = $pdos->fetchAll(PDO::FETCH_ASSOC);
+        //print_pre($r,"results from fetchAll()");
         
-        // check if key SHOULD be an array
-        // this pre-supposes that a given db key should NOT have a comma in it.  I think this is a safe assumption
+        ////// could potentially break this out into its own method
+        ////// and reuse for fetchList and others !!!!
+        ////if( is_string($qstr) && is_null($values)){
+        ////    $result = $this->query("$qstr");
+        ////}
+        ////else if (  is_string($qstr) && ! is_null($values) ){
+        ////    if( is_array($values)){
+        ////        $stm = $this->prepare($qstr);
+        ////        if( $stm->execute($values) === true) {
+        ////            print "success<br />\n";
+        ////            $r = $stm->fetchAll(PDO::FETCH_ASSOC);
+        ////        }
+        ////        else {
+        ////            print "fail<br />\n";
+        ////            print_pre($stm->errorInfo(),"error info",true);
+        ////            return $hash;
+        ////        }
+        ////    }
+        ////}
+        ////else if ( is_object($qstr) && method_exists($qstr,'bindParam')){ // if object, verify that its a PDOStatement
+        ////    print "error: for now<br />\n";
+        ////    if( is_null($values)){
+        ////        $qstr->execute();
+        ////    }
+        ////    else if ( is_array($values)){
+        ////        print "executing with values<br />\n";
+        ////        if( $qstr->execute($values) === true ){
+        ////            print "success<br />\n";
+        ////            $r = $qstr->fetchAll(PDO::FETCH_ASSOC);
+        ////        }
+        ////        else {
+        ////            print "fail<br />\n";
+        ////            print_pre($qstr->errorInfo(),"error info",true);
+        ////            return $hash;
+        ////        }
+        ////    }
+        ////    else {
+        ////        print "3rd argument to getKeyedHash is not null or array";
+        ////    }
+        ////}
+        ////else {
+        ////    print "2rd argument to getKeyedHash is not string or PDOStatement Object";
+        ////}
+        //////print_pre($r,"query result for: $qstr");
+        //////print_pre($dbh,"dbhandle");
+        ////
+        ////
+        ////// check if key SHOULD be an array
+        ////// this pre-supposes that a given db key should NOT have a comma in it.  I think this is a safe assumption
         if(! is_array($key)){
             if( preg_match("/,/",$key)) $key = explode(",",$key);
         }
@@ -502,9 +628,11 @@ class dbMgmt {
 }
 ////////////////////////////////////////////////////////////////////////////////
 class dbMgmtTable {
+    ////////////////////////////////////////////////////////////////////////////
     function __construct($tablename){
         $this->name = $tablename;
     }
+    ////////////////////////////////////////////////////////////////////////////
     function addCol($fieldname,$type, $args = "",$default = "",$desc = ""){
         $this->fieldname[] = $fieldname;
         $this->type[] = $type;
@@ -514,6 +642,7 @@ class dbMgmtTable {
         $this->desc[] = $desc;
         $this->colDesc[$fieldname] = $type;
     }
+    ////////////////////////////////////////////////////////////////////////////
     function createTable(){
         $createstr = "create table {$this->name} (" . implode(",",$this->createstr) . ")";
         return $createstr;
