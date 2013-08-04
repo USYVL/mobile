@@ -380,7 +380,7 @@ class mwfMobileSite {
     function dispAuto(){
         $b = "Location:";
         $b .= "<div id=\"device_location\">NA</div>";
-        $b .= "<div id=\"site_proximity\">Nearest USYVL site: NA</div>";
+        $b .= "<div id=\"proximal_events\">Proximal Events: NA</div>";
         return $b;
     }
     // This is an unbalanced function, opens a div
