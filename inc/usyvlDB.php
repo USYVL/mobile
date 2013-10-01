@@ -1,5 +1,5 @@
 <?php
-require_once(__DIR__ . "/../inc/dbManagement.inc");
+require_once("dbManagement.php");
 
 ////////////////////////////////////////////////////////////////////////////////
 // search for sqlite3 to find where season name addition should go....

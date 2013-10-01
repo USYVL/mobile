@@ -1,6 +1,6 @@
 <?php
-require_once(__DIR__ . "/../inc/csvUtils.inc");
-require_once(__DIR__ . "/../inc/printUtils.inc");
+require_once("csvUtils.php");
+require_once("printUtils.php");
 class dbMgmt {
     function __construct($key,$dsn,$desc,&$log = null){
         $this->db = $key;

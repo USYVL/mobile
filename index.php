@@ -1,6 +1,7 @@
 <?php
-require_once("inc/dbManagement.inc");
-require_once("inc/usyvlDB.inc");
+require_once("config.php");
+require_once("dbManagement.php");
+require_once("usyvlDB.php");
 require_once("version.php");
 
 define('DEBUGLEVEL',0);
