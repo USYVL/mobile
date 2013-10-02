@@ -289,7 +289,6 @@ class mwfMobileSite {
         $b .= "    </p>\n";
         $b .= "</div>\n";
         return $b;
-        
     }
     //function dispSched(){
     //    $sdb = $GLOBALS['dbh']['sdb'];

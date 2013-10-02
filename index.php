@@ -93,7 +93,10 @@ class mwfMobileSite {
         $b .= "<ul>\n";
         
         foreach($seasons as $season){
-            $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=states&season=$season\">$season Schedules</a></li>\n";
+            $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=states&season=$season\">$season Event Schedules</a></li>\n";
+        }
+        foreach($seasons as $season){
+            $b .= "  <li><a href=\"./instSummaries.php?mode=states&season=$season\">$season Inst. Summaries</a></li>\n";
         }
         $b .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=auto\">Auto Mode</a></li>\n";
         $b .= "  <li><a href=\"./scorekeeper.php?team_a=Team C&team_b=Team D\">Score Keeper</a></li>\n";
@@ -101,20 +104,21 @@ class mwfMobileSite {
         $b .= "</ul>\n";
         $b .= "</div> <!-- close top menu div -->\n\n";
 
+        $b .= $this->disclaimer();
 
         //$b .= "<br />\n";
         //$b .= "<div class=\"light padded\"><!-- test div -->\n";
-        $b .= "<div class=\"content content-full\">\n";
-        $b .= "<h2 class=\"light\">Content</h2>\n";
-        //$b .= "  <div>\n";
-        $b .= "    <p>\n";
-        $b .= "    This is a very preliminary version of the mobile site";
-        $b .= "    designed to allow mobile access to schedules during the course of the season.\n";
-        $b .= "It is still very much under development.\n";
-        $b .= "    </p>\n";
-        //$b .= "  </div>\n";
-        $b .= "</div>\n";
-        //$b .= "</div> <!-- close of test div -->\n";
+        ////$b .= "<div class=\"content content-full\">\n";
+        ////$b .= "<h2 class=\"light\">Disclaimer</h2>\n";
+        //////$b .= "  <div>\n";
+        ////$b .= "    <p>\n";
+        ////$b .= "    This is a very preliminary version of the mobile site";
+        ////$b .= "    designed to allow mobile access to schedules during the course of the season.\n";
+        ////$b .= "It is still very much under development.\n";
+        ////$b .= "    </p>\n";
+        //////$b .= "  </div>\n";
+        ////$b .= "</div>\n";
+        //////$b .= "</div> <!-- close of test div -->\n";
         return "$b";
     }
     function dispCredits(){
@@ -401,6 +405,18 @@ class mwfMobileSite {
     }
     function getTitle(){
         return $this->title;
+    }
+    function disclaimer(){
+        $b = "";
+        $b .= "<div class=\"content content-full\">\n";
+        $b .= "<h2 class=\"light\">Disclaimer</h2>\n";
+        $b .= "    <p>\n";
+        $b .= "    This is a very preliminary version of the mobile site";
+        $b .= "    designed to allow mobile access to schedules during the course of the season.\n";
+        $b .= "It is still very much under development.\n";
+        $b .= "    </p>\n";
+        $b .= "</div>\n";
+        return $b;
     }
 }
 
