@@ -522,8 +522,8 @@ class dbMgmt {
         return $r;
     }
     ////////////////////////////////////////////////////////////////////////////////
-    function getKeyedHashSingle($key,$val,$qstr){
-        $result = $this->query("$qstr");
+    function getKeyedHashSingle($key,$val,$qstr,$values = null){
+        $result = $this->query("$qstr",$values);
         $r = $result->fetchAll(PDO::FETCH_ASSOC);
         //print_pre($r);
         
