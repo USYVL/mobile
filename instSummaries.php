@@ -119,7 +119,9 @@ class usyvlMobileSite extends mwfMobileSite {
                 $dl = "";
                 $descs = $mdb->getKeyedHash('drid',"select * from dr where drday = ? and drtype = 'DRILLDESC' order by drweight",array($isday));
                 foreach( $descs as $desc){
-                    $dl .= "<p><strong>" . $desc['drlabel'] . ":</strong>  " . $desc['drcontent'] . "</p>\n";
+                    $dl .= "<p>\n";
+                    if( $desc['drlabel'] != "" )   $dl .= "<strong>" . $desc['drlabel'] . ":</strong>  ";
+                    $dl .= $desc['drcontent'] . "</p>\n";
                 }
                 
             }
