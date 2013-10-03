@@ -27,3 +27,25 @@
     /* display: inline;  */
     width: 30%;  
 }
+table.isumm {
+    width: 100%;
+    /*
+    border-width: 5px;
+    border-color: black;
+    */
+}
+tr.isumm {
+    /*  
+    width: 100%;
+    */
+}
+td.isummtime {
+    padding-right: 10px;
+    /*
+    margin-right: 20px;
+    */
+    text-align: right;
+}
+td.isummdesc {
+    padding-left: 10px;
+}
