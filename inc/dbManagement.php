@@ -133,6 +133,11 @@ class dbMgmt {
         // original method before refined the prepare/execute options
         //$this->pdos = $this->dbh->query("$qstr");
         
+        if( is_object($this->result)){
+            //dprint("having to closeCursor on non-empty result before query",1,0,"");
+            //print_pre($this->result,"remaining result");
+            $this->result->closeCursor();
+        }
         
         if( is_string($qstr) && is_null($values)){
             //print "running straight query<br />";
@@ -185,8 +190,8 @@ class dbMgmt {
         if ($this->pdos == null  || $error != "" ) {
         //if ($error != "") {
                 //$error = $result->errorCode();
-                dprint(__FUNCTION__,0,0,"$error:");
-                dprint("error on query",0,0,"$qstr, debug_backtrace follows:");
+                //dprint(__FUNCTION__,0,0,"$error:");
+                dprint("error on query",0,0,"error: $error, $qstr, debug_backtrace follows:");
                 $dbt = debug_backtrace();
                 $ei = $this->dbh->errorInfo();
                 print_pre($ei);
@@ -225,8 +230,10 @@ class dbMgmt {
     ////////////////////////////////////////////////////////////////////////////
     function resetTable($which){
         if ( isset( $this->tables[$which])){
+            $this->query("BEGIN TRANSACTION");
             $this->query("drop table if exists $which");
             $this->query($this->tables[$which]->createTable());
+            $this->query("END TRANSACTION");
         }
     }
     ////////////////////////////////////////////////////////////////////////////
@@ -371,6 +378,8 @@ class dbMgmt {
         $this->mesgs .= print_pre($skippedcols,"skipped columns",true);
         $this->mesgs .= print_pre($exportcols,"export columns",true);
 
+        $this->query("BEGIN TRANSACTION");
+
         // prepare a PDOStatement for doing multiple executes while looping through hash
         $pq = "insert into $table (";
         $pq .= implode(",",$exportcols);
@@ -409,7 +418,8 @@ class dbMgmt {
             $pqvstr = implode(",",$pqvals);
             $this->mesgs .= "insertArrayOfHashes(): prepared query: $pq   : valstr: $pqvstr<br>\n";
         }
-        
+        $this->query("END TRANSACTION");
+
         // return the rowid of this entry, (0 if it fails), should be last primary key...
         return $this->getLastInserted($primary_key,$table);
         // should return last primary key....
@@ -553,55 +563,6 @@ class dbMgmt {
         $r = $pdos->fetchAll(PDO::FETCH_ASSOC);
         //print_pre($r,"results from fetchAll()");
         
-        ////// could potentially break this out into its own method
-        ////// and reuse for fetchList and others !!!!
-        ////if( is_string($qstr) && is_null($values)){
-        ////    $result = $this->query("$qstr");
-        ////}
-        ////else if (  is_string($qstr) && ! is_null($values) ){
-        ////    if( is_array($values)){
-        ////        $stm = $this->prepare($qstr);
-        ////        if( $stm->execute($values) === true) {
-        ////            print "success<br />\n";
-        ////            $r = $stm->fetchAll(PDO::FETCH_ASSOC);
-        ////        }
-        ////        else {
-        ////            print "fail<br />\n";
-        ////            print_pre($stm->errorInfo(),"error info",true);
-        ////            return $hash;
-        ////        }
-        ////    }
-        ////}
-        ////else if ( is_object($qstr) && method_exists($qstr,'bindParam')){ // if object, verify that its a PDOStatement
-        ////    print "error: for now<br />\n";
-        ////    if( is_null($values)){
-        ////        $qstr->execute();
-        ////    }
-        ////    else if ( is_array($values)){
-        ////        print "executing with values<br />\n";
-        ////        if( $qstr->execute($values) === true ){
-        ////            print "success<br />\n";
-        ////            $r = $qstr->fetchAll(PDO::FETCH_ASSOC);
-        ////        }
-        ////        else {
-        ////            print "fail<br />\n";
-        ////            print_pre($qstr->errorInfo(),"error info",true);
-        ////            return $hash;
-        ////        }
-        ////    }
-        ////    else {
-        ////        print "3rd argument to getKeyedHash is not null or array";
-        ////    }
-        ////}
-        ////else {
-        ////    print "2rd argument to getKeyedHash is not string or PDOStatement Object";
-        ////}
-        //////print_pre($r,"query result for: $qstr");
-        //////print_pre($dbh,"dbhandle");
-        ////
-        ////
-        ////// check if key SHOULD be an array
-        ////// this pre-supposes that a given db key should NOT have a comma in it.  I think this is a safe assumption
         if(! is_array($key)){
             if( preg_match("/,/",$key)) $key = explode(",",$key);
         }
