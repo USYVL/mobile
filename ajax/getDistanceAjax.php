@@ -1,9 +1,10 @@
 <?php
-require_once(__DIR__ . "/../inc/printUtils.inc");
-require_once(__DIR__ . "/../inc/gcd.inc");
-require_once(__DIR__ . "/../inc/dbManagement.inc");
-require_once(__DIR__ . "/../inc/csvUtils.inc");
-require_once(__DIR__ . "/../inc/usyvlDB.inc");
+require_once("../config.php");
+require_once("printUtils.php");
+require_once("gcd.php");
+require_once("dbManagement.php");
+require_once("csvUtils.php");
+require_once("usyvlDB.php");
 
 //print __DIR__ . "<br />\n";
 

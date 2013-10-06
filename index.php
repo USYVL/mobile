@@ -125,6 +125,7 @@ class usyvlMobileSite extends mwfMobileSite {
                 $othertmid = ( $d['tmid1'] == $tmid ) ? $d['tmid2'] : $d['tmid1'];
                 $othertmname = $this->sdb->fetchVal('tmname from tm',"tmid=?",array($othertmid));
                 $b .= "<br /><a href=\"scorekeeper.php?team_a=$team&team_b=$othertmname\">Scorekeep This Game</a>\n";
+                $b .= "<br /><a href=\"tournSummaries.php?mode=tsumm&season=$season&date=$date&state=$state&program=$program\">Tournament Info</a>\n";
             }
             $b .= "</p>\n";
         }

@@ -1,5 +1,5 @@
 <?php
 
-ini_set('include_path',ini_get('include_path') . ":./inc");
+ini_set('include_path',ini_get('include_path') . ":./inc:../inc");
 
 ?>

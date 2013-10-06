@@ -155,6 +155,7 @@ class mwfMobileSite {
         foreach($seasons as $season){
             $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=states&season=$season\">$season Event Schedules</a></li>\n";
             $m .= "  <li><a href=\"./instSummaries.php?mode=states&season=$season\">$season Inst. Summaries</a></li>\n";
+            $m .= "  <li><a href=\"./tournSummaries.php?mode=states&season=$season\">$season Tourn. Summaries</a></li>\n";
         }
         $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=auto\">Auto Mode</a></li>\n";
         $m .= "  <li><a href=\"./scorekeeper.php?team_a=Team C&team_b=Team D\">Score Keeper</a></li>\n";
