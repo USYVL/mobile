@@ -21,6 +21,12 @@ class usyvlMobileSite extends mwfMobileSite {
         $this->registerFunc('isumm'       , 'dispISumm'     );
     }
     function dispDates(){
+        $evistypemap = array(
+            'PRAC' => 'Practice',
+            'GAME' => 'Games',
+            'INTE' => 'Tournament',
+            );
+        
         $sdb = $GLOBALS['dbh']['sdb'];
         $state = $_GET['state'];
         $program = $_GET['program'];
@@ -28,12 +34,23 @@ class usyvlMobileSite extends mwfMobileSite {
         $this->title = "USYVL Mobile - Select Date from $state Program $program for $season";
         
         $m = "";
-        $dates = $sdb->fetchList("distinct evds from ev","evprogram = '$program'",'evds');
-        //$divisions = $sdb->fetchList("distinct tmdiv from tm left join so on tmdiv=so_div","( tmprogram=? and tmseason=? )","so_order",array($program,$season));
-        //$divisions = $sdb->fetchListNew("select distinct tmdiv from tm left join so on tmdiv=so_div where ( tmprogram=? and tmseason=? ) order by so_order",array($program,$season));
-        foreach( $dates as $date){
-           $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=isumm&date=$date&season=$season&state=$state&program=$program\">$date</a></li>\n";
+        //$dates = $sdb->fetchListNew("select distinct evds from ev where evseason=? and evprogram = ?",array($season,$program));
+        $evh = $sdb->getKeyedHash('evds',"select * from ev where evseason=? and evprogram = ? order by evds",array($season,$program));
+        $dates = array_keys($evh);
+        //print_pre($evh,"Event Hash");
+        foreach($evh as $date => $evd){
+            //foreach( $dates as $date){
+            $label = "$date - " . $evistypemap[$evd['evistype']];
+            $label = "$date - " . $evd['evname'];
+            // if the event is a tournament/intersite game day, then switch over to the tournament summary page for this day
+            if( $evd['evistype'] == 'INTE' ){
+                $m .= "  <li><a href=\"./tournSummaries.php?mode=tsumm&date=$date&season=$season&state=$state&program=$program\">$label</a></li>\n";
+            }
+            else {
+                $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=isumm&date=$date&season=$season&state=$state&program=$program\">$label</a></li>\n";
+            }
         }
+        
         $b = $this->fMenu("Select Date",$m);
         
         return "$b";
@@ -114,7 +131,6 @@ class usyvlMobileSite extends mwfMobileSite {
                 }
                 $bl .= "</table>";
                 
-                
                 // drill descriptions
                 $dl = "";
                 $descs = $mdb->getKeyedHash('drid',"select * from dr where drday = ? and drtype = 'DRILLDESC' order by drweight",array($isday));
@@ -123,7 +139,6 @@ class usyvlMobileSite extends mwfMobileSite {
                     if( $desc['drlabel'] != "" )   $dl .= "<strong>" . $desc['drlabel'] . ":</strong>  ";
                     $dl .= $desc['drcontent'] . "</p>\n";
                 }
-                
             }
         }
         $b .= $this->contentDiv($t,$c);

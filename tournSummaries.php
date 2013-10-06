@@ -53,7 +53,12 @@ class usyvlMobileSite extends mwfMobileSite {
         $evid = $sdb->fetchVal("evid from ev","evprogram = ? and evistype = ? and evds = ?",array($program,'INTE',$date));
         $b = "";
         
-        $evd = $sdb->getKeyedHash('gmid',"select * from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ?",array($date,$program,'INTE'));
+        // This is really only used for the location stuff, possibly a better way to get it...
+        $evd = $sdb->getKeyedHash('evid',"select * from ev left join lc on ev_lcid = lcid where evds=? and evprogram=?",array($date,$program));
+        if( count($evd) > 1 )  $b .= "ERROR on getKeyedHash";
+        else                   $d = array_shift($evd);
+
+        //$evd = $sdb->getKeyedHash('gmid',"select * from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ?",array($date,$program,'INTE'));
         $descs = $sdb->fetchListNew("select distinct evname from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ?",array($date,$program,'INTE'));       
         $desc = $descs[0];
         $cb = "";
@@ -63,6 +68,7 @@ class usyvlMobileSite extends mwfMobileSite {
         $cb .= "$desc<br />";
         //$cb .= "Host: Host Site<br />";
         $cb .= "</h3>";
+        $cb .= "<h3>" . $d['lclocation'] . "<br />" . $d['lcaddress'] . "</h3>\n";
         $b .= $this->contentDiv("Intersite Game Day",$cb);
         
         if( preg_match("/Intersite Game Day *Away Game *vs.* (.*)$/",$desc,$m) ){
@@ -114,7 +120,14 @@ class usyvlMobileSite extends mwfMobileSite {
         
         $b = "";
         
-        $evd = $sdb->getKeyedHash('gmid',"select * from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ?",array($date,$program,'INTE'));
+        // This is really only used for the location stuff, possibly a better way to get it...
+        $evd = $sdb->getKeyedHash('gmid',"select * from ev left join lc on ev_lcid = lcid where ev.evds = ? and evprogram = ? and evistype = ?",array($date,$program,'INTE'));
+        if( count($evd) > 1 ){
+            $b .= "ERROR on getKeyedHash";
+            //print_pre($evd,"event data: should have been a single event");
+        }
+        else                   $d = array_shift($evd);
+        
         $descs = $sdb->fetchListNew("select distinct evname from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ?",array($date,$program,'INTE'));       
         $desc = $descs[0];
         $cb = "";
@@ -124,6 +137,7 @@ class usyvlMobileSite extends mwfMobileSite {
         $cb .= "$desc<br />";
         //$cb .= "Host: Host Site<br />";
         $cb .= "</h3>";
+        $cb .= "<h3>" . $d['lclocation'] . "<br />" . $d['lcaddress'] . "</h3>\n";
         $b .= $this->contentDiv("Intersite Game Day",$cb);
         
         $bb = "";
