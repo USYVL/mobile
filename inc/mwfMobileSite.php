@@ -3,8 +3,8 @@ class mwfMobileSite {
     function __construct(){
         $this->mode = "";
         $this->title = "Main Menu";
-        $this->funcs = array();
-        $this->args = array();
+        $this->regsiteredFunctions = array();
+        $this->regFunctionsArgs = array();
         $this->registerCoreFunctions();
         $this->registerExtendedFunctions();
         $this->processGET();
@@ -55,13 +55,13 @@ class mwfMobileSite {
         $this->registerFunc('programs' , 'dispPrograms'  );
     }
     function registerFunc($key,$method,$args = null){
-        $this->funcs[$key] = $method;
-        $this->args[$key] = $args;
+        $this->regsiteredFunctions[$key] = $method;
+        $this->regFunctionsArgs[$key] = $args;
     }
     function display(){
         // possibly use disp or page instead of mode
         $b = "";
-        foreach( $this->funcs as $mode => $method){
+        foreach( $this->regsiteredFunctions as $mode => $method){
             if( $this->mode == $mode ){
                 if( method_exists($this,$method)){
                     if( is_callable(array($this,$method))){
@@ -144,18 +144,65 @@ class mwfMobileSite {
         $b .= "</div>\n";
         return "$b";
     }
+    function buildURL($url,$queryargs,$label = "",$li = null ){
+        $qa = array();
+        if( is_array($queryargs)){
+            foreach($queryargs as $qk => $qv){
+                $qa[] = "$qk=$qv";
+            }
+            $qstr = implode("&",$qa);
+        }
+        else $qstr=$queryargs;
+        
+        $u = "";
+        if( ! is_null( $li)) {
+            $u .= "<li";
+            if( $li != "" ) $u .= " $li";
+            $u .= ">";
+        }
+        $u .= "<a href=\"$url";
+        if( $qstr != "" ) $u .= "?$qstr\"";
+        $u .= ">";
+        if( $label != "" ) $u .= "$label";
+        $u .= "</a>";
+        if( ! is_null( $li)) $u .= "</li>";
+        return $u;
+    }
+    // Need to figure out if I want to do more with this: ie set keys and values????
+    // look for values in get or session!!!
+    function initArgs($mode = "", $keys = array()){
+        if( isset($this->args)) unset($this->args);
+        $this->args = array();
+        foreach($keys as $key){
+            if( isset($_GET[$key])) $this->args[$key] = $_GET[$key];
+            else                    $this->args[$key] = "";
+        }
+        $this->args['mode'] = $mode;
+    }
+    function setArg($key,$val){
+        $this->args[$key] = $val;
+        return $this->args[$key];
+    }
+    function getArg($key){
+        return $this->args[$key];
+    }
     ////////////////////////////////////////////////////////////////////////////
     // Below here, functions should be the functions registered with registerFunc
     ////////////////////////////////////////////////////////////////////////////
     function dispMain(){
         $this->collectValidateDataChain('season');
         $seasons = $this->sdb->fetchList("distinct evseason from ev");
-        
+        $this->initArgs('states',array('mode','season'));
+                
         $m = "";
         foreach($seasons as $season){
-            $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=states&season=$season\">$season Event Schedules</a></li>\n";
-            $m .= "  <li><a href=\"./instSummaries.php?mode=states&season=$season\">$season Inst. Summaries</a></li>\n";
-            $m .= "  <li><a href=\"./tournSummaries.php?mode=states&season=$season\">$season Tourn. Summaries</a></li>\n";
+            $this->args['season'] = $season;
+            $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,"$season Event Schedules","class=\"nonereally\"");
+            $m .= $this->buildURL("./instSummaries.php",$this->args,"$season Inst. Summaries","class=\"nonereally\"");
+            $m .= $this->buildURL("./tournSummaries.php",$this->args,"$season Tourn. Summaries","class=\"nonereally\"");
+            //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=states&season=$season\">$season Event Schedules</a></li>\n";
+            //$m .= "  <li><a href=\"./instSummaries.php?mode=states&season=$season\">$season Inst. Summaries</a></li>\n";
+            //$m .= "  <li><a href=\"./tournSummaries.php?mode=states&season=$season\">$season Tourn. Summaries</a></li>\n";
         }
         $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=auto\">Auto Mode</a></li>\n";
         $m .= "  <li><a href=\"./scorekeeper.php?team_a=Team C&team_b=Team D\">Score Keeper</a></li>\n";
@@ -166,28 +213,35 @@ class mwfMobileSite {
         return "$b";
     }
     function dispStates(){
-        $season = $_GET['season'];
-        $this->title = "USYVL Mobile - Select State $season";
+        $this->initArgs('programs',array('mode','season'));
+        $this->title = "USYVL Mobile - Select State {$this->args['season']}";
+        
+        //$this->args['mode'] = 'programs';
         
         $m = "";
-        $states = $this->sdb->fetchList("distinct lcstate from ev left join lc on ev_lcid = lcid where evseason='$season'");
+        $states = $this->sdb->fetchListNew("select distinct lcstate from ev left join lc on ev_lcid = lcid where evseason=?",array($this->args['season']));
         foreach( $states as $state){
-           $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=programs&season=$season&state=$state\">$state</a></li>\n";
+            $this->args['state'] = $state;
+            $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,"$state programs","class=\"nonereally\"");
+            //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=programs&season=$season&state=$state\">$state</a></li>\n";
         }
         
         $b = $this->fMenu("Select State",$m);
         return "$b";
     }
     function dispPrograms(){
-        $state = $_GET['state'];
-        $season = $_GET['season'];
-        $this->title = "USYVL Mobile - Select Program from $state for $season";
+        $this->initArgs('divisions',array('mode','season','state'));
+        $this->title = "USYVL Mobile - Select Program from {$this->args['state']} for {$this->args['season']}";
+
+        //$this->args['mode'] = 'divisions';
         
         $m = "";
         //$programs = $this->sdb->fetchListNew("distinct evprogram from ev left join lc on ev_lcid = lcid ","( lcstate='$state' and evseason='$season' )",array($state,$season));
-        $programs = $this->sdb->fetchListNew("select distinct evprogram from ev left join lc on ev_lcid = lcid where ( lcstate=? and evseason=? )",array($state,$season));
+        $programs = $this->sdb->fetchListNew("select distinct evprogram from ev left join lc on ev_lcid = lcid where ( lcstate=? and evseason=? )",array($this->args['state'],$this->args['season']));
         foreach( $programs as $program){
-           $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=divisions&season=$season&state=$state&program=$program\">$program</a></li>\n";
+            $this->args['program'] = $program;
+            $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,"$program","class=\"nonereally\"");
+            //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=divisions&season=$season&state=$state&program=$program\">$program</a></li>\n";
         }
         
         $b = $this->fMenu("Select Program",$m);
