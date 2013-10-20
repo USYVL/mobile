@@ -8,6 +8,11 @@ require_once("usyvlDB.php");
 
 //print __DIR__ . "<br />\n";
 
+
+// Need a way to test this by feeding in fake location and fake date
+// $bds, $eds, 
+// lat, lon are fed in
+
 $sdb = $GLOBALS['dbh']['sdb'];
 date_default_timezone_set('America/Los_Angeles');
 // .1 is ~ 6.9 miles at 47.8, -122.2
@@ -16,8 +21,10 @@ $location_tol = 0.6;
 $miles_tol = sprintf("%.2f miles",($location_tol * 69));
 $ds_tol = "7 days";
 
-$bds = date("Y-m-d");
-$eds = date("Y-m-d",strtotime('+' . $ds_tol));
+$bds = ( isset($_GET['bds'])) ? $_GET['bds'] : date("Y-m-d");
+$eds = ( isset($_GET['eds'])) ? $_GET['eds'] : date("Y-m-d",strtotime('+' . $ds_tol));
+
+//$eds = date("Y-m-d",strtotime('+' . $ds_tol));
 if( isset($_GET['lat'])){
     $lat = $_GET['lat'];
     $latmin = $_GET['lat'] - $location_tol;
@@ -49,14 +56,17 @@ asort($distance_hash);
 $h = "<h2>Found the following USYVL events:</h2>\n";
 $b = "";
 foreach($distance_hash as $k => $v ){
-    $events = $sdb->getKeyedHash('evid',"select * from ev left join lc on lcid = ev_lcid where ( lcid = ? and evds >= ? and evds <= ? ) order by evds",array($lcid,$bds,$eds));
+    $events = $sdb->getKeyedHash('evid',"select * from ev left join lc on lcid = ev_lcid where ( lcid = ? and evds >= ? and evds <= ? ) order by evds",array($k,$bds,$eds));
     //print_pre($events,"events for lcid=$lcid between $bds and $eds");
     foreach($events as $e){
+        $b .= "Program: " . $e['evprogram'] . "<br />\n";
         $b .= $data[$k]['lclocation'] . "<br />";
         $b .= $data[$k]['lcaddress'] . "<br />";
         $b .= sprintf("%.2f miles",$v) . " away<br />\n";
         $b .= $e['evname'] . ": ";
         $b .= $e['evds'] . " at ";
+        //$b .= $e['lcstate'] . " at ";
+        //$b .= $e['evseason'] . " at ";
         $b .= $e['evtime_beg'] . "-";
         $b .= $e['evtime_end'] . "<br /><br />";
     }
