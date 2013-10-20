@@ -12,6 +12,8 @@ $content['title'] = "";
 $content['body'] = "";
 
 
+// Rename Instructional Summaries to Daily Practic Plans
+
 class usyvlMobileSite extends mwfMobileSite {
     function __construct(){
         parent::__construct();
@@ -21,33 +23,35 @@ class usyvlMobileSite extends mwfMobileSite {
         $this->registerFunc('isumm'       , 'dispISumm'     );
     }
     function dispDates(){
-        $evistypemap = array(
-            'PRAC' => 'Practice',
-            'GAME' => 'Games',
-            'INTE' => 'Tournament',
-            );
+        $this->initArgs('tsumm',array('mode','season','state','program'));
+        ///$evistypemap = array(
+        ///    'PRAC' => 'Practice',
+        ///    'GAME' => 'Games',
+        ///    'INTE' => 'Tournament',
+        ///    );
         
-        $sdb = $GLOBALS['dbh']['sdb'];
-        $state = $_GET['state'];
-        $program = $_GET['program'];
-        $season = $_GET['season'];
-        $this->title = "USYVL Mobile - Select Date from $state Program $program for $season";
+        $this->title = "USYVL Mobile - Select Date from {$this->args['state']} Program {$this->args['program']} for {$this->args['season']}";
         
         $m = "";
         //$dates = $sdb->fetchListNew("select distinct evds from ev where evseason=? and evprogram = ?",array($season,$program));
-        $evh = $sdb->getKeyedHash('evds',"select * from ev where evseason=? and evprogram = ? order by evds",array($season,$program));
+        $evh = $this->sdb->getKeyedHash('evds',"select * from ev where evseason=? and evprogram = ? order by evds",array($this->getArg('season'),$this->getArg('program')));
         $dates = array_keys($evh);
         //print_pre($evh,"Event Hash");
         foreach($evh as $date => $evd){
+            $this->setArg('date',$date);
             //foreach( $dates as $date){
-            $label = "$date - " . $evistypemap[$evd['evistype']];
+            //$label = "$date - " . $evistypemap[$evd['evistype']];
             $label = "$date - " . $evd['evname'];
             // if the event is a tournament/intersite game day, then switch over to the tournament summary page for this day
             if( $evd['evistype'] == 'INTE' ){
-                $m .= "  <li><a href=\"./tournSummaries.php?mode=tsumm&date=$date&season=$season&state=$state&program=$program\">$label</a></li>\n";
+                $this->setArg('mode','tsumm');
+                //$m .= "  <li><a href=\"./tournSummaries.php?mode=tsumm&date=$date&season=$season&state=$state&program=$program\">$label</a></li>\n";
+                $m .= $this->buildURL('./tournSummaries.php',$this->args,$label,"class=\"nonereally\"");
             }
             else {
-                $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=isumm&date=$date&season=$season&state=$state&program=$program\">$label</a></li>\n";
+                $this->setArg('mode','isumm');
+                //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=isumm&date=$date&season=$season&state=$state&program=$program\">$label</a></li>\n";
+                $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,$label,"class=\"nonereally\"");
             }
         }
         
@@ -56,22 +60,16 @@ class usyvlMobileSite extends mwfMobileSite {
         return "$b";
     }
     function dispISumm(){
-        $sdb = $GLOBALS['dbh']['sdb'];
-        $mdb = $GLOBALS['dbh']['mdb'];
-        $state = $_GET['state'];
-        $program = $_GET['program'];
-        $season = $_GET['season'];
-        $date = $_GET['date'];
-        //$division = $_GET['division'];
-        $this->title = "USYVL Mobile - Instructional Summary - $season $program";
+        $this->initArgs('tsumm',array('mode','season','state','program','date'));
+        $this->title = "USYVL Mobile - Instructional Summary - {$this->args['season']} {$this->args['program']}";
         
         $b = "";
         
         // so we need to get evisday - this is the number of the day in the manual
-        $isdays = $sdb->fetchList("evisday from ev","evprogram = '$program' and evds ='$date'",'evisday');
+        $isdays = $this->sdb->fetchListNew("select evisday from ev where evprogram=? and evds=?",array($this->args['program'],$this->args['date']));
         
         // could get the isdays above from this
-        $evd = $sdb->getKeyedHash('evid',"select * from ev left join lc on ev_lcid = lcid where evds=? and evprogram=?",array($date,$program));
+        $evd = $this->sdb->getKeyedHash('evid',"select * from ev left join lc on ev_lcid = lcid where evds=? and evprogram=?",array($this->args['date'],$this->args['program']));
         if( count($evd) > 1 ) {
             $b .= "ERROR on getKeyedHash";
         }
@@ -83,7 +81,7 @@ class usyvlMobileSite extends mwfMobileSite {
         //$b .= "<h2 class=\"light\">\n";
         
         $t  = "";
-        $t .= "Instructional Summary<br />\n$program<br />\n$date<br />\n";
+        $t .= "Instructional Summary<br />\n{$this->args['program']}<br />\n{$this->args['date']}<br />\n";
         $t .= $d['evname'] . "<br />\n" . $d['evtime_beg'] . " to " .  $d['evtime_end'] . "\n";
         $t .= "</h2>\n";
         
@@ -97,7 +95,7 @@ class usyvlMobileSite extends mwfMobileSite {
             else {
                 $divisions = $this->sdb->fetchListNew("select distinct tmdiv from tm left join so on tmdiv=so_div order by so_order");
 
-                $isd = $mdb->getKeyedHash('ddid',"select * from dd where ddday = ?",array($isday));
+                $isd = $this->mdb->getKeyedHash('ddid',"select * from dd where ddday = ?",array($isday));
                 $netheights = explode(",",$isd[$isday]['ddneth']);
                 
                 $nh  = "";
@@ -116,7 +114,7 @@ class usyvlMobileSite extends mwfMobileSite {
                 //$nh .= "<p>Net Heights: " . $isd[$isday]['ddneth'] . "</p>\n";
 
                 // prep drills table
-                $drills = $mdb->getKeyedHash('drid',"select * from dr where drday = ? and drtype = 'DRILL' order by drweight",array($isday));
+                $drills = $this->mdb->getKeyedHash('drid',"select * from dr where drday = ? and drtype = 'DRILL' order by drweight",array($isday));
                 $bl  = "";
                 $bl .= "<table class=\"isumm\">";
                 $bl .= "<tr class=\"isumm\">";
@@ -133,7 +131,7 @@ class usyvlMobileSite extends mwfMobileSite {
                 
                 // drill descriptions
                 $dl = "";
-                $descs = $mdb->getKeyedHash('drid',"select * from dr where drday = ? and drtype = 'DRILLDESC' order by drweight",array($isday));
+                $descs = $this->mdb->getKeyedHash('drid',"select * from dr where drday = ? and drtype = 'DRILLDESC' order by drweight",array($isday));
                 foreach( $descs as $desc){
                     $dl .= "<p>\n";
                     if( $desc['drlabel'] != "" )   $dl .= "<strong>" . $desc['drlabel'] . ":</strong>  ";
