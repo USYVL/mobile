@@ -11,6 +11,7 @@ $content['errs'] = "";
 $content['title'] = "";
 $content['body'] = "";
 
+// Change Tournament Summaries to Tournament Pools
 
 class usyvlMobileSite extends mwfMobileSite {
     function __construct(){
@@ -22,130 +23,151 @@ class usyvlMobileSite extends mwfMobileSite {
         $this->registerFunc('tpool'       , 'dispTPool'     );
     }
     function dispDates(){
+        $this->initArgs('tsumm',array('mode','season','state','program','date'));
         $sdb = $GLOBALS['dbh']['sdb'];
         $state = $_GET['state'];
         $program = $_GET['program'];
         $season = $_GET['season'];
-        $this->title = "USYVL Mobile - Select Tournament Date from $state Program $program for $season";
+        $this->title = "USYVL Mobile - Select Tournament Date from $state Program {$this->args['program']} for {$this->args['season']}";
         
         $m = "";
-        $dates = $sdb->fetchListNew("select distinct evds from ev where evprogram = ? and evistype=?",array($program,'INTE'));
-        //$divisions = $sdb->fetchList("distinct tmdiv from tm left join so on tmdiv=so_div","( tmprogram=? and tmseason=? )","so_order",array($program,$season));
-        //$divisions = $sdb->fetchListNew("select distinct tmdiv from tm left join so on tmdiv=so_div where ( tmprogram=? and tmseason=? ) order by so_order",array($program,$season));
+        $dates = $this->sdb->fetchListNew("select distinct evds from ev where evprogram = ? and evistype=?",array($this->args['program'],'INTE'));
+        //$divisions = $this->sdb->fetchList("distinct tmdiv from tm left join so on tmdiv=so_div","( tmprogram=? and tmseason=? )","so_order",array({$this->args['program']},{$this->args['season']}));
+        //$divisions = $this->sdb->fetchListNew("select distinct tmdiv from tm left join so on tmdiv=so_div where ( tmprogram=? and tmseason=? ) order by so_order",array({$this->args['program']},{$this->args['season']}));
         foreach( $dates as $date){
-           $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=tsumm&date=$date&season=$season&state=$state&program=$program\">$date</a></li>\n";
+                $this->setArg('date',$date);
+           //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=tsumm&date=$date&season=$season&state=$state&program=$program\">$date</a></li>\n";
+                $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,$date,"class=\"nonereally\"");
         }
         $b = $this->fMenu("Select Tourn Date",$m);
         
         return "$b";
     }
     function dispTSumm(){
-        $sdb = $GLOBALS['dbh']['sdb'];
-        $mdb = $GLOBALS['dbh']['mdb'];
-        $state = $_GET['state'];
-        $program = $_GET['program'];
-        $season = $_GET['season'];
-        $date = $_GET['date'];
-        //$division = $_GET['division'];
-        $this->title = "USYVL Mobile - Tournament Summary - $season $program - $date";
+        $this->initArgs('tsumm',array('mode','season','state','program','date'));
+        $this->title = "USYVL Mobile - Tournament Summary - {$this->args['season']} {$this->args['program']} - {$this->args['date']}";
         
         // We need the particular evid for this event...
-        $evid = $sdb->fetchVal("evid from ev","evprogram = ? and evistype = ? and evds = ?",array($program,'INTE',$date));
+        $this->args['evid'] = $this->sdb->fetchVal("evid from ev","evprogram = ? and evistype = ? and evds = ?",array($this->args['program'],'INTE',$this->args['date']));
         $b = "";
         
-        // This is really only used for the location stuff, possibly a better way to get it...
-        $evd = $sdb->getKeyedHash('evid',"select * from ev left join lc on ev_lcid = lcid where evds=? and evprogram=?",array($date,$program));
+        // Get location info, possibly a better way to get it than this larger query
+        $evd = $this->sdb->getKeyedHash('evid',"select * from ev left join lc on ev_lcid = lcid where evds=? and evprogram=?",array($this->args['date'],$this->args['program']));
         if( count($evd) > 1 )  $b .= "ERROR on getKeyedHash";
         else                   $d = array_shift($evd);
 
-        //$evd = $sdb->getKeyedHash('gmid',"select * from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ?",array($date,$program,'INTE'));
-        $descs = $sdb->fetchListNew("select distinct evname from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ?",array($date,$program,'INTE'));       
+        // get event description, this is not based on the evid
+        $descs = $this->sdb->fetchListNew("select distinct evname from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ?",array($this->args['date'],$this->args['program'],'INTE'));       
         $desc = $descs[0];
+        
+        // start building the page
         $cb = "";
         $cb .= "<h3>";
-        $cb .= "Date: $date<br />";
-        $cb .= "$program<br />";
+        $cb .= "Date: {$this->args['date']}<br />";
+        $cb .= "{$this->args['program']}<br />";
         $cb .= "$desc<br />";
         //$cb .= "Host: Host Site<br />";
         $cb .= "</h3>";
         $cb .= "<h3>" . $d['lclocation'] . "<br />" . $d['lcaddress'] . "</h3>\n";
         $b .= $this->contentDiv("Intersite Game Day",$cb);
         
+        // Pretty sure this can be restructured...  If away game set program to tournament host
+        // then we should be able to carry on normally.  It looks like the evid is not even used
+        // till we get further into it below...
         if( preg_match("/Intersite Game Day *Away Game *vs.* (.*)$/",$desc,$m) ){
             $sites = explode(",",$m[1]);
             $tournhost = $sites[0];
-            $b .= $this->contentDiv("Workaround Required",$this->awayGameMessage($tournhost));
-            $m = "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=tsumm&date=$date&season=$season&state=$state&program=$tournhost\">$tournhost<br />$date</a></li>\n";
-            $b .= $this->fMenu("Tournament Hosts Link",$m); 
+            $this->setArg('mode','tsumm');
+            $this->setArg('program',$tournhost);
+            
+            //Hmmmm, at this point we might be able to just get the updated evid and proceed as normal 
+            $evid = $this->sdb->fetchVal("evid from ev","evprogram = ? and evistype = ? and evds = ?",array($this->args['program'],'INTE',$this->args['date']));
 
+            $b .= $this->contentDiv("Workaround Required",$this->awayGameMessage($tournhost));
+            $m = $this->buildURL($_SERVER['PHP_SELF'],$this->args,"$tournhost<br />{$this->args['date']}","class=\"nonereally\"");
+            $b .= $this->fMenu("Tournament Hosts Link",$m); 
         }
         else {
-            $pdata = $sdb->getKeyedHash('poolid',"select * from pool where p_evid = ?",array($evid));
-            //print_pre($pdata,"pool data");
+            $this->setArg('mode','tpool');
+            $pdata = $this->sdb->getKeyedHash('poolid',"select * from pool where p_evid = ?",array($this->args['evid']));
             
-            // so we need to get evisday - this is the number of the day in the manual
-            $pools = $sdb->fetchListNew("select distinct pool from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ?",array($date,$program,'INTE'));       
             $m = "";
             foreach($pdata as $pool){
-                $poolid = $pool['poolid'];
-                $poolnum = $pool['poolnum'];
+                $this->setArg('poolid',$pool['poolid']);
+                $this->setArg('poolnum',$pool['poolnum']);
                 $div = $pool['division'];
                 $cts = $pool['courts'];
                 $tmcount = count(explode(",",$pool['tmids']));
-                $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=tpool&poolid=$poolid&poolnum=$poolnum&date=$date&season=$season&state=$state&program=$program\">Pool $poolnum ($div div) - $tmcount Teams - Cts. $cts</a></li>\n";
+                $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,"Pool " . $pool['poolnum'] . " ($div div) <br /> $tmcount Teams - Cts. $cts","class=\"nonereally\"");
             }
-            //foreach($pools as $pool){
-            //    //$bb .= "<li><a href=Pool $pool</li>";
-            //    $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=tpool&pool=$pool&date=$date&season=$season&state=$state&program=$program\">Pool $pool</a></li>\n";
-            //}
             $b .= $this->fMenu("Tourn. Pools",$m);
         }
         
+        
+        // With a few changes up above, we can just add the pool info below here
+        
         return "$b";
     }
+    // because of the way I want to navigate between pools, we may be able to just
+    // merge dispTSumm and dispTPool, if we have poolid and poolnum then we have the extra display
     function dispTPool(){
-        $sdb = $GLOBALS['dbh']['sdb'];
-        $mdb = $GLOBALS['dbh']['mdb'];
-        $state = $_GET['state'];
-        $program = $_GET['program'];
-        $season = $_GET['season'];
-        $date = $_GET['date'];
-        $poolid = $_GET['poolid'];
+        $this->initArgs('tsumm',array('mode','season','state','program','date','poolid','evid'));
        
-        $pdata = $sdb->getKeyedHash('poolid',"select * from pool where poolid = ?",array($poolid));
-        $p = $pdata[$poolid];
+        $pdata = $this->sdb->getKeyedHash('poolid',"select * from pool where poolid = ?",array($this->args['poolid']));
+        $p = $pdata[$this->args['poolid']];
         $poolnum = $p['poolnum'];
 
-        $this->title = "USYVL Mobile - Tournament Summary - $season $program - $date - Pool " . $p['poolnum'];
+        $this->title = "USYVL Mobile - Tournament Summary - {$this->args['season']} {$this->args['program']} - {$this->args['date']} - Pool " . $p['poolnum'];
         
         $b = "";
         
         // This is really only used for the location stuff, possibly a better way to get it...
-        $evd = $sdb->getKeyedHash('gmid',"select * from ev left join lc on ev_lcid = lcid where ev.evds = ? and evprogram = ? and evistype = ?",array($date,$program,'INTE'));
+        $evd = $this->sdb->getKeyedHash('gmid',"select * from ev left join lc on ev_lcid = lcid where ev.evds = ? and evprogram = ? and evistype = ?",array($this->args['date'],$this->args['program'],'INTE'));
         if( count($evd) > 1 ){
             $b .= "ERROR on getKeyedHash";
             //print_pre($evd,"event data: should have been a single event");
         }
         else                   $d = array_shift($evd);
         
-        $descs = $sdb->fetchListNew("select distinct evname from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ?",array($date,$program,'INTE'));       
+        $descs = $this->sdb->fetchListNew("select distinct evname from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ?",array($this->args['date'],$this->args['program'],'INTE'));       
         $desc = $descs[0];
         $cb = "";
         $cb .= "<h3>";
-        $cb .= "Date: $date<br />";
-        $cb .= "$program<br />";
+        $cb .= "Date: {$this->args['date']}<br />";
+        $cb .= "{$this->args['program']}<br />";
         $cb .= "$desc<br />";
         //$cb .= "Host: Host Site<br />";
         $cb .= "</h3>";
         $cb .= "<h3>" . $d['lclocation'] . "<br />" . $d['lcaddress'] . "</h3>\n";
         $b .= $this->contentDiv("Intersite Game Day",$cb);
+
+        //$bb = "";
+        //$b .= $this->contentDiv("Navigation",$bb);
+        if( true ){
+            $this->setArg('mode','tpool');
+            $pdata = $this->sdb->getKeyedHash('poolid',"select * from pool where p_evid = ?",array($this->args['evid']));
+            
+            $m = "";
+            foreach($pdata as $pool){
+                $this->setArg('poolid',$pool['poolid']);
+                $this->setArg('poolnum',$pool['poolnum']);
+                $div = $pool['division'];
+                $cts = $pool['courts'];
+                $tmcount = count(explode(",",$pool['tmids']));
+                $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,"Pool " . $pool['poolnum'] . " ($div div) <br /> $tmcount Teams - Cts. $cts","class=\"nonereally\"");
+            }
+            $b .= $this->fMenu("Tourn. Pools",$m);
+        }
+        
+        
+        // To this point, tpool is pretty much the same at poolsumm
         
         $bb = "";
         $bb .= "<p><strong>Courts: </strong>" . $p['courts'] . "&nbsp;&nbsp;<strong>NetHeight: </strong>" . $p['neth'] . "<br />\n";
         $bb .= "<strong>Division: </strong>" . $p['division'] . "<br />\n";
         $bb .= "<strong>Game Times: </strong>" . $p['times'] . "\n";
         $bb .= "</p>\n";
-        $b .= $this->contentDiv("Pool $poolnum General Info",$bb);
+        $b .= $this->contentDiv("Pool $poolnum - General Info",$bb);
         
         //print_pre($p,"Pool Hash");
         
@@ -156,13 +178,14 @@ class usyvlMobileSite extends mwfMobileSite {
         
         //if( preg_match("/Intersite Game Day *Away Game *vs\.* *(\w+) *$/",$desc[0],$m)){
         // so we need to get evisday - this is the number of the day in the manual
-        //$t1 = $sdb->fetchListNew("select distinct tmid1 from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ? and pool = ?",array($date,$program,'INTE',$pool));       
-        //$t2 = $sdb->fetchListNew("select distinct tmid2 from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ? and pool = ?",array($date,$program,'INTE',$pool));       
+        //$t1 = $this->sdb->fetchListNew("select distinct tmid1 from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ? and pool = ?",array({$this->args['date']},{$this->args['program']},'INTE',$pool));       
+        //$t2 = $this->sdb->fetchListNew("select distinct tmid2 from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ? and pool = ?",array({$this->args['date']},{$this->args['program']},'INTE',$pool));       
         //$teams = array_unique(array_merge($t1,$t2));
         $bb = "";
         $thash = array();   // team name hash for use later in unwinding the game schedule...
+        $tshh = array();   // team name hash for use later in unwinding the game schedule...
         foreach( explode(",",$p['tmids']) as $ind => $tmid){
-            $r = $sdb->getKeyedHash('tmid',"select * from tm where tmid=?",array($tmid));
+            $r = $this->sdb->getKeyedHash('tmid',"select * from tm where tmid=?",array($tmid));
             $tm = array_shift($r);
             
             // sort out team names and program numbers...
@@ -179,6 +202,7 @@ class usyvlMobileSite extends mwfMobileSite {
                 $tmnam = $m[2];
             }
             $thash[$num] = $tmnam;
+            $tshh[$num] = $tm['tmtshirt'];
             $bb .= "<p>\n";
             $bb .= "<strong>$num - $tmnam</strong><br />\n";
             $bb .= "{$tm['tmprogram']} <em>team number $tmnum ({$tm['tmdiv']})</em><br />\n";
@@ -188,21 +212,30 @@ class usyvlMobileSite extends mwfMobileSite {
         ///foreach($teams as $team){
         ///    $bb .= "<li>Team $team</li>";
         ///}
-        $b .= $this->contentDiv("Teams in Pool " . $p['poolnum'],$bb);
+        $b .= $this->contentDiv("Pool " . $p['poolnum'] . " - Teams",$bb);
         
         $bb = "";
         $gamepl = explode("|",$p['poollayout']);
         foreach(explode(",",$p['times']) as $gkey => $time){
+            $sk = array();
             $courta = explode(",",$p['courts']);
             $matcha = explode("+",$gamepl[$gkey]);  // we now have match defined as: X-Y where X and Y are ints
             $num = $gkey + 1;
             $bb .= "<h2>Game #$num - $time</h2>\n";
+            //$bb .= "<h3>Game #$num - $time</h3>\n";
+            //$bb .= "<h4>Game #$num - $time</h4>\n";
             //$bb .= "<p>\n";
             foreach( $courta as $ckey => $court){
                 $tmnums = explode("-",$matcha[$ckey]);
                 $bb .= "<p>\n";
                 $bb .= "<strong>Court: </strong> $court &nbsp;&nbsp;(match: " . $matcha[$ckey] . ")<br />";
                 $bb .= $thash[$tmnums[0]] . " <strong>VS.</strong> " . $thash[$tmnums[1]] . "<br />";
+                $sk['team_a'] = htmlentities($thash[$tmnums[0]],ENT_QUOTES);
+                $sk['team_b'] = htmlentities($thash[$tmnums[1]],ENT_QUOTES);
+                $sk['tshirt_a'] = $tshh[$tmnums[0]];
+                $sk['tshirt_b'] = $tshh[$tmnums[1]];
+                $bb .= $this->buildURL("./scorekeeper.php",$sk,"Scorekeep This Game") . "<br />\n";
+                //$bb .= "<a href='./scorekeeper.php?team_a=" . . "&team_b=" . . "'>Score Keep This Match</a><br />";
                 $bb .= "</p>\n";
             }
             if( count($matcha) > count($courta)){
@@ -214,7 +247,7 @@ class usyvlMobileSite extends mwfMobileSite {
             //$bb .= "<strong>Game Time: </strong>$time<br />\n";
             //$bb .= "</p>\n";
         }
-        $b .= $this->contentDiv("Game Schedules Pool " . $p['poolnum'],$bb);
+        $b .= $this->contentDiv("Pool " . $p['poolnum'] . " - Game Schedules",$bb);
        
         
         
