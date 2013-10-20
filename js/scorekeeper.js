@@ -14,6 +14,8 @@ if (! $()) {
 // SideOut
 $(function() {
         var scoreTypes = [ "DoubleMax","HotPotato","Rally","SideOut"];
+        var shirtColors = [ "red","white","blue"];
+        var shirtColorsLen = shirtColors.length;
         var len = scoreTypes.length;
         var scoreMax = 25;
         var winByTwo = true;        
@@ -53,7 +55,11 @@ $(function() {
         }
         updateNotes();
         
-        
+        $().ready(function(){
+                // hack to load shirt colors from html once page is loaded
+                $('#tmA').css('background-color',$('#tmA_color').html());
+                $('#tmB').css('background-color',$('#tmB_color').html());
+        });
         // 
         $tmA.click(function(){
                 if( gameOver ) return;
@@ -117,6 +123,35 @@ $(function() {
                 $tmB.html(tmBscore.toString());
                 checkControls(tmAscore,tmBscore);
         });
+        $('#tmA_color').click(function(){
+                
+                shirtColorA = $(this).html();
+                //alert(shirtColorA);
+                for( var i=0; i<shirtColors.length; i++){
+                    if( shirtColorA == shirtColors[i] ){
+                        nexti = (i+1)%shirtColors.length;
+                    }
+                }
+                shirtColorA = shirtColors[nexti];
+                $('#tmA_color').html(shirtColorA);
+                $('#tmA').css('background-color',shirtColorA);
+                //updateNotes();
+        });
+        $('#tmB_color').click(function(){
+                
+                shirtColorB = $(this).html();
+                //alert(shirtColorB);
+                for( var i=0; i<shirtColors.length; i++){
+                    if( shirtColorB == shirtColors[i] ){
+                        nexti = (i+1)%shirtColors.length;
+                    }
+                }
+                shirtColorB = shirtColors[nexti];
+                //$('#tmB_color').html(shirtColorB);
+                $(this).html(shirtColorB);
+                $('#tmB').css('background-color',shirtColorB);
+                //updateNotes();
+        });
         
         $('#scoreType').click(function () {
                 // cycle through the options
@@ -140,15 +175,19 @@ $(function() {
                 $('#c2_wrapper').toggleClass('rfloat');
         });
         
-        
+        // show/hide controls based on whether a score has been registered yet
         function checkControls(a,b) {
             if( a == 0 && b == 0){
                 $toggleServe.show();
                 $('#scoreType').show();
+                $('#tmA_color').show();            
+                $('#tmB_color').show();            
             }
             else {
                 $toggleServe.hide();
                 $('#scoreType').hide();
+                $('#tmA_color').hide();            
+                $('#tmB_color').hide();            
             }
         }
         function checkForWinner(a,b){
@@ -306,44 +345,12 @@ $(function() {
         }, true);
         
         
-        
-        
         $('#play-single').click(function() {
                 whistleSingle.play();
         });
         $('#play-double').click(function() {
                 whistleDouble.play();
-        });
-        
-        
-        //$('.play').click(function() {
-        //        whistleSingle.play();
-        //});
-        
-        
-        //$('.pause').click(function() {
-        //        whistleSingle.pause();
-        //});
-        
-        // Now unused code from the button clicks (A and B)
-                ///if( iServed){
-                ///    consServes["a"]++;
-                ///    consServes["b"]=0;
-                ///}
-                ///else         {
-                ///    consServes["a"]=0;
-                ///    consServes["b"]++;  // pretty sure this breaks doublemax
-                ///}
-
-                 ///if( iServed){
-                ///    consServes["b"]++;
-                ///    consServes["a"]=0;  // pretty sure this breaks doublemax
-                ///}
-                ///else         {
-                ///    consServes["b"]=0;
-                ///    consServes["a"]++;  // pretty sure this breaks doublemax
-                ///}
-       
+        });       
 });
 
 $(function() {

@@ -8,6 +8,7 @@ define('DEBUGLEVEL',0);
 function sanitize($str){
     $s = htmlspecialchars($str);
     $s = str_replace(array("The","the"),"",$s);
+    $s = str_replace(array("\\",""),"",$s);
     $s = preg_replace("/\d+ *- */","",$s);
     return $s;
 }
@@ -16,6 +17,8 @@ function sanitize($str){
 // to get the length set correctly.
 $team_a = ( isset($_GET['team_a'])) ? sanitize($_GET['team_a']) : sanitize("The A's");
 $team_b = ( isset($_GET['team_b'])) ? sanitize($_GET['team_b']) : sanitize("01 - The BB's");
+$tshirt_a = ( isset($_GET['tshirt_a'])) ? sanitize($_GET['tshirt_a']) : sanitize("blue");
+$tshirt_b = ( isset($_GET['tshirt_b'])) ? sanitize($_GET['tshirt_b']) : sanitize("red");
 
 
 $content['errs'] = "";
@@ -70,6 +73,10 @@ $b .= '<a class="button short" id="scoreType">DoubleMax</a>' . "\n";
 
 
 //$b .= '<div id="notes"></div>' . "\n";
+$b .= '<div class="button short">' . "\n";
+$b .= '<a id="tmA_color" href="#">' . $tshirt_a . '</a>' . "\n";
+$b .= '<a id="tmB_color" href="#">' . $tshirt_b . '</a>' . "\n";
+$b .= '</div>' . "\n";
 
 $b .= '<div id="notes" class="content"></div>';
 
