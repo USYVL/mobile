@@ -32,12 +32,9 @@ $mwf = "http://mwf.usyvl.org/assets";
 <script type="text/javascript" src="js/digital-clock.js"></script>
 
 
-
-
 <title><?php  print $content['title']; ?></title>
 
 </head>
-
 
 <body>
 <div id="errs">
@@ -48,27 +45,15 @@ $mwf = "http://mwf.usyvl.org/assets";
     <a href="."> 
         <img src="http://mwf.usyvl.org/assets/img/header-usyvl.png" alt="USYVL" width="50" height="35">
     </a> 
-    <span>USYVL Mobile</span> 
+    <span><a href=".">USYVL Mobile</a></span> 
 </h1>
 
-
-
 <?php  print $content['body']; ?>
-
 
 <div id="footer">
     <p>United States Youth Volleyball League &copy; 2013 USYVL<br>
     <a href="http://www.usyvl.org/help">Help</a> | <a href="http://www.usyvl.org">View Full Site</a></p>
 </div>
-
-<!--
-<ul id="digital-clock" class="digital">
-  <li class="hour"></li>
-  <li class="min"></li>
-  <li class="sec"></li>
-  <li class="meridiem"></li>
-</ul>
-  -->
 
 <div class="digital-clock">
 <div id="Date"></div>

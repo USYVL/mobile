@@ -42,7 +42,8 @@ $(function() {
         var notes = "";
         
         function updateNotes(){
-            notes="<p>Scoring Type: "+scoreType+"<br />\n";
+            notes+="<h2>Current Settings</h2>\n";
+            notes+="<p>Scoring Type: "+scoreType+"<br />\n";
             notes+="Score Max: "+scoreMax+"<br />\n";
             notes+="Score Cap: "+scoreCap+"<br />\n";
             notes+="Win By Two: ";
@@ -124,33 +125,30 @@ $(function() {
                 checkControls(tmAscore,tmBscore);
         });
         $('#tmA_color').click(function(){
-                
+                var nexti = -1;
                 shirtColorA = $(this).html();
-                //alert(shirtColorA);
                 for( var i=0; i<shirtColors.length; i++){
                     if( shirtColorA == shirtColors[i] ){
                         nexti = (i+1)%shirtColors.length;
                     }
                 }
+                if( nexti < 0) nexti = 0;
                 shirtColorA = shirtColors[nexti];
-                $('#tmA_color').html(shirtColorA);
+                $(this).html(shirtColorA);
                 $('#tmA').css('background-color',shirtColorA);
-                //updateNotes();
         });
         $('#tmB_color').click(function(){
-                
+                var nexti = -1;
                 shirtColorB = $(this).html();
-                //alert(shirtColorB);
                 for( var i=0; i<shirtColors.length; i++){
                     if( shirtColorB == shirtColors[i] ){
                         nexti = (i+1)%shirtColors.length;
                     }
                 }
+                if( nexti < 0) nexti = 0;
                 shirtColorB = shirtColors[nexti];
-                //$('#tmB_color').html(shirtColorB);
                 $(this).html(shirtColorB);
                 $('#tmB').css('background-color',shirtColorB);
-                //updateNotes();
         });
         
         $('#scoreType').click(function () {

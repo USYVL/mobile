@@ -44,11 +44,13 @@
 }
 
 #tmA {
+    /* background-color gets changed programmatically */
     background-color: blue;
     width: 100%;
 }
 
 #tmB {
+    /* background-color gets changed programmatically */
     background-color: red;
     width: 100%;
 }
@@ -109,7 +111,7 @@ a.button-full:hover, a.button-full:focus, a.button-full:active, div.button-full 
 .section_style {
     margin: 8px;
     border-radius: 8px;
-    border: 5px solid black;
+    border: 5px solid #666;
 }
 .clear {
     clear: both;

@@ -18,7 +18,7 @@ class usyvlMobileSite extends mwfMobileSite {
         parent::__construct();
     }
     function registerExtendedFunctions(){
-        $this->registerFunc('divisions'   , 'dispDates'     );  // use the divisions key, since thats what the core "programs" uses
+        $this->registerFunc('launch'      , 'dispDates'     );  // use the divisions key, since thats what the core "programs" uses
         $this->registerFunc('tsumm'       , 'dispTSumm'     );
         $this->registerFunc('tpool'       , 'dispTPool'     );
     }
@@ -39,7 +39,7 @@ class usyvlMobileSite extends mwfMobileSite {
            //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=tsumm&date=$date&season=$season&state=$state&program=$program\">$date</a></li>\n";
                 $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,$date,"class=\"nonereally\"");
         }
-        $b = $this->fMenu("Select Tourn Date",$m);
+        $b = $this->fMenu($this->args['program'] . "<br />Tournament Dates",$m);
         
         return "$b";
     }

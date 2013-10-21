@@ -25,6 +25,21 @@ $content['errs'] = "";
 $content['title'] = "";
 $content['body'] = "";
 
+$clock = '
+<div class="digital-clock">
+<!--
+<div id="Date"></div>
+-->
+  <ul class="digital-clock">
+      <li id="hours"></li>
+      <li id="point">:</li>
+      <li id="min"></li>
+      <li id="point">:</li>
+      <li id="sec"></li>
+  </ul>
+</div>
+';
+
 $b .= '<div id="skwrapper">';
 $htb = '
 
@@ -60,6 +75,8 @@ $b .= "</div><!-- close skwrapper -->\n";
 
 $b .= '<div id="winner"></div>';
 
+$b .= $clock;
+
 $b .= '<div class="button padded">' . "\n";
 $b .= '<a id="play-single" href="#">Whistle</a>' . "\n";
 $b .= '<a id="play-double" href="#">WhistleX2</a>' . "\n";
@@ -77,6 +94,20 @@ $b .= '<div class="button short">' . "\n";
 $b .= '<a id="tmA_color" href="#">' . $tshirt_a . '</a>' . "\n";
 $b .= '<a id="tmB_color" href="#">' . $tshirt_b . '</a>' . "\n";
 $b .= '</div>' . "\n";
+
+$b .= '<div id="help" class="content">' . "\n";
+$b .= "<h2>Instructions</h2>\n";
+$b .= "<h3>The following controls can only be changed while the score is 0-0</h3>\n";
+$b .= "<p>Scoring Type: (Default: DoubleMax) Clicking the button toggles between the different scoring options.</p>\n";
+$b .= "<p>Toggle Initial Service: shifts the serve indicator (\"Serving\") to the other team.  Service should be automatically tracked once scoring begins.</p>\n";
+$b .= "<p>Score Panel Color: click button to toggle between available colors.  The color is initially set to the teams tshirt color (when available or defaults if not).</p>\n";
+$b .= "<h3>The following controls are available at all times:</h3>\n";
+$b .= "<p>Score Pads: Tap the score pad of the team that wins the rally.  The score is incremented and service indicator is updated.</p>\n";
+$b .= "<p>Tap the Minus sign just below each scorepad to decrement the score (in the event of a mistake).  <span class=\"r\">NOTE: </span> that the service indicator may no longer correctly reflect the server once the score has been corrected. </p>\n";
+$b .= "<p>Switch Sides: This will flip the Score Pad to opposite sides (ie: it can be used when the teams switch sides of the net to make it easier to apply scores based on winning side).</p>\n";
+$b .= "<h3>Tips</h3>\n";
+$b .= "<p></p>\n";
+$b .= "</div>\n";
 
 $b .= '<div id="notes" class="content"></div>';
 

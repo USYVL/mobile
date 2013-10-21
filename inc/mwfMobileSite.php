@@ -1,5 +1,6 @@
 <?php
 class mwfMobileSite {
+    ////////////////////////////////////////////////////////////////////////////
     function __construct(){
         $this->mode = "";
         $this->title = "Main Menu";
@@ -11,22 +12,26 @@ class mwfMobileSite {
         $this->sdb = $GLOBALS['dbh']['sdb'];
         $this->mdb = $GLOBALS['dbh']['mdb'];
     }
+    ////////////////////////////////////////////////////////////////////////////
     function getTitle(){
         return $this->title;
     }
+    ////////////////////////////////////////////////////////////////////////////
     function disclaimer(){
         $bb  = "";
         $bb .= "<p>\n";
-        $bb .= "This is a very preliminary version of the mobile site";
+        $bb .= "This is a very preliminary version of the mobile site ";
         $bb .= "designed to allow mobile access to schedules during the course of the season.\n";
-        $bb .= "It is still very much under development.\n";
+        $bb .= "It is still very much under development and may contain errors.\n";
         $bb .= "</p>\n";
         $b = $this->contentDiv("Disclaimer",$bb);
         return $b;
     }
+    ////////////////////////////////////////////////////////////////////////////
     function processGET(){
         if( isset($_GET['mode'])) $this->mode = $_GET['mode'];
     }
+    ////////////////////////////////////////////////////////////////////////////
     function fMenu($label = "",$menuitems = ""){
         $b  = "";
         $b .= "<div class=\"menu\">\n";
@@ -42,22 +47,27 @@ class mwfMobileSite {
         $b .= "</div><!-- Close Menu div -->\n";
         return $b;
     }
+    ////////////////////////////////////////////////////////////////////////////
     function button($href = "", $label = ""){
         $b = "";
         $b .= "<a href=\"" . $href . "\" class=\"button button-padded\">$label</a>\n";
         return $b;
     }
+    ////////////////////////////////////////////////////////////////////////////
     // This is meant to be overloaded with functions particular to child classes
     function registerCoreFunctions(){
-        $this->registerFunc(''         , 'dispMain'      );
-        $this->registerFunc('seasons'  , 'dispMain'      );
-        $this->registerFunc('states'   , 'dispStates'    );
-        $this->registerFunc('programs' , 'dispPrograms'  );
+        $this->registerFunc(''             , 'dispMain'         );
+        $this->registerFunc('seasons'      , 'dispMain'         );
+        $this->registerFunc('states'       , 'dispStates'       );
+        $this->registerFunc('programs'     , 'dispPrograms'     );
+        $this->registerFunc('program_info' , 'dispProgramInfo'  );
     }
+    ////////////////////////////////////////////////////////////////////////////
     function registerFunc($key,$method,$args = null){
         $this->regsiteredFunctions[$key] = $method;
         $this->regFunctionsArgs[$key] = $args;
     }
+    ////////////////////////////////////////////////////////////////////////////
     function display(){
         // possibly use disp or page instead of mode
         $b = "";
@@ -136,6 +146,7 @@ class mwfMobileSite {
             }
         }
     }
+    ////////////////////////////////////////////////////////////////////////////
     function contentDiv($label = "", $content = ""){
         $b = "";
         $b .= "<div class=\"content\">\n";
@@ -144,6 +155,7 @@ class mwfMobileSite {
         $b .= "</div>\n";
         return "$b";
     }
+    ////////////////////////////////////////////////////////////////////////////
     function buildURL($url,$queryargs,$label = "",$li = null ){
         $qa = array();
         if( is_array($queryargs)){
@@ -170,6 +182,7 @@ class mwfMobileSite {
     }
     // Need to figure out if I want to do more with this: ie set keys and values????
     // look for values in get or session!!!
+    ////////////////////////////////////////////////////////////////////////////
     function initArgs($mode = "", $keys = array()){
         if( isset($this->args)) unset($this->args);
         $this->args = array();
@@ -179,10 +192,12 @@ class mwfMobileSite {
         }
         $this->args['mode'] = $mode;
     }
+    ////////////////////////////////////////////////////////////////////////////
     function setArg($key,$val){
         $this->args[$key] = $val;
         return $this->args[$key];
     }
+    ////////////////////////////////////////////////////////////////////////////
     function getArg($key){
         return $this->args[$key];
     }
@@ -197,15 +212,15 @@ class mwfMobileSite {
         $m = "";
         foreach($seasons as $season){
             $this->args['season'] = $season;
-            $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,"$season Event Schedules","class=\"nonereally\"");
-            $m .= $this->buildURL("./instSummaries.php",$this->args,"$season Inst. Summaries","class=\"nonereally\"");
-            $m .= $this->buildURL("./tournSummaries.php",$this->args,"$season Tourn. Summaries","class=\"nonereally\"");
-            //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=states&season=$season\">$season Event Schedules</a></li>\n";
-            //$m .= "  <li><a href=\"./instSummaries.php?mode=states&season=$season\">$season Inst. Summaries</a></li>\n";
-            //$m .= "  <li><a href=\"./tournSummaries.php?mode=states&season=$season\">$season Tourn. Summaries</a></li>\n";
+            $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,"$season Programs","class=\"nonereally\"");
+            ////$m .= $this->buildURL("./instSummaries.php",$this->args,"$season Inst. Summaries","class=\"nonereally\"");
+            ////$m .= $this->buildURL("./tournSummaries.php",$this->args,"$season Tourn. Summaries","class=\"nonereally\"");
+            //////$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=states&season=$season\">$season Event Schedules</a></li>\n";
+            //////$m .= "  <li><a href=\"./instSummaries.php?mode=states&season=$season\">$season Inst. Summaries</a></li>\n";
+            //////$m .= "  <li><a href=\"./tournSummaries.php?mode=states&season=$season\">$season Tourn. Summaries</a></li>\n";
         }
-        $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=auto\">Auto Mode</a></li>\n";
-        $m .= "  <li><a href=\"./scorekeeper.php?team_a=Team C&team_b=Team D\">Score Keeper</a></li>\n";
+        $m .= "  <li><a href=\"./scorekeeper.php?team_a=Team A&team_b=Team B&tshirt_a=cyan&tshirt_b=yellow\">Score Keeper</a></li>\n";
+        $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=auto\">Locator Mode</a></li>\n";
         $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=settings\">Settings</a></li>\n";
         $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=credits\">Credits</a></li>\n";
 
@@ -230,15 +245,13 @@ class mwfMobileSite {
         return "$b";
     }
     function dispPrograms(){
-        $this->initArgs('divisions',array('mode','season','state'));
+        $this->initArgs('program_info',array('mode','season','state'));
         $this->title = "USYVL Mobile - Select Program from {$this->args['state']} for {$this->args['season']}";
-
-        //$this->args['mode'] = 'divisions';
         
         $m = "";
-        //$programs = $this->sdb->fetchListNew("distinct evprogram from ev left join lc on ev_lcid = lcid ","( lcstate='$state' and evseason='$season' )",array($state,$season));
         $programs = $this->sdb->fetchListNew("select distinct evprogram from ev left join lc on ev_lcid = lcid where ( lcstate=? and evseason=? )",array($this->args['state'],$this->args['season']));
         foreach( $programs as $program){
+            $this->args['mode'] = 'program_info';
             $this->args['program'] = $program;
             $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,"$program","class=\"nonereally\"");
             //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=divisions&season=$season&state=$state&program=$program\">$program</a></li>\n";
@@ -246,6 +259,31 @@ class mwfMobileSite {
         
         $b = $this->fMenu("Select Program",$m);
         return "$b";
+    }
+    function dispProgramInfo(){
+        $this->initArgs('launch',array('mode','season','state','program'));
+        $this->title = "USYVL Mobile - {$this->args['state']} Program {$this->args['program']} information for {$this->args['season']}";
+        $b = "";
+        
+        $m  = "<p>The descriptions of these various functional displays are below.</p>\n";
+        $m .= $this->buildURL("./instSummaries.php",$this->args,"$season Inst. Summaries","class=\"nonereally\"");
+        $m .= $this->buildURL("./tournSummaries.php",$this->args,"$season Tourn. Summaries","class=\"nonereally\"");
+        $m .= $this->buildURL("./teamMatches.php",$this->args,"$season Team Matches","class=\"nonereally\"");
+        $b .= $this->fMenu("Various Program Functions",$m);
+        
+        $bb  = "<h3>Instructional Summaries</h3>";
+        $bb .= "<p>This provides the seasons schedule of Instruction, Games and Tournaments.</p>";
+        $bb .= "<h3>Tournament Summaries</h3>";
+        $bb .= "<p>This provides direct links to the seasons Tournaments for this program.</p>";
+        $bb .= "<h3>Team Matches</h3>";
+        $bb .= "<p>The Team Matches display is designed to show you all matches for a single team for the entire season.  ";
+        $bb .= "<span class=\"r\">NOTE:</span>  Because of some data collection and structure issues, ";
+        $bb .= "Intersite Gamedays are currently displayed with the title for the Home (hosting) programs description as a Home Game. ";
+        $bb .= "This problem is being looked into. </p>";
+        $b .= $this->contentDiv("Description of Program Functions",$bb);
+        
+        return $b;
+        // Now we split out the various functions
     }
 }
 

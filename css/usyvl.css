@@ -13,6 +13,15 @@
 .credits {
     text-align: center;
 }
+.r {
+    color: red;
+}
+.g {
+    color: green;
+}
+.b {
+    color: blue;
+}
 .author {
    font-size: 85%;
 }

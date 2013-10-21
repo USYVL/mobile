@@ -19,8 +19,8 @@ class usyvlMobileSite extends mwfMobileSite {
         parent::__construct();
     }
     function registerExtendedFunctions(){
-        $this->registerFunc('divisions'   , 'dispDates'     );  // use the divisions key, since thats what the core "programs" uses
-        $this->registerFunc('isumm'       , 'dispISumm'     );
+        $this->registerFunc('launch'   , 'dispDates'     );  // use the divisions key, since thats what the core "programs" uses
+        $this->registerFunc('isumm'    , 'dispISumm'     );
     }
     function dispDates(){
         $this->initArgs('tsumm',array('mode','season','state','program'));
@@ -55,7 +55,7 @@ class usyvlMobileSite extends mwfMobileSite {
             }
         }
         
-        $b = $this->fMenu("Select Date",$m);
+        $b = $this->fMenu($this->args['program'] . "<br />Daily Schedule Entries",$m);
         
         return "$b";
     }

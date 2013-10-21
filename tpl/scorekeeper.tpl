@@ -17,12 +17,13 @@ $mwf = "http://mwf.usyvl.org/assets";
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 <script type="text/javascript" src="js/qlib.js"></script>
 <link rel="stylesheet" href="css/scorekeeper.css" type="text/css"> 
+<link rel="stylesheet" href="css/digital-clock.css" type="text/css">
 <script type="text/javascript" src="js/scorekeeper.js"></script>
+<script type="text/javascript" src="js/digital-clock.js"></script>
 
 <title><?php  print $content['title']; ?></title>
 
 </head>
-
 
 <body>
 <div id="fb-root"></div>
@@ -42,26 +43,11 @@ $mwf = "http://mwf.usyvl.org/assets";
     <a href="."> 
         <img src="http://mwf.usyvl.org/assets/img/header-usyvl.png" alt="USYVL" width="50" height="35">
     </a> 
-    <span>USYVL Mobile</span> 
+    <span><a href=".">USYVL Mobile</a></span> 
 </h1>
 
-
-
 <?php  print $content['body']; ?>
-<!--
-<div id="skwrapper">
-  <div id="hometeam_wrapper">
-    <p class="team_label">Home Team</p>
-    <button id="hometeam" class="score">25</button>
-  </div>
-  <div id="awayteam_wrapper">
-    <p class="team_label">Visiting</p>
-    <button id="awayteam" class="score">25</button>  
-  </div>
-</div>
-<div class="clear">
-</div>
--->
+
 <a href="https://twitter.com/usyvl" class="twitter-follow-button" data-show-count="false" data-show-screen-name="false">Follow @twitter</a>
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';
 if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';
