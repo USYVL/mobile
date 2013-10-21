@@ -74,9 +74,9 @@ class usyvlMobileSite extends mwfMobileSite {
         // Pretty sure this can be restructured...  If away game set program to tournament host
         // then we should be able to carry on normally.  It looks like the evid is not even used
         // till we get further into it below...
-        if( preg_match("/Intersite Game Day *Away Game *vs.* (.*)$/",$desc,$m) ){
-            $sites = explode(",",$m[1]);
-            $tournhost = $sites[0];
+        if( preg_match("/Intersite Game Day *Away Game *vs[.]* (.*)$/",$desc,$m) ){
+            $sites = explode(" & ",$m[1]);
+            $tournhost = trim($sites[0]);
             $this->setArg('mode','tsumm');
             $this->setArg('program',$tournhost);
             
