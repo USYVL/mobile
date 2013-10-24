@@ -266,13 +266,13 @@ class mwfMobileSite {
         $this->initArgs('launch',array('mode','season','state','program'));
         $this->title = "USYVL Mobile - {$this->args['state']} Program {$this->args['program']} information for {$this->args['season']}";
         $b = "";
-        
-        $m  = "<p>The descriptions of these various functional displays are below.</p>\n";
-        $m .= $this->buildURL("./instSummaries.php",$this->args,"$season Inst. Summaries","class=\"nonereally\"");
+        $program = $this->args['program'];
+        $m  = "<p>Descriptions of these various functional displays are below.</p>\n";
+        $m .= $this->buildURL("./instSummaries.php",$this->args,"$season Schedule for<br />$program","class=\"nonereally\"");
         $m .= $this->buildURL("./tournSummaries.php",$this->args,"$season Tourn. Summaries","class=\"nonereally\"");
         $m .= $this->buildURL("./gameSummaries.php",$this->args,"$season Game Summaries","class=\"nonereally\"");
         $m .= $this->buildURL("./teamMatches.php",$this->args,"$season Team Matches","class=\"nonereally\"");
-        $b .= $this->fMenu("Various Program Functions",$m);
+        $b .= $this->fMenu("Program Functions for: <br />$program",$m);
         
         $bb  = "<h3>Instructional Summaries</h3>";
         $bb .= "<p>This provides the seasons schedule of Instruction, Games and Tournaments.</p>";
