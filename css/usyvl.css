@@ -58,3 +58,10 @@ td.isummtime {
 td.isummdesc {
     padding-left: 10px;
 }
+.subhead {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2em;
+    padding: 0px;
+    color: #00a;
+}

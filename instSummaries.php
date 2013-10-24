@@ -10,6 +10,11 @@ define('DEBUGLEVEL',0);
 $content['errs'] = "";
 $content['title'] = "";
 $content['body'] = "";
+$content['css'] = "";
+$content['scripts'] = "";
+
+$content['scripts'] .= '<script type="text/javascript" src="js/index.js"></script>' . "\n";
+$content['css']  .= '<link rel="stylesheet" href="css/usyvl.css" type="text/css">' . "\n";
 
 
 // Rename Instructional Summaries to Daily Practic Plans
@@ -48,6 +53,11 @@ class usyvlMobileSite extends mwfMobileSite {
                 //$m .= "  <li><a href=\"./tournSummaries.php?mode=tsumm&date=$date&season=$season&state=$state&program=$program\">$label</a></li>\n";
                 $m .= $this->buildURL('./tournSummaries.php',$this->args,$label,"class=\"nonereally\"");
             }
+            if( $evd['evistype'] == 'GAME' ){
+                $this->setArg('mode','gsumm');
+                //$m .= "  <li><a href=\"./tournSummaries.php?mode=tsumm&date=$date&season=$season&state=$state&program=$program\">$label</a></li>\n";
+                $m .= $this->buildURL('./gameSummaries.php',$this->args,$label,"class=\"nonereally\"");
+            }
             else {
                 $this->setArg('mode','isumm');
                 //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=isumm&date=$date&season=$season&state=$state&program=$program\">$label</a></li>\n";
@@ -58,6 +68,7 @@ class usyvlMobileSite extends mwfMobileSite {
         $b = $this->fMenu($this->args['program'] . "<br />Daily Schedule Entries",$m);
         
         return "$b";
+//         $this->initArgs('gsumm',array('mode','season','state','program','date'));
     }
     function dispISumm(){
         $this->initArgs('tsumm',array('mode','season','state','program','date'));

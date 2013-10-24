@@ -24,11 +24,11 @@ class usyvlMobileSite extends mwfMobileSite {
     }
     function registerExtendedFunctions(){
         $this->registerFunc('launch'      , 'dispDates'     );  // use the divisions key, since thats what the core "programs" uses
-        $this->registerFunc('tsumm'       , 'dispTSumm'     );
-        $this->registerFunc('tpool'       , 'dispTPool'     );
+        $this->registerFunc('gsumm'       , 'dispGSumm'     );
+        $this->registerFunc('gpool'       , 'dispGPool'     );
     }
     function dispDates(){
-        $this->initArgs('tsumm',array('mode','season','state','program','date'));
+        $this->initArgs('gsumm',array('mode','season','state','program','date'));
         $sdb = $GLOBALS['dbh']['sdb'];
         $state = $_GET['state'];
         $program = $_GET['program'];
@@ -36,7 +36,7 @@ class usyvlMobileSite extends mwfMobileSite {
         $this->title = "USYVL Mobile - Select Tournament Date from $state Program {$this->args['program']} for {$this->args['season']}";
         
         $m = "";
-        $dates = $this->sdb->fetchListNew("select distinct evds from ev where evprogram = ? and evistype=?",array($this->args['program'],'INTE'));
+        $dates = $this->sdb->fetchListNew("select distinct evds from ev where evprogram = ? and evistype=?",array($this->args['program'],'GAME'));
         //$divisions = $this->sdb->fetchList("distinct tmdiv from tm left join so on tmdiv=so_div","( tmprogram=? and tmseason=? )","so_order",array({$this->args['program']},{$this->args['season']}));
         //$divisions = $this->sdb->fetchListNew("select distinct tmdiv from tm left join so on tmdiv=so_div where ( tmprogram=? and tmseason=? ) order by so_order",array({$this->args['program']},{$this->args['season']}));
         foreach( $dates as $date){
@@ -44,16 +44,16 @@ class usyvlMobileSite extends mwfMobileSite {
            //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=tsumm&date=$date&season=$season&state=$state&program=$program\">$date</a></li>\n";
                 $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,$date,"class=\"nonereally\"");
         }
-        $b = $this->fMenu($this->args['program'] . "<br />Tournament Dates",$m);
+        $b = $this->fMenu($this->args['program'] . "<br />Game Days",$m);
         
         return "$b";
     }
-    function dispTSumm(){
-        $this->initArgs('tsumm',array('mode','season','state','program','date'));
-        $this->title = "USYVL Mobile - Tournament Summary - {$this->args['season']} {$this->args['program']} - {$this->args['date']}";
+    function dispGSumm(){
+        $this->initArgs('gsumm',array('mode','season','state','program','date'));
+        $this->title = "USYVL Mobile - Game Summary - {$this->args['season']} {$this->args['program']} - {$this->args['date']}";
         
         // We need the particular evid for this event...
-        $this->args['evid'] = $this->sdb->fetchVal("evid from ev","evprogram = ? and evistype = ? and evds = ?",array($this->args['program'],'INTE',$this->args['date']));
+        $this->args['evid'] = $this->sdb->fetchVal("evid from ev","evprogram = ? and evistype = ? and evds = ?",array($this->args['program'],'GAME',$this->args['date']));
         $b = "";
         
         // Get location info, possibly a better way to get it than this larger query
@@ -62,7 +62,7 @@ class usyvlMobileSite extends mwfMobileSite {
         else                   $d = array_shift($evd);
 
         // get event description, this is not based on the evid
-        $descs = $this->sdb->fetchListNew("select distinct evname from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ?",array($this->args['date'],$this->args['program'],'INTE'));       
+        $descs = $this->sdb->fetchListNew("select distinct evname from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ?",array($this->args['date'],$this->args['program'],'GAME'));       
         $desc = $descs[0];
         
         // start building the page
@@ -74,38 +74,41 @@ class usyvlMobileSite extends mwfMobileSite {
         //$cb .= "Host: Host Site<br />";
         $cb .= "</h3>";
         $cb .= "<h3>" . $d['lclocation'] . "<br />" . $d['lcaddress'] . "</h3>\n";
-        $b .= $this->contentDiv("Intersite Game Day",$cb);
+        $b .= $this->contentDiv("Game Day",$cb);
         
-        // Pretty sure this can be restructured...  If away game set program to tournament host
-        // then we should be able to carry on normally.  It looks like the evid is not even used
-        // till we get further into it below...
-        if( preg_match("/Intersite Game Day *Away Game *vs[.]* (.*)$/",$desc,$m) ){
-            $sites = explode(" & ",$m[1]);
-            $tournhost = trim($sites[0]);
-            $this->setArg('mode','tsumm');
-            $this->setArg('program',$tournhost);
-            
-            //Hmmmm, at this point we might be able to just get the updated evid and proceed as normal 
-            $evid = $this->sdb->fetchVal("evid from ev","evprogram = ? and evistype = ? and evds = ?",array($this->args['program'],'INTE',$this->args['date']));
+        
+        // Each age division, is, in essence, a pool
+        // but we want to get a list of all the matches on this day
+        $games = $this->sdb->fetchListNew("select distinct game from gm left join ev on ev.evid = gm.evid where ev.evid = ?",array($this->args['evid']));       
 
-            $b .= $this->contentDiv("Workaround Required",$this->awayGameMessage($tournhost));
-            $m = $this->buildURL($_SERVER['PHP_SELF'],$this->args,"$tournhost<br />{$this->args['date']}","class=\"nonereally\"");
-            $b .= $this->fMenu("Tournament Hosts Link",$m); 
-        }
-        else {
-            $this->setArg('mode','tpool');
-            $pdata = $this->sdb->getKeyedHash('poolid',"select * from pool where p_evid = ?",array($this->args['evid']));
+            //$this->setArg('mode','gpool');
+        foreach($games as $game){
+            $tmdata = $this->sdb->getKeyedHash('tmid',"select * from tm where tmprogram = ?",array($this->args['program']));
+            // could possibly get distinct times and then loop over that as well...
+            $mdata = $this->sdb->getKeyedHash('gmid',"select * from gm left join ev on gm.evid = ev.evid where ev.evid = ? and game = ? order by court",array($this->args['evid'],$game));
+            //print_pre($mdata,"matchdata");
             
-            $m = "";
-            foreach($pdata as $pool){
+            $bb = "";
+            foreach($mdata as $pool){
                 $this->setArg('poolid',$pool['poolid']);
                 $this->setArg('poolnum',$pool['poolnum']);
-                $div = $pool['division'];
-                $cts = $pool['courts'];
-                $tmcount = count(explode(",",$pool['tmids']));
-                $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,"Pool " . $pool['poolnum'] . " ($div div) <br /> $tmcount Teams - Cts. $cts","class=\"nonereally\"");
+                $time = $pool['time'];
+                
+                $div = $pool['pool'];
+                $ct = $pool['court'];
+                $sk['team_a'] = htmlentities($tmdata[$pool['tmid1']]['tmname'],ENT_QUOTES);
+                $sk['team_b'] = htmlentities($tmdata[$pool['tmid2']]['tmname'],ENT_QUOTES);
+                $sk['tshirt_a'] = $tmdata[$pool['tmid1']]['tmtshirt'];
+                $sk['tshirt_b'] = $tmdata[$pool['tmid2']]['tmtshirt'];
+                $bb .= "<p>Ct. $ct - ($div div)<br />";
+                $bb .= $sk['team_a']; 
+                $bb .= "  <strong>VS.</strong>  "; 
+                $bb .= $sk['team_b']; 
+                $bb .= "<br />\n";
+                $bb .= $this->buildURL("./scorekeeper.php",$sk,"Scorekeep This Game");
+                $bb .= "\n</p>\n";
             }
-            $b .= $this->fMenu("Tourn. Pools",$m);
+            $b .= $this->contentDiv("Game $game Matches<br />$time",$bb);
         }
         
         
@@ -115,8 +118,8 @@ class usyvlMobileSite extends mwfMobileSite {
     }
     // because of the way I want to navigate between pools, we may be able to just
     // merge dispTSumm and dispTPool, if we have poolid and poolnum then we have the extra display
-    function dispTPool(){
-        $this->initArgs('tsumm',array('mode','season','state','program','date','poolid','evid'));
+    function dispGPool(){
+        $this->initArgs('gsumm',array('mode','season','state','program','date','poolid','evid'));
        
         $pdata = $this->sdb->getKeyedHash('poolid',"select * from pool where poolid = ?",array($this->args['poolid']));
         $p = $pdata[$this->args['poolid']];

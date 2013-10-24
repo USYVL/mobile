@@ -12,43 +12,51 @@
 */
 
 .container {
-    width: 960px;
+    width: 300px;
     margin: 0 auto;
     overflow: hidden;
 }
 
-.dgital-clock {
-    width: 800px;
+.dgitalClock {
+    width: 280px;
     margin: 0 auto;
-    padding: 10px;
+    padding: 5px;
     border: 1px solid #333;
     color: #fff;
 }
 
-#Date {
+#digitalClock_date {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 18px;
     text-align: center;
-    text-shadow: 0 0 5px #000000;
+    text-shadow: 0 0 2px #000000;
+    /*
+    */
 }
 
-ul.digital-clock {
-    width: 400px;
+ul.digitalClock {
+    width: 200px;
     margin: 0 auto;
     padding: 0px;
     list-style: none;
     text-align: center;
 }
 
-ul.digital-clock li {
+ul.digitalClock li {
     display: inline;
-    font-size: 2em;
+    /*
+    margin: 0px;
+    padding: 0px;
+    */
+    font-size: 1.6em;
     text-align: center;
     font-family: Arial, Helvetica, sans-serif;
-    text-shadow: 0 0 5px #000000;
+    text-shadow: 0 0 2px #000000;
+    /*
+    */
 }
 
-#point {
+#digitalClock_point {
     position: relative;
     -moz-animation: mymove 1s ease infinite;
     -webkit-animation: mymove 1s ease infinite;
@@ -59,7 +67,7 @@ ul.digital-clock li {
 /* Simple Animation */
 @-webkit-keyframes mymove {
     0% {opacity: 1.0;
-        text-shadow: 0 0 20px #00c6ff;
+        text-shadow: 0 0 10px #00c6ff;
     }
     
     50% {
@@ -69,14 +77,14 @@ ul.digital-clock li {
     
     100% {
         opacity: 1.0;
-        text-shadow: 0 0 20px #00c6ff;
+        text-shadow: 0 0 10px #00c6ff;
     }	
 }
 
 @-moz-keyframes mymove {
     0% {
         opacity: 1.0;
-        text-shadow: 0 0 20px #00c6ff;
+        text-shadow: 0 0 10px #00c6ff;
     }
 
     50% {
@@ -86,6 +94,6 @@ ul.digital-clock li {
 
     100% {
         opacity: 1.0;
-        text-shadow: 0 0 20px #00c6ff;
+        text-shadow: 0 0 10px #00c6ff;
     };
 }

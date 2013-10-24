@@ -2,6 +2,7 @@
 require_once("config.php");
 require_once("dbManagement.php");
 require_once("usyvlDB.php");
+require_once("digitalClock.php");
 
 define('DEBUGLEVEL',0);
 
@@ -24,21 +25,10 @@ $tshirt_b = ( isset($_GET['tshirt_b'])) ? sanitize($_GET['tshirt_b']) : sanitize
 $content['errs'] = "";
 $content['title'] = "";
 $content['body'] = "";
-
-$clock = '
-<div class="digital-clock">
-<!--
-<div id="Date"></div>
--->
-  <ul class="digital-clock">
-      <li id="hours"></li>
-      <li id="point">:</li>
-      <li id="min"></li>
-      <li id="point">:</li>
-      <li id="sec"></li>
-  </ul>
-</div>
-';
+$content['css'] = "";
+$content['scripts'] = "";
+$content['css']      .= '<link rel="stylesheet" href="css/scorekeeper.css" type="text/css">' . "\n";
+$content['scripts']  .= '<script type="text/javascript" src="js/scorekeeper.js"></script>' . "\n";
 
 $b .= '<div id="skwrapper">';
 $htb = '
@@ -75,21 +65,23 @@ $b .= "</div><!-- close skwrapper -->\n";
 
 $b .= '<div id="winner"></div>';
 
-$b .= $clock;
+$b .= "<div id=\"TheClock\" class=\"content\">\n";
+$digitalClock = new digitalClock();
+$b .= $digitalClock->timeHtml();
+$b .= "</div>\n";
 
 $b .= '<div class="button padded">' . "\n";
 $b .= '<a id="play-single" href="#">Whistle</a>' . "\n";
 $b .= '<a id="play-double" href="#">WhistleX2</a>' . "\n";
 $b .= '</div>' . "\n";
 
-$b .= '<a class="button padded short" id="switch_sides">Switch Sides</a>' . "\n";
+$b .= '<a class="button padded short" id="switch_sides">Swap Scorepads</a>' . "\n";
 $b .= '<a class="button short" id="toggle_serve">Toggle Initial Service</a>' . "\n";
 $b .= '<a class="button short" id="scoreType">DoubleMax</a>' . "\n";
 //$b .= '<audio controls id="whistle"><source src="media/whistle-single.mp3" type="audio/mpeg"></audio>';
 //$b .= '<div class="play">Play</div>';
 
 
-//$b .= '<div id="notes"></div>' . "\n";
 $b .= '<div class="button short">' . "\n";
 $b .= '<a id="tmA_color" href="#">' . $tshirt_a . '</a>' . "\n";
 $b .= '<a id="tmB_color" href="#">' . $tshirt_b . '</a>' . "\n";
@@ -104,7 +96,7 @@ $b .= "<p>Score Panel Color: click button to toggle between available colors.  T
 $b .= "<h3>The following controls are available at all times:</h3>\n";
 $b .= "<p>Score Pads: Tap the score pad of the team that wins the rally.  The score is incremented and service indicator is updated.</p>\n";
 $b .= "<p>Tap the Minus sign just below each scorepad to decrement the score (in the event of a mistake).  <span class=\"r\">NOTE: </span> that the service indicator may no longer correctly reflect the server once the score has been corrected. </p>\n";
-$b .= "<p>Switch Sides: This will flip the Score Pad to opposite sides (ie: it can be used when the teams switch sides of the net to make it easier to apply scores based on winning side).</p>\n";
+$b .= "<p>Swap Sides: This will swap the Score Pad positions to accomodate team side changes.</p>\n";
 $b .= "<h3>Tips</h3>\n";
 $b .= "<p></p>\n";
 $b .= "</div>\n";
@@ -115,7 +107,7 @@ $content['body'] .= "$b";
 $content['title'] = "ScoreKeeper";  // title is not set till after display is run...
 $content['errs'] .= "";
 
-include("tpl/scorekeeper.tpl");
+include("tpl/usyvl.tpl");
 
 
 ?>

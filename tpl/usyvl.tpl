@@ -10,26 +10,18 @@ $mwf = "http://mwf.usyvl.org/assets";
 
 <head>
 <meta charset="utf-8">
-
-<!-- MWF 1.2 stuff
--->
-<!--
-<link rel="stylesheet" href="http://mwf.library.ucsb.edu/assets/css.php" type="text/css"> 
-<script type="text/javascript" src="http://mwf.usyvl.org/assets/js.php?standard_libs=geolocation"></script>
-<meta name="viewport" content="height=device-height,width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
--->
-
 <!-- MWF 1.3 setup -->
 <link rel="stylesheet" type="text/css" href="<?php echo $mwf?>/css.php?lean" media="screen">
 <script type="text/javascript" src="<?php echo $mwf?>/js.php?standard_libs=geolocation"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 
-<link rel="stylesheet" href="css/usyvl.css" type="text/css">
-<link rel="stylesheet" href="css/digital-clock.css" type="text/css">
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script type="text/javascript" src="js/digitalClock.js"></script>
 <script type="text/javascript" src="js/qlib.js"></script>
-<script type="text/javascript" src="js/index.js"></script>
-<script type="text/javascript" src="js/digital-clock.js"></script>
+<?php  print $content['scripts']; ?>
+<link rel="stylesheet" href="css/digitalClock.css" type="text/css">
+<link rel="stylesheet" href="css/social.css" type="text/css">
+<?php  print $content['css']; ?>
 
 
 <title><?php  print $content['title']; ?></title>
@@ -37,6 +29,22 @@ $mwf = "http://mwf.usyvl.org/assets";
 </head>
 
 <body>
+<!-- facebook script for follow and like -->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<!-- twitter script -->
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';
+if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';
+fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+
 <div id="errs">
 <?php  print $content['errs']; ?>
 </div>
@@ -50,20 +58,34 @@ $mwf = "http://mwf.usyvl.org/assets";
 
 <?php  print $content['body']; ?>
 
-<div id="footer">
-    <p>United States Youth Volleyball League &copy; 2013 USYVL<br>
-    <a href="http://www.usyvl.org/help">Help</a> | <a href="http://www.usyvl.org">View Full Site</a></p>
+<a href="./" class="button button-padded">Main Menu</a>
+
+<div class="social-block">
+    <div class="social-container">
+        <!-- twitter follow -->
+        <div class="social">
+        <a href="https://twitter.com/usyvl" class="twitter-follow-button" data-show-count="false" data-show-screen-name="false">Follow @twitter</a>
+        </div>
+        
+        <!-- facebook like -->
+        <div class="social">
+        <div class="fb-like" data-href="https://developers.facebook.com/docs/plugins/" data-kid-directed-site="true" data-width="The pixel width of the plugin" data-height="The pixel height of the plugin" data-colorscheme="light" data-layout="button_count" data-action="like" data-show-faces="false" data-send="false"></div>
+        </div>
+        
+        <!-- facebook follow -->
+        <div class="social">
+        <div class="fb-follow" data-href="http://www.facebook.com/usyvl" data-width="The pixel width of the plugin" data-height="The pixel height of the plugin" data-colorscheme="light" data-layout="button_count" data-kid-directed-site="true" data-show-faces="false"></div>
+        </div>
+    </div>
 </div>
 
-<div class="digital-clock">
-<div id="Date"></div>
-  <ul class="digital-clock">
-      <li id="hours"></li>
-      <li id="point">:</li>
-      <li id="min"></li>
-      <li id="point">:</li>
-      <li id="sec"></li>
-  </ul>
+
+<div id="footer">
+    <p>United States Youth Volleyball League &copy; 2013 USYVL<br />
+    <a href="http://www.usyvl.org/about-united-states-youth-volleyball-league/contact-us">Contact USYVL</a> | 
+    <a href="http://www.usyvl.org">View USYVL Main Site</a><br />
+    <a href="./?mode=indev">In Development</a>
+    </p>
 </div>
 
 </body>

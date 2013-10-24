@@ -61,6 +61,11 @@ class mwfMobileSite {
         $this->registerFunc('states'       , 'dispStates'       );
         $this->registerFunc('programs'     , 'dispPrograms'     );
         $this->registerFunc('program_info' , 'dispProgramInfo'  );
+        $this->registerFunc('credits'      , 'dispCredits'      );
+        $this->registerFunc('settings'     , 'dispSettings'     );
+        $this->registerFunc('auto'         , 'dispAuto'         );
+        $this->registerFunc('about'        , 'dispAbout'        );
+        $this->registerFunc('indev'        , 'dispInDev'        );
     }
     ////////////////////////////////////////////////////////////////////////////
     function registerFunc($key,$method,$args = null){
@@ -83,11 +88,11 @@ class mwfMobileSite {
         
         $b .= $this->disclaimer();
         
-        $b .= $this->button("http://www.usyvl.org","USYVL Website");
-        $b .= $this->button("./","Main Menu");
+        //$b .= $this->button("http://www.usyvl.org","USYVL Website");
+        //$b .= $this->button("./","Main Menu");
         return "$b";
     }
-     ////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
     // Want to centralize the data collection/validation/storage since the chain
     // is pretty well defined:
     //   season
@@ -205,24 +210,21 @@ class mwfMobileSite {
     // Below here, functions should be the functions registered with registerFunc
     ////////////////////////////////////////////////////////////////////////////
     function dispMain(){
-        $this->collectValidateDataChain('season');
-        $seasons = $this->sdb->fetchList("distinct evseason from ev");
+        //$this->collectValidateDataChain('season');
         $this->initArgs('states',array('mode','season'));
                 
         $m = "";
+        $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=about\">About</a></li>\n";
+        $seasons = $this->sdb->fetchList("distinct evseason from ev");
         foreach($seasons as $season){
             $this->args['season'] = $season;
             $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,"$season Programs","class=\"nonereally\"");
-            ////$m .= $this->buildURL("./instSummaries.php",$this->args,"$season Inst. Summaries","class=\"nonereally\"");
-            ////$m .= $this->buildURL("./tournSummaries.php",$this->args,"$season Tourn. Summaries","class=\"nonereally\"");
-            //////$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=states&season=$season\">$season Event Schedules</a></li>\n";
-            //////$m .= "  <li><a href=\"./instSummaries.php?mode=states&season=$season\">$season Inst. Summaries</a></li>\n";
-            //////$m .= "  <li><a href=\"./tournSummaries.php?mode=states&season=$season\">$season Tourn. Summaries</a></li>\n";
         }
         $m .= "  <li><a href=\"./scorekeeper.php?team_a=Team A&team_b=Team B&tshirt_a=cyan&tshirt_b=yellow\">Score Keeper</a></li>\n";
-        $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=auto\">Locator Mode</a></li>\n";
-        $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=settings\">Settings</a></li>\n";
+        //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=auto\">Locator Mode</a></li>\n";
+        //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=settings\">Settings</a></li>\n";
         $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=credits\">Credits</a></li>\n";
+        //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=indev\">In Development</a></li>\n";
 
         $b = $this->fMenu("Main Menu",$m);
         return "$b";
@@ -268,6 +270,7 @@ class mwfMobileSite {
         $m  = "<p>The descriptions of these various functional displays are below.</p>\n";
         $m .= $this->buildURL("./instSummaries.php",$this->args,"$season Inst. Summaries","class=\"nonereally\"");
         $m .= $this->buildURL("./tournSummaries.php",$this->args,"$season Tourn. Summaries","class=\"nonereally\"");
+        $m .= $this->buildURL("./gameSummaries.php",$this->args,"$season Game Summaries","class=\"nonereally\"");
         $m .= $this->buildURL("./teamMatches.php",$this->args,"$season Team Matches","class=\"nonereally\"");
         $b .= $this->fMenu("Various Program Functions",$m);
         
@@ -284,6 +287,88 @@ class mwfMobileSite {
         
         return $b;
         // Now we split out the various functions
+    }
+    // Most of this is actually done with javascript/jquery
+    function dispAuto(){
+        $b = "Location:";
+        $b .= "<div id=\"device_location\">NA</div>";
+        $b .= "<div id=\"proximal_events\">Proximal Events: NA</div>";
+        return $b;
+    }
+    function dispSettings(){
+        $this->title = "USYVL Mobile - Settings";
+        
+        $b = $this->contentDiv("Settings","<p>\nSettings Coming Soon!\n</p>\n");
+        
+        return "$b";
+    }
+    function dispCredits(){
+        $this->title = "USYVL Mobile - Credits";
+        
+        $b = "";
+        $b .= $this->contentDiv("Version","<p class=\"credits author\">\nVersion: " . $GLOBALS['version'] . "\n</p>\n");
+        $bb .= "<p class=\"credits\">\n";
+        $bb .= "HTML 5\n";
+        $bb .= "</p>\n";
+        $bb .= "<p class=\"credits\">\n";
+        $bb .= "CSS 3\n";
+        $bb .= "</p>\n";
+        $bb .= "<p class=\"credits\">\n";
+        $bb .= "Mobile Web Framework (MWF) 1.3\n";
+        $bb .= "</p>\n";
+        $bb .= "<p class=\"credits\">\n";
+        $bb .= "jQuery 1.10.x\n";
+        $bb .= "</p>\n";
+        $b .= $this->contentDiv("Tech",$bb);
+        $bb = "<p class=\"credits author\">\nCreated for USYVL by Aaron Martin\n</p>\n";
+        $bb .= "<p class=\"credits author\">A longtime clinician at our Goleta site, Aaron also volunteers time on USYVL IT related efforts.</p>";
+        $b .= $this->contentDiv("Author",$bb);
+        $b .= $this->contentDiv("Art/Graphics","<p class=\"credits\">\nProvided by USYVL</p>\n");
+        return "$b";
+    }
+    function dispAbout(){
+        $b = "";
+        $bb = "<p>The United States Youth Volleyball League's mission is to provide ";
+        $bb .= "every child between the ages of 7 and 15 a chance to learn and play ";
+        $bb .= "volleyball in a fun, safe, supervised environment. One of the main ";
+        $bb .= "tenets of the program is to encourage children to do their best with ";
+        $bb .= "their abilities. With an emphasis on positive reinforcement, the program ";
+        $bb .= "seeks to build confidence and self-esteem in each child.</p>";
+        $b .= $this->contentDiv("Our Mission",$bb);
+        
+        $bb = "<h3 class=\"subhead\">Fun</h3><p>While the program teaches children the skills necessary to excel in the  ";
+        $bb .= "sport of volleyball, the focus remains on participation, cooperation,  ";
+        $bb .= "sportsmanship, responsibility and, of course, fun!</p>";
+        
+        $bb .= "<h3 class=\"subhead\">Action</h3><p>Strength, endurance and improved coordination result from the weekly  ";
+        $bb .= "activity of the program. Furthermore, a season of league games is sure  ";
+        $bb .= "to provide plenty of exciting volleyball action.</p>";
+        
+        $bb .= "<h3 class=\"subhead\">Skills</h3><p>Skills are taught using technically correct methods for peak performance and safety.";
+        
+        $bb .= "<h3 class=\"subhead\">Teamwork</h3><p>The USYVL is a family-oriented program where parents, siblings, grandparents, ";
+        $bb .= "and friends are strongly encouraged to become involved. Parents and volunteers ";
+        $bb .= "assist with coaching, registration, check-in and equipment set-up.</p>";
+        $b .= $this->contentDiv("What will your child get out of USYVL?",$bb);
+        
+        
+        //$b .= $this->contentDiv("About USYVL",$bb);
+
+        return $b;
+    }
+    function dispInDev(){
+        $b = "";
+        $bb = "<p>The links on this page are to items under development</p>";
+        $b .= $this->contentDiv("In Development",$bb);
+        
+                
+        $m = "";
+        //$m .= "  <li><a href=\"./scorekeeper.php?team_a=Team A&team_b=Team B&tshirt_a=cyan&tshirt_b=yellow\">Score Keeper</a></li>\n";
+        $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=auto\">Locator Mode</a></li>\n";
+        $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=settings\">Settings</a></li>\n";
+
+        $b = $this->fMenu("In Dev Menu",$m);
+        return "$b";
     }
 }
 

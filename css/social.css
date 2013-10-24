@@ -1,0 +1,39 @@
+.social-block {
+    /* goal is to create a block for all the social buttons to live in */
+    text-align: center;
+    width:  100%;
+    padding-top: 10px;
+    padding-bottom: 0px;
+    /*
+    background-color: blue;
+    display: none;
+    */
+}
+.social-container {
+    /* goal is to create a block for all the social buttons to live in */
+    width:  100%;
+    /*
+    display:inline-block; 
+    */
+}
+
+
+.social {
+    display:        inline-block; 
+    white-space:    nowrap; 
+    vertical-align: top;
+}
+.fb-follow {
+    /* to correct some weirdness in facebooks alignment */
+    top: -2px;
+    /*
+    vertical-align: baseline;
+    position: relative;
+    padding: 0px;
+    margin: 0px;
+    top: -6px;
+    background-color: red;
+    height: 100px; 
+    */
+}
+
