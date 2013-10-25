@@ -254,8 +254,9 @@ class usyvlMobileSite extends mwfMobileSite {
         }
         $b .= $this->contentDiv("Pool " . $p['poolnum'] . " - Game Schedules",$bb);
        
-        
-        
+        $dc = new digitalClock();
+        $b .= $dc->dateTimeDiv("content");
+
         return "$b";
     }
     function awayGameMessage($tournhost = ""){

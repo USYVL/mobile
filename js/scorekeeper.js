@@ -124,7 +124,7 @@ $(function() {
                 $tmB.html(tmBscore.toString());
                 checkControls(tmAscore,tmBscore);
         });
-        $('#tmA_color').click(function(){
+        $('#tmA_color').click(function(evt){
                 var nexti = -1;
                 shirtColorA = $(this).html();
                 for( var i=0; i<shirtColors.length; i++){
@@ -136,8 +136,12 @@ $(function() {
                 shirtColorA = shirtColors[nexti];
                 $(this).html(shirtColorA);
                 $('#tmA').css('background-color',shirtColorA);
+                
+                // do the following to prevent the scroll to top that happens
+                evt.preventDefault();
+                return false;
         });
-        $('#tmB_color').click(function(){
+        $('#tmB_color').click(function(evt){
                 var nexti = -1;
                 shirtColorB = $(this).html();
                 for( var i=0; i<shirtColors.length; i++){
@@ -149,6 +153,10 @@ $(function() {
                 shirtColorB = shirtColors[nexti];
                 $(this).html(shirtColorB);
                 $('#tmB').css('background-color',shirtColorB);
+                
+                // do the following to prevent the scroll to top that happens
+                evt.preventDefault();
+                return false;
         });
         
         $('#scoreType').click(function () {

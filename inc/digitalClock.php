@@ -35,5 +35,12 @@ class digitalClock {
         $b .= $this->indent($sIndent,'</div>');
         return $b;
     }
+    function dateTimeDiv($divclass){
+        $b = "";
+        $b .= "<div class=\"$divclass\">";
+        $b .= $this->dateTimeHtml(4);
+        $b .= "</div>\n";
+        return $b;
+    }
 }
 ?>

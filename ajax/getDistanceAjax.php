@@ -38,9 +38,12 @@ if( isset($_GET['lon'])){
 
 // should return nothing if we didnt get a lat lon passed in
 
-//print "Checking for sites between $latmin,$latmax,$lonmin,$lonmax<br />\n";
+print "Recieved location: $lat, $lon<br />\n";
+print "Checking for sites between $latmin,$latmax,$lonmin,$lonmax<br />\n";
+$rawqstr = "select * from lc where ( cast(lclat as real) > $latmin and cast(lclat as real) < $latmax and cast(lclon as real) > $lonmin and cast(lclon as real) < $lonmax )";
+print "Raw query string: $rawqstr<br />\n";
 $data = $sdb->getKeyedHash('lcid',"select * from lc where ( cast(lclat as real) > ? and cast(lclat as real) < ? and cast(lclon as real) > ? and cast(lclon as real) < ? )",array($latmin,$latmax,$lonmin,$lonmax));
-//print_pre($data,"sites within the predescribed tolerance ($location_tol degrees)");
+print_pre($data,"sites within the predescribed tolerance ($location_tol degrees)");
 
 $distance_hash = array();  // create a hash with 
 // loop over results getting distances

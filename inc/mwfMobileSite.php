@@ -366,6 +366,7 @@ class mwfMobileSite {
         //$m .= "  <li><a href=\"./scorekeeper.php?team_a=Team A&team_b=Team B&tshirt_a=cyan&tshirt_b=yellow\">Score Keeper</a></li>\n";
         $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=auto\">Locator Mode</a></li>\n";
         $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=settings\">Settings</a></li>\n";
+        $m .= "  <li><a href=\"./testing/testLocator.php\">Locator Testing</a></li>\n";
 
         $b = $this->fMenu("In Dev Menu",$m);
         return "$b";

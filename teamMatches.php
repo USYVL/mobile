@@ -10,6 +10,11 @@ define('DEBUGLEVEL',0);
 $content['errs'] = "";
 $content['title'] = "";
 $content['body'] = "";
+$content['css'] = "";
+$content['scripts'] = "";
+
+$content['scripts'] .= '<script type="text/javascript" src="js/locator.js"></script>' . "\n";
+$content['css']  .= '<link rel="stylesheet" href="css/usyvl.css" type="text/css">' . "\n";
 
 // The first three layers are dealt with in the parent class
 class usyvlMobileSite extends mwfMobileSite {
@@ -100,6 +105,7 @@ class usyvlMobileSite extends mwfMobileSite {
             $this->args['date'] = $d['evds'];
             // Want to determine type of entry for possible filtering later
             // possibilities are: Practice, Home Game, Tournament
+            // Actually, we should have an evtype already...
             if( preg_match("/^Practice/",$evnm)){
                 $evtype = "Practices";
             }
@@ -127,8 +133,14 @@ class usyvlMobileSite extends mwfMobileSite {
                 //$b .= "<br /><a href=\"scorekeeper.php?team_a=$team&team_b=$othertmname\">Scorekeep This Game</a>\n";
                 //$b .= "<br />" . $this->buildURL("./scorekeeper.php","team_a=$team&team_b=$othertmname","Scorekeep This Game") . "\n";
                 $b .= "<br />" . $this->buildURL("./scorekeeper.php",$sk,"Scorekeep This Game") . "\n";
-                //$b .= "<br /><a href=\"tournSummaries.php?mode=tsumm&season=$season&date=$date&state=$state&program={$this->args['program']}\">Tournament Info</a>\n";
+            }
+            if( $d['evistype']  == 'INTE' ){
+                $this->args['mode'] = "tsumm";
                 $b .= "<br />" . $this->buildURL("./tournSummaries.php",$this->args,"Tournament Info") . "\n";
+            }
+            elseif(  $d['evistype']  == 'GAME' ){
+                $this->args['mode'] = "gsumm";
+                $b .= "<br />" . $this->buildURL("./gameSummaries.php",$this->args,"Game Info") . "\n";
             }
             $b .= "</p>\n";
         }

@@ -3,7 +3,8 @@ require_once("config.php");
 require_once("dbManagement.php");
 require_once("usyvlDB.php");
 require_once("mwfMobileSite.php");
-require_once("version.php");
+require_once("digitalClock.php");
+//require_once("version.php");
 
 define('DEBUGLEVEL',0);
 
@@ -154,6 +155,9 @@ class usyvlMobileSite extends mwfMobileSite {
         $b .= $this->contentDiv("Net Heights",$nh);
         $b .= $this->contentDiv("Drill Schedule",$bl);
         $b .= $this->contentDiv("Drill Details/Notes",$dl);
+        
+        $dc = new digitalClock();
+        $b .= $dc->dateTimeDiv("content");
         
         return "$b";
     }
