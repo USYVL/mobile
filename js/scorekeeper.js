@@ -20,7 +20,7 @@ $(function() {
         var scoreMax = 25;
         var winByTwo = true;        
         var gameOver = false;
-        var scoreType  = "DoubleMax"; // type of scoring - only rally currently supported
+        var scoreType  = "DoubleMax"; // type of scoring - think I have Rally, DoubleMax, Sideout, HotPotato supported
         var scoreCap = 35;  // where we no longer need to win by two
         var switchOn = 7;  // indicate a side change on multiples of this 
         var switchAt = 0;  // indicate a single switch in the middle of the game
@@ -34,6 +34,9 @@ $(function() {
         var tmBscore = parseInt($tmB.html());
         var consServes = new Array();
         var iServed = false;
+        var sss = new Array();    // Service Score State
+        var sssi = -1;            // index into sss above
+        var sssni = 0;            // next index into sss above
         consServes["a"] = 0;
         consServes["b"] = 0;
         
@@ -60,8 +63,19 @@ $(function() {
                 // hack to load shirt colors from html once page is loaded
                 $('#tmA').css('background-color',$('#tmA_color').html());
                 $('#tmB').css('background-color',$('#tmB_color').html());
+                saveServiceScoreState();
         });
-        // 
+        // Want to look into having a stack that tracks the elements that determine
+        // score and service so that we can provide an undo button...
+        // Variables to track for scoring and serving to allow unwinding of scores/serves
+        //   tmAscore
+        //   tmBscore
+        //   consServes[a|b] ???
+        //   visibility of of #tm(A|B)_service - arg1 of serviceTracker is the 
+        //     visibility of the y entry - see serviceTracker below
+        //     The other args of service tracker are a and b 
+        
+        // Scorepad for Team A
         $tmA.click(function(){
                 if( gameOver ) return;
                 servStatus='#tmA_service';
@@ -83,7 +97,9 @@ $(function() {
                 //}
                 checkForWinner(tmAscore,tmBscore);
                 checkSideChange(tmAscore,tmBscore);
+                saveServiceScoreState();
         });
+        // Scorepad for Team B
         $tmB.click(function(){
                 if( gameOver ) return;
                 
@@ -109,21 +125,22 @@ $(function() {
                 //if ($('#tmA_service').isVisible()){
                 //    serviceChange();
                 //}
+                saveServiceScoreState();
         });
-        $tmAminus.click(function(){
-                if( gameOver ) gameOver = false;
-                tmAscore--;
-                //var tmAscore = parseInt($tmA.html()) - 1;
-                $tmA.html(tmAscore.toString());
-                checkControls(tmAscore,tmBscore);
-        });
-        $tmBminus.click(function(){
-                if( gameOver ) gameOver = false;
-                //var tmBscore = parseInt($tmB.html()) - 1;
-                tmBscore--;
-                $tmB.html(tmBscore.toString());
-                checkControls(tmAscore,tmBscore);
-        });
+        //$tmAminus.click(function(){
+        //        if( gameOver ) gameOver = false;
+        //        tmAscore--;
+        //        //var tmAscore = parseInt($tmA.html()) - 1;
+        //        $tmA.html(tmAscore.toString());
+        //        checkControls(tmAscore,tmBscore);
+        //});
+        //$tmBminus.click(function(){
+        //        if( gameOver ) gameOver = false;
+        //        //var tmBscore = parseInt($tmB.html()) - 1;
+        //        tmBscore--;
+        //        $tmB.html(tmBscore.toString());
+        //        checkControls(tmAscore,tmBscore);
+        //});
         $('#tmA_color').click(function(evt){
                 var nexti = -1;
                 shirtColorA = $(this).html();
@@ -196,6 +213,41 @@ $(function() {
                 $('#tmB_color').hide();            
             }
         }
+        function saveServiceScoreState(){
+            sss[sssni] = {
+                csa:consServes['a'],
+                csb:consServes['b'],
+                sca:tmAscore,
+                scb:tmBscore,
+                visa:$('#tmA_service').isVisible(),
+                visb:$('#tmB_service').isVisible(),
+            }
+            sssni++;
+            sssi++;
+        }
+        function rewindServiceScore(){
+            sssni--;
+            sssi--;
+            
+            // if its the first rewind then we are just back to where we were
+            consServes['a'] = sss[sssi].csa;
+            consServes['b'] = sss[sssi].csb;
+            tmAscore = sss[sssi].sca;
+            tmBscore = sss[sssi].scb;
+            if ( $('#tmA_service').isVisible() != sss[sssi].visa ) serviceChange();
+            //tmAscore = '20';
+            //alert(tmAscore.toString());
+
+            // need to set visibility of the appropriate serve 
+            // need to set the value of each of the scorePads...
+            $('#tmA').html(tmAscore.toString());
+            $tmB.html(tmBscore.toString());
+        }
+        $('#undo').click(function(){
+                if ( sssi > 0 ){
+                       rewindServiceScore();
+                }
+        });
         function checkForWinner(a,b){
             if( a >= scoreMax || b >= scoreMax ){
                 if( a >= scoreCap || b >= scoreCap && winByTwo ){
@@ -228,6 +280,7 @@ $(function() {
         // get scores and see if there is a winner
         //$tmAscore = parseInt($tmA.html());
         //$tmBscore = parseInt($tmB.html());
+        // arg1 is the visibility of the y entry (which can be a or b)...
         function serviceTracker(served,y,n){
             if( served){
                 consServes[y]++;

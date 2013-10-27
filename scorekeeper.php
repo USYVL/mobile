@@ -37,9 +37,9 @@ $htb = '
     <div class="section_style">
     ';
 $htb .= "      <button id=\"tmA\" class=\"score\">0</button>\n";
-$htb .= "        <button id=\"tmA_minus\" class=\"decrement\">-</button>  \n";
-$htb .= "        <span id=\"tmA_service\" class=\"service\">Serving</span>  \n";
+//$htb .= "        <button id=\"tmA_minus\" class=\"decrement\">-</button>  \n";
 $htb .= '<p id="tmAname" class="team_label">' . "$team_a</p>\n";
+$htb .= "        <span id=\"tmA_service\" class=\"service\">Serving</span>  \n";
 $htb .= "    </div>\n";
 $htb .= "  </div> \n";
   
@@ -48,9 +48,9 @@ $atb .= '<div id="c2_wrapper" class="rfloat">
     <div class="section_style">
     ';
 $atb .= "      <button id=\"tmB\" class=\"score\">0</button>  \n";
-$atb .= "        <button id=\"tmB_minus\" class=\"decrement\">-</button>  \n";
-$atb .= "        <span id=\"tmB_service\" class=\"service hideservice\">Serving</span>  \n";
+//$atb .= "        <button id=\"tmB_minus\" class=\"decrement\">-</button>  \n";
 $atb .= '<p id="tmBname" class="team_label">' . "$team_b</p>\n";
+$atb .= "        <span id=\"tmB_service\" class=\"service hideservice\">Serving</span>  \n";
 $atb .= "    </div>\n";
 $atb .= "  </div>\n";
 
@@ -74,6 +74,8 @@ $b .= '<div class="button padded">' . "\n";
 $b .= '<a id="play-single" href="#">Whistle</a>' . "\n";
 $b .= '<a id="play-double" href="#">WhistleX2</a>' . "\n";
 $b .= '</div>' . "\n";
+
+$b .= '<a class="button padded short" id="undo">Undo</a>' . "\n";
 
 $b .= '<a class="button padded short" id="switch_sides">Swap Scorepads</a>' . "\n";
 $b .= '<a class="button short" id="toggle_serve">Toggle Initial Service</a>' . "\n";
