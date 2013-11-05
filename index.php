@@ -39,11 +39,11 @@ class usyvlMobileSite extends mwfMobileSite {
         $divisions = $this->sdb->fetchListNew("select distinct tmdiv from tm left join so on tmdiv=so_div where ( tmprogram=? and tmseason=? ) order by so_order",array($this->args['program'],$this->args['season']));
         foreach( $divisions as $division){
             $this->args['division'] = $division;
-            $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,"$division division","class=\"nonereally\"");
+            $m .= $this->buildURL_li($_SERVER['PHP_SELF'],$this->args,"$division division","class=\"nonereally\"");
            //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=teams&division=$division&season=$season&state=$state&program={$this->args['program']}\">$division</a></li>\n";
         }
         
-        $b = $this->fMenu("Select Age Division",$m);
+        $b = $this->contentList("Select Age Division",$m);
         
         return "$b";
     }
@@ -57,11 +57,11 @@ class usyvlMobileSite extends mwfMobileSite {
         foreach( $data as $k => $d){
             $this->args['team'] = $d['tmname'];
             $this->args['tmid'] = $k;
-            $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,$this->args['team'],"class=\"nonereally\"");
+            $m .= $this->buildURL_li($_SERVER['PHP_SELF'],$this->args,$this->args['team'],"class=\"nonereally\"");
             //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=sched&season=$season&tmid=$tmid&team=$team&division={$this->args['division']}&state=$state&program={$this->args['program']}\">$team</a></li>\n";
         }
         
-        $b = $this->fMenu("Select Team",$m);
+        $b = $this->contentList("Select Team",$m);
         
         return "$b";
     }
@@ -130,10 +130,10 @@ class usyvlMobileSite extends mwfMobileSite {
                 $sk['team_b']   = $this->sdb->fetchVal('tmname from tm',"tmid=?",array($othertmid));
                 $sk['tshirt_b'] = $this->sdb->fetchVal('tmtshirt from tm',"tmid=?",array($othertmid));
                 //$b .= "<br /><a href=\"scorekeeper.php?team_a=$team&team_b=$othertmname\">Scorekeep This Game</a>\n";
-                //$b .= "<br />" . $this->buildURL("./scorekeeper.php","team_a=$team&team_b=$othertmname","Scorekeep This Game") . "\n";
-                $b .= "<br />" . $this->buildURL("./scorekeeper.php",$sk,"Scorekeep This Game") . "\n";
+                //$b .= "<br />" . $this->buildURL_li("./scorekeeper.php","team_a=$team&team_b=$othertmname","Scorekeep This Game") . "\n";
+                $b .= "<br />" . $this->buildURL_li("./scorekeeper.php",$sk,"Scorekeep This Game") . "\n";
                 //$b .= "<br /><a href=\"tournSummaries.php?mode=tsumm&season=$season&date=$date&state=$state&program={$this->args['program']}\">Tournament Info</a>\n";
-                $b .= "<br />" . $this->buildURL("./tournSummaries.php",$this->args,"Tournament Info") . "\n";
+                $b .= "<br />" . $this->buildURL_li("./tournSummaries.php",$this->args,"Tournament Info") . "\n";
             }
             $b .= "</p>\n";
         }

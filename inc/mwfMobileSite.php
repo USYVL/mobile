@@ -32,7 +32,7 @@ class mwfMobileSite {
         if( isset($_GET['mode'])) $this->mode = $_GET['mode'];
     }
     ////////////////////////////////////////////////////////////////////////////
-    function fMenu($label = "",$menuitems = ""){
+    function contentList($label = "",$menuitems = ""){
         $b  = "";
         $b .= "<div class=\"menu\">\n";
         $b .= "<h1 class=\"light menu-first\">$label</h1>\n"; 
@@ -161,7 +161,8 @@ class mwfMobileSite {
         return "$b";
     }
     ////////////////////////////////////////////////////////////////////////////
-    function buildURL($url,$queryargs,$label = "",$li = null ){
+    // Still have to build this out, but want to build the url with this
+    function buildURL_base($atag,$queryargs,$label = ""){
         $qa = array();
         if( is_array($queryargs)){
             foreach($queryargs as $qk => $qv){
@@ -171,18 +172,57 @@ class mwfMobileSite {
         }
         else $qstr=$queryargs;
         
+        $u = "\n"; 
+        $u .= "<a ";
+        
+        // set up a hash with any optional entries and then append...
+        
+        // so exargs['href'] = "?arg=val&arg=val"
+        
+        if( is_array($atag)){
+            if( isset($atag['ajax_result'])) $u .= " ajax_result=\"" . $atag['ajax_result'] . "\"";
+            if( isset($atag['class'])) $u .= " class=\"" . $atag['class'] . "\"";
+            if( isset($atag['href'])) $u .= " href=\"" . $atag['href'] ;
+        }
+        else {
+            $u .= "href=\"" . $atag;
+        }
+        
+        if( $qstr != "" ) $u .= "?$qstr";
+        $u .= "\">";
+        if( $label != "" ) $u .= "$label";
+        $u .= "</a>\n";
+        
+        return $u;
+    }
+    ////////////////////////////////////////////////////////////////////////////
+    function buildURL_li($url,$queryargs,$label = "",$li = null ,$classes = ""){     
         $u = "";
         if( ! is_null( $li)) {
             $u .= "<li";
+            $u .= ( $classes == "" ) ? "" : " class=\"$classes\"";
             if( $li != "" ) $u .= " $li";
             $u .= ">";
         }
-        $u .= "<a href=\"$url";
-        if( $qstr != "" ) $u .= "?$qstr\"";
-        $u .= ">";
-        if( $label != "" ) $u .= "$label";
-        $u .= "</a>";
-        if( ! is_null( $li)) $u .= "</li>";
+        
+        $u .= $this->buildURL_base($url,$queryargs,$label);
+        
+        if( ! is_null( $li)) $u .= "</li>\n";
+        return $u;
+    }
+    ////////////////////////////////////////////////////////////////////////////
+    function buildURL_wrapped($url,$queryargs,$label = "",$wrapper = null ,$attrs = ""){     
+        $u = "";
+        if( ! is_null( $wrapper )) {
+            $u .= "<$wrapper";
+            $u .= ( $attrs == "" ) ? "" : " $attrs";
+            //if( $li != "" ) $u .= " $li";
+            $u .= ">";
+        }
+        
+        $u .= $this->buildURL_base($url,$queryargs,$label);
+        
+        if( ! is_null( $wrapper)) $u .= "</$wrapper>";
         return $u;
     }
     // Need to figure out if I want to do more with this: ie set keys and values????
@@ -218,7 +258,7 @@ class mwfMobileSite {
         $seasons = $this->sdb->fetchList("distinct evseason from ev");
         foreach($seasons as $season){
             $this->args['season'] = $season;
-            $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,"$season Programs","class=\"nonereally\"");
+            $m .= $this->buildURL_li($_SERVER['PHP_SELF'],$this->args,"$season Programs","class=\"nonereally\"");
         }
         $m .= "  <li><a href=\"./scorekeeper.php?team_a=Team A&team_b=Team B&tshirt_a=cyan&tshirt_b=yellow\">Score Keeper</a></li>\n";
         //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=auto\">Locator Mode</a></li>\n";
@@ -226,7 +266,7 @@ class mwfMobileSite {
         $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=credits\">Credits</a></li>\n";
         //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=indev\">In Development</a></li>\n";
 
-        $b = $this->fMenu("Main Menu",$m);
+        $b = $this->contentList("Main Menu",$m);
         return "$b";
     }
     function dispStates(){
@@ -239,11 +279,11 @@ class mwfMobileSite {
         $states = $this->sdb->fetchListNew("select distinct lcstate from ev left join lc on ev_lcid = lcid where evseason=?",array($this->args['season']));
         foreach( $states as $state){
             $this->args['state'] = $state;
-            $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,"$state programs","class=\"nonereally\"");
+            $m .= $this->buildURL_li($_SERVER['PHP_SELF'],$this->args,"$state programs","class=\"nonereally\"");
             //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=programs&season=$season&state=$state\">$state</a></li>\n";
         }
         
-        $b = $this->fMenu("Select State",$m);
+        $b = $this->contentList("Select State",$m);
         return "$b";
     }
     function dispPrograms(){
@@ -255,11 +295,11 @@ class mwfMobileSite {
         foreach( $programs as $program){
             $this->args['mode'] = 'program_info';
             $this->args['program'] = $program;
-            $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,"$program","class=\"nonereally\"");
+            $m .= $this->buildURL_li($_SERVER['PHP_SELF'],$this->args,"$program","class=\"nonereally\"");
             //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=divisions&season=$season&state=$state&program=$program\">$program</a></li>\n";
         }
         
-        $b = $this->fMenu("Select Program",$m);
+        $b = $this->contentList("Select Program",$m);
         return "$b";
     }
     function dispProgramInfo(){
@@ -267,23 +307,57 @@ class mwfMobileSite {
         $this->title = "USYVL Mobile - {$this->args['state']} Program {$this->args['program']} information for {$this->args['season']}";
         $b = "";
         $program = $this->args['program'];
-        $m  = "<p>Descriptions of these various functional displays are below.</p>\n";
-        $m .= $this->buildURL("./instSummaries.php",$this->args,"$season Schedule for<br />$program","class=\"nonereally\"");
-        $m .= $this->buildURL("./tournSummaries.php",$this->args,"$season Tourn. Summaries","class=\"nonereally\"");
-        $m .= $this->buildURL("./gameSummaries.php",$this->args,"$season Game Summaries","class=\"nonereally\"");
-        $m .= $this->buildURL("./teamMatches.php",$this->args,"$season Team Matches","class=\"nonereally\"");
-        $b .= $this->fMenu("Program Functions for: <br />$program",$m);
         
-        $bb  = "<h3>Instructional Summaries</h3>";
-        $bb .= "<p>This provides the seasons schedule of Instruction, Games and Tournaments.</p>";
+        $bb = $this->buildURL_wrapped("./instSummaries.php",$this->args,"Daily Schedules",'li');
+        $b .= $this->contentList("$program",$bb);
+        
+        $m = "";
+        //$m  = "<p class=\"content nopadding\">Day to Day schedule.</p>\n";
+        //$m .= $this->buildURL_li("./instSummaries.php",$this->args,"$season Schedule for<br />$program","class=\"nonereally\"");
+
+        $m .= $this->buildURL_wrapped("./gameSummaries.php"  ,$this->args,"Games"       ,"li");
+        $m .= $this->buildURL_wrapped("./tournSummaries.php" ,$this->args,"Tournaments" ,"li");
+        $m .= $this->buildURL_wrapped("./teamMatches.php"    ,$this->args,"Team Matches","li");
+        $b .= $this->contentList("Alternate Schedule Listings for<br />$program",$m);
+        
+        $bb  = "<h3>Daily Schedules</h3>";
+        $bb .= "<p>This provides the seasons day to day schedule of Instruction, Games and Tournaments.</p>";
+        $bb .= "<h3>Game Summaries</h3>";
+        $bb .= "<p>This provides direct links to the seasons Game days for this program.</p>";
         $bb .= "<h3>Tournament Summaries</h3>";
         $bb .= "<p>This provides direct links to the seasons Tournaments for this program.</p>";
         $bb .= "<h3>Team Matches</h3>";
-        $bb .= "<p>The Team Matches display is designed to show you all matches for a single team for the entire season.  ";
+        $bb .= "<p>The Team Matches display is designed to display all matches for a single team for the entire season.  ";
         $bb .= "<span class=\"r\">NOTE:</span>  Because of some data collection and structure issues, ";
         $bb .= "Intersite Gamedays are currently displayed with the title for the Home (hosting) programs description as a Home Game. ";
         $bb .= "This problem is being looked into. </p>";
-        $b .= $this->contentDiv("Description of Program Functions",$bb);
+        $b .= $this->contentDiv("Description of Program Listings",$bb);
+        
+        //$b .= "<div class=\"content\">";
+        //$b .= "<h2>Block Title</h2>";
+        //$b .= "<div class=\"button\">";
+        //$b .= "<a href=\"#\">";
+        //$b .= "<div class=\"label\">Label</div>\n";
+        //$b .= "</a>";
+        //$b .= "</div>";
+        //
+        //$b .= "<div class=\"button\">";
+        //$b .= "<a href=\"#\">Label";
+        //$b .= "</a>";
+        //$b .= "</div>";
+        
+        /////$b .= "<div class=\"button not-padded light\">";
+        ///$b .= "<a class=\"button not-padded light\" href=\"#\">Label";
+        ///$b .= "</a>";
+        /////$b .= "</div>";
+
+        //$b .= "<div class=\"button not-padded light\">";
+        //$b .= "<div class=\"button no-padding light\">";
+        //$b .= "<a href=\"#\">Label</a>";
+        //$b .= "</div>";
+        
+        
+        //$b .= "</div>";
         
         return $b;
         // Now we split out the various functions
@@ -368,7 +442,7 @@ class mwfMobileSite {
         $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=settings\">Settings</a></li>\n";
         $m .= "  <li><a href=\"./testing/testLocator.php\">Locator Testing</a></li>\n";
 
-        $b = $this->fMenu("In Dev Menu",$m);
+        $b = $this->contentList("In Dev Menu",$m);
         return "$b";
     }
 }

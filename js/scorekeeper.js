@@ -411,7 +411,3 @@ $(function() {
                 whistleDouble.play();
         });       
 });
-
-$(function() {
-});
-

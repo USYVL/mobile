@@ -42,9 +42,9 @@ class usyvlMobileSite extends mwfMobileSite {
         foreach( $dates as $date){
                 $this->setArg('date',$date);
            //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=tsumm&date=$date&season=$season&state=$state&program=$program\">$date</a></li>\n";
-                $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,$date,"class=\"nonereally\"");
+                $m .= $this->buildURL_li($_SERVER['PHP_SELF'],$this->args,$date,"class=\"nonereally\"");
         }
-        $b = $this->fMenu($this->args['program'] . "<br />Game Days",$m);
+        $b = $this->contentList($this->args['program'] . "<br />Game Days",$m);
         
         return "$b";
     }
@@ -100,12 +100,19 @@ class usyvlMobileSite extends mwfMobileSite {
                 $sk['team_b'] = htmlentities($tmdata[$pool['tmid2']]['tmname'],ENT_QUOTES);
                 $sk['tshirt_a'] = $tmdata[$pool['tmid1']]['tmtshirt'];
                 $sk['tshirt_b'] = $tmdata[$pool['tmid2']]['tmtshirt'];
+                
                 $bb .= "<p>Ct. $ct - ($div div)<br />";
-                $bb .= $sk['team_a']; 
-                $bb .= "  <strong>VS.</strong>  "; 
-                $bb .= $sk['team_b']; 
-                $bb .= "<br />\n";
-                $bb .= $this->buildURL("./scorekeeper.php",$sk,"Scorekeep This Game");
+                
+                if ( $sk['team_a'] == "" || $sk['team_b'] == "" ){
+                    $bb .= $sk['team_a'] . " " . $sk['team_b'];
+                }
+                else {
+                    $bb .= $sk['team_a']; 
+                    $bb .= "  <strong>VS.</strong>  "; 
+                    $bb .= $sk['team_b']; 
+                    $bb .= "<br />\n";
+                    $bb .= $this->buildURL_li("./scorekeeper.php",$sk,"Scorekeep This Game");
+                }
                 $bb .= "\n</p>\n";
             }
             $b .= $this->contentDiv("Game $game Matches<br />$time",$bb);
@@ -161,9 +168,9 @@ class usyvlMobileSite extends mwfMobileSite {
     ////            $div = $pool['division'];
     ////            $cts = $pool['courts'];
     ////            $tmcount = count(explode(",",$pool['tmids']));
-    ////            $m .= $this->buildURL($_SERVER['PHP_SELF'],$this->args,"Pool " . $pool['poolnum'] . " ($div div) <br /> $tmcount Teams - Cts. $cts","class=\"nonereally\"");
+    ////            $m .= $this->buildURL_li($_SERVER['PHP_SELF'],$this->args,"Pool " . $pool['poolnum'] . " ($div div) <br /> $tmcount Teams - Cts. $cts","class=\"nonereally\"");
     ////        }
-    ////        $b .= $this->fMenu("Tourn. Pools",$m);
+    ////        $b .= $this->contentList("Tourn. Pools",$m);
     ////    }
     ////    
     ////    
@@ -241,7 +248,7 @@ class usyvlMobileSite extends mwfMobileSite {
     ////            $sk['team_b'] = htmlentities($thash[$tmnums[1]],ENT_QUOTES);
     ////            $sk['tshirt_a'] = $tshh[$tmnums[0]];
     ////            $sk['tshirt_b'] = $tshh[$tmnums[1]];
-    ////            $bb .= $this->buildURL("./scorekeeper.php",$sk,"Scorekeep This Game") . "<br />\n";
+    ////            $bb .= $this->buildURL_li("./scorekeeper.php",$sk,"Scorekeep This Game") . "<br />\n";
     ////            //$bb .= "<a href='./scorekeeper.php?team_a=" . . "&team_b=" . . "'>Score Keep This Match</a><br />";
     ////            $bb .= "</p>\n";
     ////        }
