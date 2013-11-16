@@ -1,5 +1,5 @@
 <?php
-require_once("mwfMobileSite.php");
+require_once("mwfMobileSiteClass.php");
 
 class mwfMobileSite_tourn extends mwfMobileSite {
     function __construct(){

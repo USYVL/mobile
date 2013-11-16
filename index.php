@@ -2,8 +2,8 @@
 require_once("config.php");
 require_once("dbManagement.php");
 require_once("usyvlDB.php");
-require_once("mwfMobileSite.php");
 require_once("version.php");
+require_once("index_inc.php");
 
 define('DEBUGLEVEL',0);
 
@@ -16,133 +16,7 @@ $content['scripts'] = "";
 $content['scripts'] .= '<script type="text/javascript" src="js/locator.js"></script>' . "\n";
 $content['css']  .= '<link rel="stylesheet" href="css/usyvl.css" type="text/css">' . "\n";
 
-// The first three layers are dealt with in the parent class
-class usyvlMobileSite extends mwfMobileSite {
-    function __construct(){
-        parent::__construct();
-    }
-    function registerExtendedFunctions(){
-        $this->registerFunc('divisions', 'dispDivisions' );
-        $this->registerFunc('teams'    , 'dispTeams'     );
-        $this->registerFunc('sched'    , 'dispSched'     );
-    }
-    function dispDivisions(){
-        $this->initArgs('teams',array('mode','season','state','program'));
-        //$state = $_GET['state'];
-        //$program = $_GET['program'];
-        //$season = $_GET['season'];
-        $this->title = "USYVL Mobile - Select Division from {$this->args['state']} Program {$this->args['program']} for $season";
-        
-        //$divisions = $this->sdb->fetchList("distinct tmdiv from tm left join so on tmdiv=so_div","( tmprogram='$program' and tmseason='$season' )","so_order");
-        //$divisions = $this->sdb->fetchList("distinct tmdiv from tm left join so on tmdiv=so_div","( tmprogram=? and tmseason=? )","so_order",array($program,$season));
-        $m = "";
-        $divisions = $this->sdb->fetchListNew("select distinct tmdiv from tm left join so on tmdiv=so_div where ( tmprogram=? and tmseason=? ) order by so_order",array($this->args['program'],$this->args['season']));
-        foreach( $divisions as $division){
-            $this->args['division'] = $division;
-            $m .= $this->buildURL_li($_SERVER['PHP_SELF'],$this->args,"$division division","class=\"nonereally\"");
-           //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=teams&division=$division&season=$season&state=$state&program={$this->args['program']}\">$division</a></li>\n";
-        }
-        
-        $b = $this->contentList("Select Age Division",$m);
-        
-        return "$b";
-    }
-    function dispTeams(){
-        $this->initArgs('sched',array('mode','season','state','program','division'));
-        $this->title = "USYVL Mobile - Select Team in $division Division from {$this->args['state']} Program {$this->args['program']} for $season";
-        
-        $data = $this->sdb->getKeyedHash('tmid',"select * from tm where ( tmprogram=? and tmdiv=? and tmseason=? )",array($this->args['program'],$this->args['division'],$this->args['season']));
-        
-        $m = "";
-        foreach( $data as $k => $d){
-            $this->args['team'] = $d['tmname'];
-            $this->args['tmid'] = $k;
-            $m .= $this->buildURL_li($_SERVER['PHP_SELF'],$this->args,$this->args['team'],"class=\"nonereally\"");
-            //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=sched&season=$season&tmid=$tmid&team=$team&division={$this->args['division']}&state=$state&program={$this->args['program']}\">$team</a></li>\n";
-        }
-        
-        $b = $this->contentList("Select Team",$m);
-        
-        return "$b";
-    }
-    function dispSched(){
-        $sk = array();
-        $this->initArgs('sched',array('mode','season','state','program','division','team','tmid'));
-        $this->title = "USYVL Mobile - $team Schedule for $season";
-                
-        $coach = $this->sdb->fetchVal('distinct tmcoach from tm','tmid=?',array($this->args['tmid']));
-
-        $b = "";
-        $b .= "<div class=\"content content-full\">\n";
-        $b .= "<h1>$team Schedule</h2>\n";
-        $b .= "<p>\n";
-        $b .= "Program: {$this->args['program']}<br />\n";
-        $b .= "Coach: $coach<br />\n";
-        $b .= "</p>\n";
-       
-        $b .= "<p id=\"select-schedule-display-container\">\n";
-        $b .= "Display: ";
-        $b .= "<select id=\"select-schedule-display\">\n";
-        $b .= "<option>All</option>\n";
-        $b .= "<option>Practices</option>\n";
-        $b .= "<option>Games</option>\n";
-        $b .= "<option>Tournaments</option>\n";
-        $b .= "</select>\n";
-        $b .= "</p>\n";
-        
-        // need to get team id
-        //$data = $this->sdb->getKeyedHash('gmid',"select * from gm left join ev on gm.evid = ev.evid left join lc on ev.ev_lcid = lcid where ( ( tmid1=$tmid or tmid2=$tmid ) and evseason='$season' ) order by evds");
-        //$data = $this->sdb->getKeyedHash('gmid',"select * from gm left join ev on gm.evid = ev.evid left join lc on ev.ev_lcid = lcid where ( ( tmid1=? or tmid2=? ) and evseason=? and evprogram=?) order by evds",array($this->args['tmid'],$this->args['tmid'],$this->args['season'],$this->args['program']));
-        $data = $this->sdb->getKeyedHash('gmid',"select * from gm left join ev on gm.evid = ev.evid left join lc on ev.ev_lcid = lcid where ( ( tmid1=? or tmid2=? ) and evseason=?) order by evds",array($this->args['tmid'],$this->args['tmid'],$this->args['season']));
-        $sk['tshirt_a'] = $this->sdb->fetchVal('tmtshirt from tm',"tmid=?",array($this->args['tmid']));
-        $sk['team_a'] = $this->args['team'];
-        $sk['tmid_a'] = $this->args['tmid'];
-        foreach( $data as $d){
-            $evloc = $d['lclocation'];
-            $evnm = $d['evname'];
-            $court = $d['court'];
-            $time = $d['time'];
-            $this->args['date'] = $d['evds'];
-            // Want to determine type of entry for possible filtering later
-            // possibilities are: Practice, Home Game, Tournament
-            if( preg_match("/^Practice/",$evnm)){
-                $evtype = "Practices";
-            }
-            elseif( preg_match("/^Intersite Game Day/",$evnm)){
-                $evtype = "Tournaments";
-            }
-            elseif( preg_match("/^Games/",$evnm)){
-                $evtype = "Games";
-            }
-            else {
-                $evtype = "unknown";
-            }
-            
-            // depending on type of event, court may be specified in one of two locations...
-            $b .= "<p class=\"$evtype\">\n";
-            $b .= "{$this->args['date']} - $time<br />";
-            $b .= "$evnm<br />\n";
-            $b .= "$evloc - Court $court\n";
-            if( $d['tmid1'] != "" and $d['tmid2'] != "" ){
-                // need to get the other teams name
-                // this team could be either tmid1 or tmid2
-                $othertmid = ( $d['tmid1'] == $tmid ) ? $d['tmid2'] : $d['tmid1'];
-                $sk['team_b']   = $this->sdb->fetchVal('tmname from tm',"tmid=?",array($othertmid));
-                $sk['tshirt_b'] = $this->sdb->fetchVal('tmtshirt from tm',"tmid=?",array($othertmid));
-                //$b .= "<br /><a href=\"scorekeeper.php?team_a=$team&team_b=$othertmname\">Scorekeep This Game</a>\n";
-                //$b .= "<br />" . $this->buildURL_li("./scorekeeper.php","team_a=$team&team_b=$othertmname","Scorekeep This Game") . "\n";
-                $b .= "<br />" . $this->buildURL_li("./scorekeeper.php",$sk,"Scorekeep This Game") . "\n";
-                //$b .= "<br /><a href=\"tournSummaries.php?mode=tsumm&season=$season&date=$date&state=$state&program={$this->args['program']}\">Tournament Info</a>\n";
-                $b .= "<br />" . $this->buildURL_li("./tournSummaries.php",$this->args,"Tournament Info") . "\n";
-            }
-            $b .= "</p>\n";
-        }
-        $b .= "</div>\n";
-        return "$b";
-    }
-}
-
-$ms = new usyvlMobileSite();
+$ms = new indexMobile();
 
 $content['body']  .= $ms->display();
 $content['title']  = $ms->getTitle();  // title is not set till after display is run...

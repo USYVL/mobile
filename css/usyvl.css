@@ -65,3 +65,19 @@ td.isummdesc {
     padding: 0px;
     color: #00a;
 }
+.header_sm {
+    color: blue;
+    font-size: 75%;
+    font-weight: normal;
+}
+.glossary {
+}
+.glossary_term {
+    font-weight: bold;
+    /*
+    font-size: 100%;
+    */
+    color: blue;
+}
+.glossary_definition {
+}

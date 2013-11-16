@@ -2,7 +2,7 @@
 require_once("config.php");
 require_once("dbManagement.php");
 require_once("usyvlDB.php");
-require_once("mwfMobileSite_tourn.php");
+require_once("tournSummaries_inc.php");
 require_once("digitalClock.php");
 
 define('DEBUGLEVEL',0);

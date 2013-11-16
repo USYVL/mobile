@@ -25,9 +25,9 @@ class usyvlMobileSite extends mwfMobileSite {
         $this->registerFunc('launch'   , 'dispDivisions' );
         $this->registerFunc('teams'    , 'dispTeams'     );
         $this->registerFunc('sched'    , 'dispSched'     );
-        $this->registerFunc('credits'  , 'dispCredits'   );
-        $this->registerFunc('settings' , 'dispSettings'  );
-        $this->registerFunc('auto'     , 'dispAuto'      );
+        //$this->registerFunc('credits'  , 'dispCredits'   );
+        //$this->registerFunc('settings' , 'dispSettings'  );
+        //$this->registerFunc('auto'     , 'dispAuto'      );
     }
     function dispDivisions(){
         $this->initArgs('teams',array('mode','season','state','program'));
@@ -147,42 +147,42 @@ class usyvlMobileSite extends mwfMobileSite {
         $b .= "</div>\n";
         return "$b";
     }
-    // Most of this is actually done with javascript/jquery
-    function dispAuto(){
-        $b = "Location:";
-        $b .= "<div id=\"device_location\">NA</div>";
-        $b .= "<div id=\"proximal_events\">Proximal Events: NA</div>";
-        return $b;
-    }
-    function dispSettings(){
-        $this->title = "USYVL Mobile - Settings";
-        
-        $b = $this->contentDiv("Settings","<p>\nSettings Coming Soon!\n</p>\n");
-        
-        return "$b";
-    }
-    function dispCredits(){
-        $this->title = "USYVL Mobile - Credits";
-        
-        $b = "";
-        $b .= $this->contentDiv("Version","<p class=\"credits author\">\nVersion: " . $GLOBALS['version'] . "\n</p>\n");
-        $bb .= "<p class=\"credits\">\n";
-        $bb .= "HTML 5\n";
-        $bb .= "</p>\n";
-        $bb .= "<p class=\"credits\">\n";
-        $bb .= "CSS 3\n";
-        $bb .= "</p>\n";
-        $bb .= "<p class=\"credits\">\n";
-        $bb .= "Mobile Web Framework (MWF) 1.3\n";
-        $bb .= "</p>\n";
-        $bb .= "<p class=\"credits\">\n";
-        $bb .= "jQuery 1.10.x\n";
-        $bb .= "</p>\n";
-        $b .= $this->contentDiv("Tech",$bb);
-        $b .= $this->contentDiv("Author","<p class=\"credits author\">\nCreated for USYVL by Aaron Martin\n</p>\n");
-        $b .= $this->contentDiv("Art/Graphics","<p class=\"credits\">\nProvided by USYVL</p>\n");
-        return "$b";
-    }
+    ///// Most of this is actually done with javascript/jquery
+    ///function dispAuto(){
+    ///    $b = "Location:";
+    ///    $b .= "<div id=\"device_location\">NA</div>";
+    ///    $b .= "<div id=\"proximal_events\">Proximal Events: NA</div>";
+    ///    return $b;
+    ///}
+    ///function dispSettings(){
+    ///    $this->title = "USYVL Mobile - Settings";
+    ///    
+    ///    $b = $this->contentDiv("Settings","<p>\nSettings Coming Soon!\n</p>\n");
+    ///    
+    ///    return "$b";
+    ///}
+    ///function dispCredits(){
+    ///    $this->title = "USYVL Mobile - Credits";
+    ///    
+    ///    $b = "";
+    ///    $b .= $this->contentDiv("Version","<p class=\"credits author\">\nVersion: " . $GLOBALS['version'] . "\n</p>\n");
+    ///    $bb .= "<p class=\"credits\">\n";
+    ///    $bb .= "HTML 5\n";
+    ///    $bb .= "</p>\n";
+    ///    $bb .= "<p class=\"credits\">\n";
+    ///    $bb .= "CSS 3\n";
+    ///    $bb .= "</p>\n";
+    ///    $bb .= "<p class=\"credits\">\n";
+    ///    $bb .= "Mobile Web Framework (MWF) 1.3\n";
+    ///    $bb .= "</p>\n";
+    ///    $bb .= "<p class=\"credits\">\n";
+    ///    $bb .= "jQuery 1.10.x\n";
+    ///    $bb .= "</p>\n";
+    ///    $b .= $this->contentDiv("Tech",$bb);
+    ///    $b .= $this->contentDiv("Author","<p class=\"credits author\">\nCreated for USYVL by Aaron Martin\n</p>\n");
+    ///    $b .= $this->contentDiv("Art/Graphics","<p class=\"credits\">\nProvided by USYVL</p>\n");
+    ///    return "$b";
+    ///}
 }
 
 $ms = new usyvlMobileSite();
