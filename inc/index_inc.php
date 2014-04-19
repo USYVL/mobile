@@ -17,6 +17,7 @@ class indexMobile extends mwfMobileSite {
         $this->registerFunc('about'        , 'dispAbout'        );
         $this->registerFunc('indev'        , 'dispInDev'        );
         $this->registerFunc('rules'        , 'dispRules'        );
+        $this->registerFunc('diag'         , 'dispDiagram'      );
     }  
     ////////////////////////////////////////////////////////////////////////////
     // Below here, functions should be the functions registered with registerFunc
@@ -213,6 +214,7 @@ class indexMobile extends mwfMobileSite {
         $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=auto\">Locator Mode</a></li>\n";
         $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=settings\">Settings</a></li>\n";
         $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=rules\">Rules</a></li>\n";
+        $m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=diag\">Diagram</a></li>\n";
         $m .= "  <li><a href=\"./testing/testLocator.php\">Locator Testing</a></li>\n";
     
         $b .= $this->contentList("In Dev Menu",$m);
@@ -262,6 +264,38 @@ long whistle ends the game.";
         $bb .= "";
         $bb .= "";
         $b .= $this->contentDiv("Glossary",$bb);
+               
+        return "$b";
+    }
+    function dispDiagram(){
+        $b = "";
+        //$b .= "<canvas id=\"myCanvas\" width=\"200\" height=\"200\" class=\"myCanvasClass\"></canvas>";
+        //$b .= "<script>\n";
+        //$b .= "var c=document.getElementById(\"myCanvas\");\n";
+        //$b .= "var ctx=c.getContext(\"2d\");\n";
+        //$b .= "ctx.moveTo(0,0);\n";
+        //$b .= "ctx.lineTo(200,100);\n";
+        //$b .= "ctx.stroke();\n";   
+        //$b .= "</script>\n";
+        
+        
+        $b .= "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">\n"; 
+        //$b .= "  <g transform=\"translate(10,10)\">\n"; 
+        $b .= "<rect  x=\"20\" y=\"10\" width=\"200\" height=\"200\" stroke=\"black\" stroke-width=\"1\" fill=\"none\" />\n";
+        $b .= "<rect  x=\"20\" y=\"210\" width=\"200\" height=\"200\" stroke=\"black\" stroke-width=\"1\" fill=\"none\" />\n";
+        $b .= "<circle id=\myca\" cx=\"10\" cy=\"190\" r=\"10\" stroke=\"black\" stroke-width=\"2\" fill=\"white\" >\n";
+        $b .= "      <animateMotion  path=\"m 0 0 l 170 0\" dur=\"5s\" fill=\"freeze\" />\n"; 
+        $b .= "</circle>\n";
+        //$b .= "    <text id=\"TextElement\" x=\"0\" y=\"0\" style=\"font-family:Verdana;font-size:24\"> It's SVG!\n"; 
+        //$b .= "      <animateMotion path=\"M 100 100 L 0 0\" dur=\"5s\" fill=\"freeze\" />\n"; 
+        //$b .= "    </text>\n"; 
+        $b .= "<circle id=\mycb\" cx=\"10\" cy=\"230\" r=\"10\" stroke=\"black\" stroke-width=\"2\" fill=\"white\" >\n";
+        $b .= "      <animateMotion  path=\"m 0 0 l 230 0 \" dur=\"5s\" fill=\"freeze\" />\n"; 
+        //$b .= "      <animateMotion  path=\"m 0 0 l 360 0 \" dur=\"5s\" fill=\"freeze\" begin=\"mycb.end\" />\n"; 
+        $b .= "</circle>\n";
+        //$b .= "  </g> \n"; 
+        $b .= "</svg> \n"; 
+
                
         return "$b";
     }

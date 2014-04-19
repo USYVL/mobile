@@ -14,6 +14,7 @@ $content['css'] = "";
 $content['scripts'] = "";
 
 $content['scripts'] .= '<script type="text/javascript" src="js/locator.js"></script>' . "\n";
+$content['scripts'] .= '<script type="text/javascript" src="js/diagram.js"></script>' . "\n";
 $content['css']  .= '<link rel="stylesheet" href="css/usyvl.css" type="text/css">' . "\n";
 
 $ms = new indexMobile();

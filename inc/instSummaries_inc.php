@@ -31,12 +31,13 @@ class usyvlMobileSite extends mwfMobileSite {
             //$label = "$date - " . $evistypemap[$evd['evistype']];
             $label = "$date - " . $evd['evname'];
             // if the event is a tournament/intersite game day, then switch over to the tournament summary page for this day
+            // could do this as a switch possibly
             if( $evd['evistype'] == 'INTE' ){
                 $this->setArg('mode','tsumm');
                 //$m .= "  <li><a href=\"./tournSummaries.php?mode=tsumm&date=$date&season=$season&state=$state&program=$program\">$label</a></li>\n";
                 $m .= $this->buildURL_li('./tournSummaries.php',$this->args,$label,"class=\"nonereally\"");
             }
-            if( $evd['evistype'] == 'GAME' ){
+            elseif( $evd['evistype'] == 'GAME' ){
                 $this->setArg('mode','gsumm');
                 //$m .= "  <li><a href=\"./tournSummaries.php?mode=tsumm&date=$date&season=$season&state=$state&program=$program\">$label</a></li>\n";
                 $m .= $this->buildURL_li('./gameSummaries.php',$this->args,$label,"class=\"nonereally\"");
@@ -90,8 +91,9 @@ class usyvlMobileSite extends mwfMobileSite {
                 $divisions = $this->sdb->fetchListNew("select distinct tmdiv from tm left join so on tmdiv=so_div order by so_order");
 
                 $isd = $this->mdb->getKeyedHash('ddid',"select * from dd where ddday = ?",array($isday));
-                $netheights = explode(",",$isd[$isday]['ddneth']);
                 
+                // Build the Net Heights block
+                $netheights = explode(",",$isd[$isday]['ddneth']);
                 $nh  = "";
                 $nh .= "<table class=\"isumm\">";
                 $nh .= "<tr class=\"isumm\">";
@@ -107,7 +109,7 @@ class usyvlMobileSite extends mwfMobileSite {
                 $nh .= "</table>";
                 //$nh .= "<p>Net Heights: " . $isd[$isday]['ddneth'] . "</p>\n";
 
-                // prep drills table
+                // Build the drill/instructional Schedule
                 $drills = $this->mdb->getKeyedHash('drid',"select * from dr where drday = ? and drtype = 'DRILL' order by drweight",array($isday));
                 $bl  = "";
                 $bl .= "<table class=\"isumm\">";
@@ -123,7 +125,7 @@ class usyvlMobileSite extends mwfMobileSite {
                 }
                 $bl .= "</table>";
                 
-                // drill descriptions
+                // Build the drill/instructional details block
                 $dl = "";
                 $descs = $this->mdb->getKeyedHash('drid',"select * from dr where drday = ? and drtype = 'DRILLDESC' order by drweight",array($isday));
                 foreach( $descs as $desc){
