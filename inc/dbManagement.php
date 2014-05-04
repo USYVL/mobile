@@ -11,31 +11,26 @@ class dbMgmt {
         $this->log = $log;
         $this->counter = 0;
         $this->mesgs = "";
+        $this->tables = array();
         $this->pdos = null; // pdo statement for queries
         
+        $this->myTables();
         
         $GLOBALS['dbh'][$key] =& $this;
     }
-    /////function __construct($db,$file,$desc,&$log = null){
-    /////    $this->db = $db;
-    /////    
-    /////    // hate doing this here, this should be done differently, but this is because
-    /////    // I am sharing the access database....  Should be passing this in as a dsn  sqlite:pathname
-    /////    if ( $db == "access" ) $path = "../workflow/io/db/";
-    /////    else                   $path = "io-data/db/";
-    /////    
-    /////    $this->dbfile = $path . $file . '.sqlite3';
-    /////    $this->desc = $desc;
-    /////    $this->dsn = 'sqlite:' . $this->dbfile;
-    /////    $this->log = $log;
-    /////    $this->counter = 0;
-    /////    $this->mesgs = "";
-    /////    list($this->type,$this->path) = explode(":",$this->dsn);
-    /////    
-    /////    // what about this??????
-    /////    $GLOBALS['dbh'][$db] =& $this;
-    /////    
-    /////}
+    ////////////////////////////////////////////////////////////////////////////
+    // stub method to overload 
+    // The idea being that you define dbMgmtTables objects and use dbMgmt->addTable
+    // to add them in.
+    //
+    // Also, that overloaded function should be a good place to put queries such as:
+    //   create trigger
+    //   create index
+    //   create view
+    ////////////////////////////////////////////////////////////////////////////
+    private function myTables(){
+    }
+    ////////////////////////////////////////////////////////////////////////////
     // Do not yet have an execute feed through, but I have to think how I want to use this anyway,
     // I typically use methods such as fetchList, getKeyedHash as they return already polished php 
     // structures, so have to consider setting up a prepared statement version of those, pFetchList()???
@@ -53,6 +48,11 @@ class dbMgmt {
     function displayMesgs(){
         print $this->mesgs;
         $this->mesgs = "";
+    }
+    ////////////////////////////////////////////////////////////////////////////
+    function tableExists($table){
+        $count = $this->fetchVal("count(*) from sqlite_master","type='table' and name='{$table}'");
+        return ($count != 0);
     }
     ////////////////////////////////////////////////////////////////////////////
     function initDB(){
@@ -96,7 +96,7 @@ class dbMgmt {
             if( ! $this->tableCreated[$table->name] ){
                 // check to see if the table exists
                 // maybe do a pragma query???
-                // what about seeing if we need to alter the db (ie: usyvlDbTable has changed, but db has not been
+                // what about seeing if we need to alter the db (ie: dbMgmtTable has changed, but db has not been
                 // recreated).  Need to see if there are any new columns to be added via alter....
                 $qstr = "select * from $table->name";
                 $result = $this->dbh->query($qstr);
@@ -401,11 +401,10 @@ class dbMgmt {
             foreach($exportcols as $col){
                 $pqvals[] = $row[$col];
             }
-            
+
             if( $do_query ){
                 if( $stm->execute($pqvals) === true ){
                     $this->mesgs .= "statement execution succeeded<br>\n";
-                    // would use $stm->fetchAll() to actually get results
                 }
                 else {
                     $this->mesgs .= "statement execution failed<br>\n";
