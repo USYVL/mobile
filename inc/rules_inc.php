@@ -7,7 +7,7 @@ One player from each team will roll the ball from one sideline to the other.
 The ball can go past the line.
 
 Important Reminders: Net heights indicated on the pool sheets must be followed!
-7-8 & 9-10 div. court lines must be tied in 21Ú2 feet at each corner!
+7-8 &amp; 9-10 div. court lines must be tied in 21ï¿½2 feet at each corner!
 
 Hot Potato (for 7-8 age division only)
 <li>Every first contact should be a catch.
@@ -30,7 +30,7 @@ ball in the traditional passing stance. The player then tosses the ball to the s
 from where the ball was caught. The setter then sets it to the spiker. The spiker 
 then spikes the ball over the net. The opposing team follows the same format.
 
-Double Max (For 9-10, 11-12 & 13-15 age divisions only)
+Double Max (For 9-10, 11-12 &amp; 13-15 age divisions only)
 <li>Traditional pass, set and spike.
 <li>Rally scoring to 25, the team must win by 2 points.
 <li>Players have a two consecutive serve maximum.
