@@ -51,7 +51,7 @@ fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</scri
 
 <h1 id="header"> 
     <a href="."> 
-        <img src="http://mwf.usyvl.org/assets/img/header-usyvl.png" alt="USYVL" width="50" height="35">
+        <img src="./img/header-usyvl.png" alt="USYVL" width="50" height="35">
     </a> 
     <span><a href=".">USYVL Mobile</a></span> 
 </h1>
