@@ -1,5 +1,5 @@
 # mobile
-Utilizes UCLA's Mobile Web Framework (MWF 1.3.x) framework to create a mobile website for USYVL programs.
+Utilizes UCLA's Mobile Web Framework (MWF 1.3.x http://mwf.ucla.edu) framework to create a mobile website for USYVL programs.
 The path to the MWF server needs to be updated in the file `tpl/usyvl.tpl`.  This should be in the `$mwf` var near the top of that file.  This config may be changed in future revisions.  NOTE that mwf works best if it's at the root of the server (ie: it's own virtual host).  The docroot should be directed to the `mwf/root` folder of the MWF working copy.
 
 This framework drives a mobile site whose content is provided by two SQLite3 databases that are NOT provided via this
