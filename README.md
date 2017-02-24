@@ -16,8 +16,6 @@ CREATE TABLE gm (gmid integer primary key,tmid1 integer ,tmid2 integer ,evid int
 CREATE TABLE pool (poolid integer primary key,p_evid integer ,poollayout text ,courts text ,times text ,division text ,poolnum integer ,neth text ,tmids text );
 ```
 
-There is also a practice drill database () that must be writable by the httpd process owner.
-
 The schema for `io/db/redbook.sqlite3` is as follows:
 ```
 CREATE TABLE dd (ddid integer primary key,ddday integer ,ddtype text ,ddneth text ,ddpdfh text );
