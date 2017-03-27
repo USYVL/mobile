@@ -61,7 +61,7 @@ class mwfMobileSite_tourn extends mwfMobileSite {
         // Pretty sure this can be restructured...  If away game set program to tournament host
         // then we should be able to carry on normally.  It looks like the evid is not even used
         // till we get further into it below...
-        print "At Tournament Check<br/>\n";
+        //print "At Tournament Check<br/>\n";
         if( preg_match("/Intersite Game Day *Away Game *vs[.]* (.*)$/",$desc,$m) ){
             $sites = explode(" & ",$m[1]);
             $tournhost = trim($sites[0]);
@@ -88,15 +88,15 @@ class mwfMobileSite_tourn extends mwfMobileSite {
                 $cts = $pool['courts'];
                 $tmcount = count(explode(",",$pool['tmids']));
                 $m .= $this->buildURL_li(array('ajax_result' => '#poolInfo_ajax_result', 'class' => 'ajax_tsumm', 'href' => $poolinfo_script),$this->args,"Pool " . $pool['poolnum'] . " ($div div) <br /> $tmcount Teams - Cts. $cts","class=\"nonereally\"");
-                print "ajaxURL: $m<br/>\n";
+                //print "ajaxURL: $m<br/>\n";
             }
             $b .= $this->contentList("Tourn. Pools",$m);
         }
         else {
             //$this->setArg('mode','tpool');
             $pdata = $this->sdb->getKeyedHash('poolid',"select * from pool where p_evid = ?",array($this->args['evid']));
-            print "Home Game: {$this->args['evid']}<br>\n";
-            print_pre($pdata,"Away game data");
+            //print "Home Game: {$this->args['evid']}<br>\n";
+            //print_pre($pdata,"Away game data");
 
             $m = "";
             foreach($pdata as $pool){
@@ -107,7 +107,7 @@ class mwfMobileSite_tourn extends mwfMobileSite {
                 $cts = $pool['courts'];
                 $tmcount = count(explode(",",$pool['tmids']));
                 $m .= $this->buildURL_li(array('ajax_result' => '#poolInfo_ajax_result', 'class' => 'ajax_tsumm', 'href' => $poolinfo_script),$this->args,"Pool " . $pool['poolnum'] . " ($div div) <br /> $tmcount Teams - Cts. $cts","class=\"nonereally\"");
-                print "ajaxURL: $m<br/>\n";
+                //print "ajaxURL: $m<br/>\n";
             }
             $b .= $this->contentList("Tourn. Pools",$m);
         }
