@@ -17,9 +17,9 @@ class usyvlMobileSite extends mwfMobileSite {
         ///    'GAME' => 'Games',
         ///    'INTE' => 'Tournament',
         ///    );
-        
+
         $this->title = "USYVL Mobile - Select Date from {$this->args['state']} Program {$this->args['program']} for {$this->args['season']}";
-        
+
         $m = "";
         //$dates = $sdb->fetchListNew("select distinct evds from ev where evseason=? and evprogram = ?",array($season,$program));
         $evh = $this->sdb->getKeyedHash('evds',"select * from ev where evseason=? and evprogram = ? order by evds",array($this->getArg('season'),$this->getArg('program')));
@@ -34,6 +34,8 @@ class usyvlMobileSite extends mwfMobileSite {
             // could do this as a switch possibly
             if( $evd['evistype'] == 'INTE' ){
                 $this->setArg('mode','tsumm');
+                // this works but pretty sure it is not needed here
+                //$this->setArg('ev_refid',$evd['ev_refid']);
                 //$m .= "  <li><a href=\"./tournSummaries.php?mode=tsumm&date=$date&season=$season&state=$state&program=$program\">$label</a></li>\n";
                 $m .= $this->buildURL_li('./tournSummaries.php',$this->args,$label,"class=\"nonereally\"");
             }
@@ -48,21 +50,21 @@ class usyvlMobileSite extends mwfMobileSite {
                 $m .= $this->buildURL_li($_SERVER['PHP_SELF'],$this->args,$label,"class=\"nonereally\"");
             }
         }
-        
+
         $b = $this->contentList($this->args['program'] . "<br />Daily Schedule Entries",$m);
-        
+
         return "$b";
 //         $this->initArgs('gsumm',array('mode','season','state','program','date'));
     }
     function dispISumm(){
         $this->initArgs('tsumm',array('mode','season','state','program','date'));
         $this->title = "USYVL Mobile - Instructional Summary - {$this->args['season']} {$this->args['program']}";
-        
+
         $b = "";
-        
+
         // so we need to get evisday - this is the number of the day in the manual
         $isdays = $this->sdb->fetchListNew("select evisday from ev where evprogram=? and evds=?",array($this->args['program'],$this->args['date']));
-        
+
         // could get the isdays above from this
         $evd = $this->sdb->getKeyedHash('evid',"select * from ev left join lc on ev_lcid = lcid where evds=? and evprogram=?",array($this->args['date'],$this->args['program']));
         if( count($evd) > 1 ) {
@@ -71,18 +73,18 @@ class usyvlMobileSite extends mwfMobileSite {
         else {
             $d = array_shift($evd);
         }
-        
+
         //$b .= "<div class=\"content content-full\">\n";
         //$b .= "<h2 class=\"light\">\n";
-        
+
         $t  = "";
         $t .= "Instructional Summary<br />\n{$this->args['program']}<br />\n{$this->args['date']}<br />\n";
         $t .= $d['evname'] . "<br />\n" . $d['evtime_beg'] . " to " .  $d['evtime_end'] . "\n";
         $t .= "</h2>\n";
-        
+
         $c  = "";
         $c .= "<h3>" . $d['lclocation'] . "<br />" . $d['lcaddress'] . "</h3>\n";
-        
+
         foreach( $isdays as $isday){
             if( $isday == "" ){
                 // So we have something going on, should be OFF, SKIP or INTE type
@@ -91,7 +93,7 @@ class usyvlMobileSite extends mwfMobileSite {
                 $divisions = $this->sdb->fetchListNew("select distinct tmdiv from tm left join so on tmdiv=so_div order by so_order");
 
                 $isd = $this->mdb->getKeyedHash('ddid',"select * from dd where ddday = ?",array($isday));
-                
+
                 // Build the Net Heights block
                 $netheights = explode(",",$isd[$isday]['ddneth']);
                 $nh  = "";
@@ -124,7 +126,7 @@ class usyvlMobileSite extends mwfMobileSite {
                     $bl .= "</tr>";
                 }
                 $bl .= "</table>";
-                
+
                 // Build the drill/instructional details block
                 $dl = "";
                 $descs = $this->mdb->getKeyedHash('drid',"select * from dr where drday = ? and drtype = 'DRILLDESC' order by drweight",array($isday));
@@ -139,10 +141,10 @@ class usyvlMobileSite extends mwfMobileSite {
         $b .= $this->contentDiv("Net Heights",$nh);
         $b .= $this->contentDiv("Drill Schedule",$bl);
         $b .= $this->contentDiv("Drill Details/Notes",$dl);
-        
+
         $dc = new digitalClock();
         $b .= $dc->dateTimeDiv("content");
-        
+
         return "$b";
     }
 }

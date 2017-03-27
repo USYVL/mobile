@@ -13,7 +13,7 @@ $content['body'] = "";
 $content['css'] = "";
 $content['scripts'] = "";
 
-$content['scripts'] .= '<script type="text/javascript" src="js/index.js"></script>' . "\n";
+//$content['scripts'] .= '<script type="text/javascript" src="js/index.js"></script>' . "\n";
 $content['css']  .= '<link rel="stylesheet" href="css/usyvl.css" type="text/css">' . "\n";
 
 $ms = new usyvlMobileSite();
@@ -26,4 +26,3 @@ $content['errs'] .= "";
 include("tpl/usyvl.tpl");
 //print ob_get_clean();
 ?>
-

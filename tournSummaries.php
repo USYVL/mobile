@@ -14,7 +14,7 @@ $content['css'] = "";
 $content['scripts'] = "";
 
 $content['scripts'] .= '<script type="text/javascript" src="js/locator.js"></script>' . "\n";
-$content['scripts'] .= '<script type="text/javascript" src="js/tsumm.js"></script>' . "\n";
+$content['scripts'] .= '<script src="js/tsumm.js"></script>' . "\n";
 $content['css']  .= '<link rel="stylesheet" href="css/usyvl.css" type="text/css">' . "\n";
 
 // Change Tournament Summaries to Tournament Pools
@@ -34,4 +34,3 @@ select distinct evid from ev where evprogram = 'Goleta' and evistype = 'INTE';
 select * from ev left join gm on ev.evid = gm.evid where ev.evid=262 and evprogram = 'Goleta' and evistype = 'INTE';
 */
 ?>
-
