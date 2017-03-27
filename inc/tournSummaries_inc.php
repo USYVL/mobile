@@ -76,8 +76,8 @@ class mwfMobileSite_tourn extends mwfMobileSite {
             // $m = $this->buildURL_li($_SERVER['PHP_SELF'],$this->args,"$tournhost<br />{$this->args['date']}","class=\"nonereally\"");
             // $b .= $this->contentList("Tournament Hosts Link",$m);
             $pdata = $this->sdb->getKeyedHash('poolid',"select * from pool where p_evid = ?",array($this->args['evid']));
-            print "Away Game: {$this->args['evid']}  <br>\n";
-            print_pre($pdata,"Away game data");
+            // print "Away Game: {$this->args['evid']}  <br>\n";
+            // print_pre($pdata,"Away game data");
 
             $m = "";
             foreach($pdata as $pool){
@@ -118,6 +118,16 @@ class mwfMobileSite_tourn extends mwfMobileSite {
         // the correct args (maybe pass them into the javascript call???)
         //$b .= $this->poolInfo();
         $b .= "</div>\n";
+
+        // Add in any pdf links
+        $lb = '';
+        //$b .= "<div>\n";
+        $pdfid = $this->sdb->fetchVal("pdid from ev left join pdfs on evbase = pdfbase","evprogram = ? and evistype = ? and evds = ?",array($this->args['program'],'INTE',$this->args['date']));
+        if ($pdfid != ""){
+            $lb .= "<a href=\"displayPDF.php\">Tournament PDF</a>\n";
+        }
+        //$b .= "</div>\n";
+        $b .= $this->contentDiv('Links',$lb);
 
         // With a few changes up above, we can just add the pool info below here
         $dc = new digitalClock();
