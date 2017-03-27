@@ -1,0 +1,147 @@
+#!/bin/sh
+# just try any possibilities, allow failures to fail
+# cleaner way would be to figure out which are valid first...
+# not sure how to do that
+# add in a new line
+
+perms=/tmp/checkperms-perms.$$
+if [[ $UID -ne 0 ]]; then
+  echo "running $0 via sudo"
+  sudo $0 $*
+  exit 1
+fi
+
+fullpath=`which $0`
+if [ "$fullpath" ]; then
+  echo "fullpath = $fullpath"
+  dirn=`dirname $fullpath` 
+  cd $dirn
+  cd ..
+fi
+
+if test ! -d bin -o ! -d io  ; then
+  echo "trying up one directory"
+  cd ..
+  if test ! -d io -o ! -d bin  ; then
+    echo "cant seem to find the correct location for this to work"
+    exit
+  else
+    pwd
+    echo "seem to have found the right location"
+  fi
+fi
+
+# determine http user
+httpuser=`ps ax -o user,command | grep http | grep -v grep | grep -v Applications | awk '{ print $1}' | grep -v root | uniq`
+printf "found http user $httpuser\n"
+
+if [ ! "$httpuser" ]; then
+  echo "apache/httpd may not be running, cant determine http user"
+  exit
+fi
+
+echo "arguments: $#"
+if [ $# -gt 0 ]; then
+  echo "username provided on command line"
+  httpuser=$1
+fi
+
+
+fixPerms(){
+  #echo "file/dir: $4"
+  if [ ! -e "$4" ]; then
+    case $1 in
+      d*)   mkdir -p "$4" ;;
+      f*)   dn=`dirname "$4"`; mkdir -p "$dn"; touch "$4" ;;
+    esac
+    if [ ! -e $4 ]; then
+      echo "failed to create: $4"
+      return
+    fi
+  fi
+
+
+  if [ "$2" ]; then
+    echo "chown $2 $4"
+    chown $2 "$4"
+  fi
+
+  if [ "$3" ]; then
+    echo "$3" | tr ':' '\n' > $perms
+    while read line; do
+      echo "chmod $line $4"
+      chmod $line $4 
+    done < $perms
+  fi
+}
+
+
+new_way(){
+  for owner in $httpuser ; do
+    fixPerms d "-R $owner" "-R u+w:-R go-w" io
+    fixPerms d "-R $owner" "-R u+w:-R go-w" io/db
+
+    #fixPerms d "-R $owner" "-R a+rw" io-data/sampleInputData      # nobody needs to be able to write the lastauto files
+    #fixPerms d $owner a+x io-data/sampleInputData      # nobody needs to be able to write the lastauto files
+    #fixPerms f "" 666 io-data/sampleInputData/lastauto-ev.csv
+    #fixPerms f "" 666 io-data/sampleInputData/lastauto-ev.csv
+  done
+}
+
+
+new_way
+rm -rf /tmp/*.$$
+
+exit
+
+
+###############################################################
+# old stuff that should be removed
+###############################################################
+
+# list of subdirectories of the scheduling dir that need to exist and be readable/writable by httpuser
+# previous structure requirements...
+dirlist="schedules schedules/ts schedules/gs xml input output"
+# new structure is simpler....
+dirlist="io-data io-data/io-preserve io-data"
+fillist="usyvlSettings.php"
+
+
+checkdir(){
+  echo "checking dir $1"
+  if [ ! -d $1 ]; then
+     echo "required directory $1 being created"
+     mkdir -p $1
+  fi 
+}
+checkfile(){
+  echo "checking file $1"
+  if [ ! -f $1 ]; then
+    printf "$1 doesnt exist, we have problems"
+    exit 1
+  fi 
+}
+old_way(){
+for owner in $httpuser 
+do
+  for f in $dirlist
+  do
+    echo "processing directory $f"
+    checkdir $f
+    chown -R $owner $f
+    chmod -R u+w $f 
+    chmod -R go-w $f 
+    find $f -type d -exec chmod 0755 {} \;
+  done
+
+  for f in $fillist
+  do
+    echo "processing file $f"
+    checkfile $f
+    chown $owner $f
+    chmod u+w $f 
+    chmod go-w $f 
+  done
+done
+}
+
