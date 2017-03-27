@@ -26,6 +26,7 @@ class mwfMobileSite_tourn extends mwfMobileSite {
 
         return "$b";
     }
+    //////////////////////////////////////////////////////////////////////////////////////////
     function dispTSumm(){
         //print "WhatEvs<br/>\n";
         $this->initArgs('tsumm',array('mode','season','state','program','date'));
@@ -180,8 +181,11 @@ class mwfMobileSite_tourn extends mwfMobileSite {
     ////    $b .= $this->poolInfo();
     ////    return $b;
     ////}
+    //////////////////////////////////////////////////////////////////////////////////////////
+    // this is used by ajax call (pretty sure) to get the single pool summary
+    //////////////////////////////////////////////////////////////////////////////////////////
     function poolInfo(){
-        return "HeyThere<br>\n";
+        //return "HeyThere Pool Info<br>\n";
         //return "Right after initArgs";
         $this->initArgs('tsumm',array('mode','season','state','program','date','poolid','evid'));
         $b = "";

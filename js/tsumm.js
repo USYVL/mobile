@@ -15,6 +15,7 @@ $(document).ready(function () {
 $(function() {
     // this works, so getting into the main
     // alert("getting into tsumm.js main");
+
     $('.ajax_tsumm').click(function(){
         // working now, had wrong name
         //alert("is this getting caught?");

@@ -7,6 +7,7 @@ require_once("csvUtils.php");
 require_once("usyvlDB.php");
 
 //print __DIR__ . "<br />\n";
+// http://fablio-yosemite.local/usyvl/mobile/ajax/getPoolInfoAjax.php?mode=tsumm&season=Fall%202016&state=CA&program=Ventura&date=2016-10-08&evid=1197&poolid=96&poolnum=2&ajax_result=poolInfo_ajax_result
 
 
 // Need a way to test this by feeding in fake location and fake date
