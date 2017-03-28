@@ -40,14 +40,14 @@ class mwfMobileSite {
     function contentList($label = "",$menuitems = ""){
         $b  = "";
         $b .= "<div class=\"menu\">\n";
-        $b .= "<h1 class=\"light menu-first\">$label</h1>\n"; 
+        $b .= "<h1 class=\"light menu-first\">$label</h1>\n";
         $b .= "<ul>\n";
-        
+
         if( is_string($menuitems)) $b .= $menuitems;
         elseif( is_array($menuitems)){
             foreach($menuitems as $mitem) $b .= $mitem;
         }
-        
+
         $b .= "</ul>\n";
         $b .= "</div><!-- Close Menu div -->\n";
         return $b;
@@ -80,9 +80,9 @@ class mwfMobileSite {
                 }
             }
         }
-        
+
         $b .= $this->disclaimer();
-        
+
         //$b .= $this->button("http://www.usyvl.org","USYVL Website");
         //$b .= $this->button("./","Main Menu");
         return "$b";
@@ -95,34 +95,34 @@ class mwfMobileSite {
     //   program
     //   division
     //   team
-    // 
-    // The overall chain leads to the display of a teams schedule for the entire 
-    // season. Each step requires all the other pieces.  Of course, the automode 
+    //
+    // The overall chain leads to the display of a teams schedule for the entire
+    // season. Each step requires all the other pieces.  Of course, the automode
     // will add the additional dimension of time.
     //
     // Debating on using the singular and plural forms of each chain element.
     // ie: state and states, season and seasons
     ////////////////////////////////////////////////////////////////////////////
     function collectValidateDataChain($next){
-        // so, one thing to consider is whether I should try to figure out the 
-        // mode from what elements are available...  
-        // Interesting idea, but gets trickier if we end up having sequences that 
+        // so, one thing to consider is whether I should try to figure out the
+        // mode from what elements are available...
+        // Interesting idea, but gets trickier if we end up having sequences that
         // dont fit this chain idea.
-        
+
         // Was toying with a mask type idea though  0x07
         // season 0x01
         // state 0x02
         // program 0x04
         // division 0x08
-        
+
         // thus 0x0f would indicate the presence of all of those, 0x07 only the first three
         // but many of these values rely on the previous value (thus this idea of a chain)
         // But at some point we need to think of time (date) and what where that fits in
         // in the current scheme, we can pull the schedule for one team for that date,
         // but will I want to pull data from multiple sites on a given date?????
-        
+
         $this->chain = array('season','state','program','division','team');
-        
+
         $this->chaindata['seasons'] = $this->sdb->fetchList("distinct evseason from ev");
         $k = 'season';
         if( isset($_GET[$k])){
@@ -139,7 +139,7 @@ class mwfMobileSite {
             if( $next == $chainelement ) return $this->chaindata[$datakey];
             if( isset($_GET[$chainelement])) {
                 $this->chainval[$chainelement] = $_GET[$chainelement];
-                
+
                 // need to validate the data now, hmmmm, we need this to lag by one
                 // ie: to validate state data, we need a season value set
                 // so we need to save previous loop entry
@@ -166,14 +166,14 @@ class mwfMobileSite {
             $qstr = implode("&",$qa);
         }
         else $qstr=$queryargs;
-        
-        $u = "\n"; 
+
+        $u = "\n";
         $u .= "<a ";
-        
+
         // set up a hash with any optional entries and then append...
-        
+
         // so exargs['href'] = "?arg=val&arg=val"
-        
+
         if( is_array($atag)){
             if( isset($atag['ajax_result'])) $u .= " ajax_result=\"" . $atag['ajax_result'] . "\"";
             if( isset($atag['class'])) $u .= " class=\"" . $atag['class'] . "\"";
@@ -182,16 +182,16 @@ class mwfMobileSite {
         else {
             $u .= "href=\"" . $atag;
         }
-        
+
         if( $qstr != "" ) $u .= "?$qstr";
         $u .= "\">";
         if( $label != "" ) $u .= "$label";
         $u .= "</a>\n";
-        
+
         return $u;
     }
     ////////////////////////////////////////////////////////////////////////////
-    function buildURL_li($url,$queryargs,$label = "",$li = null ,$classes = ""){     
+    function buildURL_li($url,$queryargs,$label = "",$li = null ,$classes = ""){
         $u = "";
         if( ! is_null( $li)) {
             $u .= "<li";
@@ -199,14 +199,14 @@ class mwfMobileSite {
             if( $li != "" ) $u .= " $li";
             $u .= ">";
         }
-        
+
         $u .= $this->buildURL_base($url,$queryargs,$label);
-        
+
         if( ! is_null( $li)) $u .= "</li>\n";
         return $u;
     }
     ////////////////////////////////////////////////////////////////////////////
-    function buildURL_wrapped($url,$queryargs,$label = "",$wrapper = null ,$attrs = ""){     
+    function buildURL_wrapped($url,$queryargs,$label = "",$wrapper = null ,$attrs = ""){
         $u = "";
         if( ! is_null( $wrapper )) {
             $u .= "<$wrapper";
@@ -214,9 +214,9 @@ class mwfMobileSite {
             //if( $li != "" ) $u .= " $li";
             $u .= ">";
         }
-        
+
         $u .= $this->buildURL_base($url,$queryargs,$label);
-        
+
         if( ! is_null( $wrapper)) $u .= "</$wrapper>";
         return $u;
     }
@@ -240,6 +240,23 @@ class mwfMobileSite {
     ////////////////////////////////////////////////////////////////////////////
     function getArg($key){
         return $this->args[$key];
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////
+    function addPDFMaterialsLinks($refid,$cat,$label){
+        $b = '';
+
+        $pdid = $this->sdb->fetchVal("pdid from pdfs","pdf_refid = ? and pdfcat = ?",array($refid,$cat));
+        if ($pdid != ""){
+            $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdid\">$label</a></li>\n";
+        }
+
+        // add in static rules PDF
+        $pdfid = $this->sdb->fetchVal("pdid from pdfs","pdfcat = 'RULES';");
+        if ($pdfid != ""){
+            $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdfid\">Rules PDF</a></li>\n";
+        }
+
+        return $this->contentList('PDF Materials Links',$b);
     }
 }
 
