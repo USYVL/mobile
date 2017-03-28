@@ -58,71 +58,32 @@ class mwfMobileSite_tourn extends mwfMobileSite {
         $cb .= "<h3>" . $d['lclocation'] . "<br />" . $d['lcaddress'] . "</h3>\n";
         $b .= $this->contentDiv("Intersite Game Day",$cb);
 
-        $poolinfo_script = ( false ) ? $_SERVER['PHP_SELF'] : 'ajax/getPoolInfoAjax.php' ;
-
         // Pretty sure this can be restructured...  If away game set program to tournament host
         // then we should be able to carry on normally.  It looks like the evid is not even used
         // till we get further into it below...
         //print "At Tournament Check<br/>\n";
-        if( preg_match("/Intersite Game Day *Away Game *vs[.]* (.*)$/",$desc,$m) ){
+        if( preg_match("/Intersite Game Day *Away Game *vs[.]* (.*)$/",$desc,$m) ){  // Away Game, we have to make some adjustments
             $sites = explode(" & ",$m[1]);
             $tournhost = trim($sites[0]);
             //$this->setArg('mode','tsumm');
             $this->setArg('program',$tournhost);
 
             //Hmmmm, at this point we might be able to just get the updated evid and proceed as normal
-            $refid = $this->sdb->fetchVal("ev_refid from ev","evprogram = ? and evistype = ? and evds = ?",array($this->args['program'],'INTE',$this->args['date']));
-            $this->setArg('evid',$refid);
-
-            // $b .= $this->contentDiv("Workaround Required",$this->awayGameMessage($tournhost));
-            // $m = $this->buildURL_li($_SERVER['PHP_SELF'],$this->args,"$tournhost<br />{$this->args['date']}","class=\"nonereally\"");
-            // $b .= $this->contentList("Tournament Hosts Link",$m);
-            $pdata = $this->sdb->getKeyedHash('poolid',"select * from pool where p_evid = ?",array($this->args['evid']));
-            // print "Away Game: {$this->args['evid']}  <br>\n";
-            // print_pre($pdata,"Away game data");
-
-            $m = "";
-            foreach($pdata as $pool){
-                $this->setArg('poolid',$pool['poolid']);
-                $this->setArg('poolnum',$pool['poolnum']);
-                $this->setArg('ajax_result','poolInfo_ajax_result');
-                $div = $pool['division'];
-                $cts = $pool['courts'];
-                $tmcount = count(explode(",",$pool['tmids']));
-                $m .= $this->buildURL_li(array('ajax_result' => '#poolInfo_ajax_result', 'class' => 'ajax_tsumm', 'href' => $poolinfo_script),$this->args,"Pool " . $pool['poolnum'] . " ($div div) <br /> $tmcount Teams - Cts. $cts","class=\"nonereally\"");
-                //print "ajaxURL: $m<br/>\n";
-            }
-            $b .= $this->contentList("Tourn. Pools",$m);
+            $this->args['ev_refid'] = $this->sdb->fetchVal("ev_refid from ev","evprogram = ? and evistype = ? and evds = ?",array($this->args['program'],'INTE',$this->args['date']));
         }
-        else {
+        else {  // Home Game
             //$this->setArg('mode','tpool');
-            $pdata = $this->sdb->getKeyedHash('poolid',"select * from pool where p_evid = ?",array($this->args['evid']));
-            //print "Home Game: {$this->args['evid']}<br>\n";
-            //print_pre($pdata,"Away game data");
-
-            $m = "";
-            foreach($pdata as $pool){
-                $this->setArg('poolid',$pool['poolid']);
-                $this->setArg('poolnum',$pool['poolnum']);
-                $this->setArg('ajax_result','poolInfo_ajax_result');
-                $div = $pool['division'];
-                $cts = $pool['courts'];
-                $tmcount = count(explode(",",$pool['tmids']));
-                $m .= $this->buildURL_li(array('ajax_result' => '#poolInfo_ajax_result', 'class' => 'ajax_tsumm', 'href' => $poolinfo_script),$this->args,"Pool " . $pool['poolnum'] . " ($div div) <br /> $tmcount Teams - Cts. $cts","class=\"nonereally\"");
-                //print "ajaxURL: $m<br/>\n";
-            }
-            $b .= $this->contentList("Tourn. Pools",$m);
+            $this->setArg('ev_refid',$this->args['evid']);
         }
 
-        $b .= "<div id=\"poolInfo_ajax_result\">\n";
-        // so this is now prepped for an ajax call to provide the data here
-        // basically just need the ajax wrapper to call the poolInfo method with
-        // the correct args (maybe pass them into the javascript call???)
-        //$b .= $this->poolInfo();
-        $b .= "</div>\n";
+        $b .= $this->contentList("Tourn. Pools",$this->dispPoolSummaryFromRefID());
+
+        // div wrapper for ajax provided html prepped by $this->dispPoolSummaryFromRefID()
+        $b .= "<div id=\"poolInfo_ajax_result\">\n</div><!-- End poolInfo_ajax_result -->\n";
 
         // Add in any pdf links
-        $b .= $this->addPDFMaterialsLinks();
+        //$b .= $this->addPDFMaterialsLinks();
+        $b .= $this->addPDFMaterialsLinks($this->args['ev_refid'],'INTERSITE','Tournament PDF');
 
         // With a few changes up above, we can just add the pool info below here
         $dc = new digitalClock();
@@ -131,23 +92,42 @@ class mwfMobileSite_tourn extends mwfMobileSite {
         return "$b";
     }
     //////////////////////////////////////////////////////////////////////////////////////////
-    function addPDFMaterialsLinks(){
-        $b = '';
+    function dispPoolSummaryFromRefID(){
+        $poolinfo_script = ( false ) ? $_SERVER['PHP_SELF'] : 'ajax/getPoolInfoAjax.php' ;
+        $pdata = $this->sdb->getKeyedHash('poolid',"select * from pool where p_evid = ?",array($this->args['ev_refid']));
+        //print "Home Game: {$this->args['evid']}<br>\n";
+        //print_pre($pdata,"Away game data");
 
-        // locate the appropriate tournament PDF
-        $pdf_refid = $this->sdb->fetchVal("pdf_refid from ev left join pdfs on evbase = pdfbase","evprogram = ? and evistype = ? and evds = ?",array($this->args['program'],'INTE',$this->args['date']));
-        if ($pdf_refid != ""){
-            $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdf_refid=$pdf_refid&pdfcat=INTERSITE\">Tournament PDF</a></li>\n";
+        $m = "";
+        foreach($pdata as $pool){
+            $this->setArg('poolid',$pool['poolid']);
+            $this->setArg('poolnum',$pool['poolnum']);
+            $this->setArg('ajax_result','poolInfo_ajax_result');
+            $div = $pool['division'];
+            $cts = $pool['courts'];
+            $tmcount = count(explode(",",$pool['tmids']));
+            $m .= $this->buildURL_li(array('ajax_result' => '#poolInfo_ajax_result', 'class' => 'ajax_tsumm', 'href' => $poolinfo_script),$this->args,"Pool " . $pool['poolnum'] . " ($div div) <br /> $tmcount Teams - Cts. $cts","class=\"nonereally\"");
+            //print_pre($poolinfo_script,"ajax");
         }
-
-        // add in static rules PDF
-        $pdid = $this->sdb->fetchVal("pdid from pdfs","pdfcat = 'RULES';");
-        if ($pdid != ""){
-            $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdid\">Rules PDF</a></li>\n";
-        }
-
-        return $this->contentList('PDF Materials Links',$b);
+        return $m;
     }
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    //function addPDFMaterialsLinks(){
+    //    $b = '';
+//
+    //    $pdid = $this->sdb->fetchVal("pdid from pdfs","pdf_refid = ? and pdfcat = ?",array($this->args['ev_refid'],'INTERSITE'));
+    //    if ($pdid != ""){
+    //        $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdid\">Tournament PDF</a></li>\n";
+    //    }
+//
+    //    // add in static rules PDF
+    //    $pdid = $this->sdb->fetchVal("pdid from pdfs","pdfcat = 'RULES';");
+    //    if ($pdid != ""){
+    //        $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdid\">Rules PDF</a></li>\n";
+    //    }
+//
+    //    return $this->contentList('PDF Materials Links',$b);
+    //}
     //////////////////////////////////////////////////////////////////////////////////////////
     // this is used by ajax call (pretty sure) to get the single pool summary
     //////////////////////////////////////////////////////////////////////////////////////////

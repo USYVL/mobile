@@ -22,6 +22,7 @@ class usyvlMobileSite extends mwfMobileSite {
         //$dates = $sdb->fetchListNew("select distinct evds from ev where evseason=? and evprogram = ?",array($season,$program));
         $evh = $this->sdb->getKeyedHash('evds',"select * from ev where evseason=? and evprogram = ? order by evds",array($this->getArg('season'),$this->getArg('program')));
         $dates = array_keys($evh);
+        $this->setArg('ev_refid',$evh[$dates[0]]['ev_refid']);
         //print_pre($evh,"Event Hash");
         foreach($evh as $date => $evd){
             $this->setArg('date',$date);
@@ -51,31 +52,9 @@ class usyvlMobileSite extends mwfMobileSite {
 
         $b = $this->contentList($this->args['program'] . "<br />Daily Schedule Entries",$m);
 
-        $b .= $this->addPDFMaterialsLinks();
+        $b .= $this->addPDFMaterialsLinks($this->args['ev_refid'],'INSTRUCT','Instructional Summary PDF');
 
         return "$b";
-    }
-    //////////////////////////////////////////////////////////////////////////////////////////
-    function addPDFMaterialsLinks(){
-        $b = '';
-
-        // locate the appropriate instructional PDF
-        // this is not fully working, prclean will not match pdfbase for the actual INSTRUCT type
-        // Hmmmm, this kinda sucks, have to decide what the refid actually represents...
-        // A document ID (ie diff for GAME and INSTRUCT) or referencing an entity SITE/TOURN...
-        // This does kinda narrow in on using the base value for that...  Prepend a fixed string to some (INSTRUCT)
-        $pdf_refid = $this->sdb->fetchVal("pdf_refid from pdfs left join pr on prclean = pdfbase","prname = ? and pdfcat = ?",array($this->args['program'],'GAMES'));
-        if ($pdf_refid != ""){
-            $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdf_refid&pdfcat=INSTRUCT\">Instructional Summary PDF</a></li>\n";
-        }
-
-        // add in static rules PDF
-        $pdfid = $this->sdb->fetchVal("pdid from pdfs","pdfcat = 'RULES';");
-        if ($pdfid != ""){
-            $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdfid\">Rules PDF</a></li>\n";
-        }
-
-        return $this->contentList('PDF Materials Links',$b);
     }
     //////////////////////////////////////////////////////////////////////////////////////////
     function dispISumm(){

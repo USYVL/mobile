@@ -25,9 +25,9 @@ class usyvlMobileSite extends mwfMobileSite {
         //$divisions = $this->sdb->fetchList("distinct tmdiv from tm left join so on tmdiv=so_div","( tmprogram=? and tmseason=? )","so_order",array({$this->args['program']},{$this->args['season']}));
         //$divisions = $this->sdb->fetchListNew("select distinct tmdiv from tm left join so on tmdiv=so_div where ( tmprogram=? and tmseason=? ) order by so_order",array({$this->args['program']},{$this->args['season']}));
         foreach( $dates as $date){
-                $this->setArg('date',$date);
-           //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=tsumm&date=$date&season=$season&state=$state&program=$program\">$date</a></li>\n";
-                $m .= $this->buildURL_li($_SERVER['PHP_SELF'],$this->args,$date,"class=\"nonereally\"");
+            $this->setArg('date',$date);
+            //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=tsumm&date=$date&season=$season&state=$state&program=$program\">$date</a></li>\n";
+            $m .= $this->buildURL_li($_SERVER['PHP_SELF'],$this->args,$date,"class=\"nonereally\"");
         }
         $b = $this->contentList($this->args['program'] . "<br />Game Days",$m);
 
@@ -47,6 +47,8 @@ class usyvlMobileSite extends mwfMobileSite {
         $evd = $this->sdb->getKeyedHash('evid',"select * from ev left join lc on ev_lcid = lcid where evds=? and evprogram=?",array($this->args['date'],$this->args['program']));
         if( count($evd) > 1 )  $b .= "ERROR on getKeyedHash";
         else                   $d = array_shift($evd);
+        $this->args['ev_refid'] = $d['ev_refid'];
+        //print_pre($d,"evd");
 
         // get event description, this is not based on the evid
         $descs = $this->sdb->fetchListNew("select distinct evname from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ?",array($this->args['date'],$this->args['program'],'GAME'));
@@ -68,7 +70,8 @@ class usyvlMobileSite extends mwfMobileSite {
         $dc = new digitalClock();
         $b .= $dc->dateTimeDiv("content");
 
-        $b .= $this->addLinks();
+        //$b .= $this->addLinks();
+        $b .= $this->addPDFMaterialsLinks($this->args['ev_refid'],'GAMES','Games PDF');
 
         return "$b";
     }
@@ -118,26 +121,23 @@ class usyvlMobileSite extends mwfMobileSite {
         return $b;
     }
     ////////////////////////////////////////////////////////////////////////////
-    function addLinks(){
-        //global $sdb;
-        $b = '';
-
-        // locate the appropriate tournament PDF
-        // A bit uglier for GAMES than for others
-        $pdf_refid = $this->sdb->fetchVal("pdf_refid from ev left join pdfs on evbase = pdfbase","evprogram = ? and pdfcat = ? and evds = ?",array($this->args['program'],'GAMES',$this->args['date']));
-        if ($pdf_refid != ""){
-            $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdf_refid=$pdf_refid&amp;pdfcat=GAMES\">Games PDF</a></li>\n";
-        }
-
-        // add in static rules PDF
-        $pdid = $this->sdb->fetchVal("pdid from pdfs","pdfcat = 'RULES';");
-        if ($pdid != ""){
-            $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdid\">Rules PDF</a></li>\n";
-        }
-        //$b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdfid\">Rules PDF</a></li>\n";
-
-        return $this->contentList('PDF Materials Links',$b);
-    }
+    //function addLinks(){
+    //    //global $sdb;
+    //    $b = '';
+//
+    //    $pdid = $this->sdb->fetchVal("pdid from pdfs","pdf_refid = ? and pdfcat = ?",array($this->args['ev_refid'],'GAMES'));
+    //    if ($pdid != ""){
+    //        $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdid\">Games PDF</a></li>\n";
+    //    }
+//
+    //    // add in static rules PDF
+    //    $pdid = $this->sdb->fetchVal("pdid from pdfs","pdfcat = 'RULES';");
+    //    if ($pdid != ""){
+    //        $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdid\">Rules PDF</a></li>\n";
+    //    }
+//
+    //    return $this->contentList('PDF Materials Links',$b);
+    //}
     // ////////////////////////////////////////////////////////////////////////////
     // function awayGameMessage($tournhost = ""){
     //     $b = "";
