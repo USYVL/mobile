@@ -3,20 +3,18 @@ require_once("mwfMobileSiteClass.php");
 require_once("digitalClock.php");
 
 class usyvlMobileSite extends mwfMobileSite {
+    //////////////////////////////////////////////////////////////////////////////////////////
     function __construct(){
         parent::__construct();
     }
+    //////////////////////////////////////////////////////////////////////////////////////////
     function registerExtendedFunctions(){
         $this->registerFunc('launch'   , 'dispDates'     );  // use the divisions key, since thats what the core "programs" uses
         $this->registerFunc('isumm'    , 'dispISumm'     );
     }
+    //////////////////////////////////////////////////////////////////////////////////////////
     function dispDates(){
         $this->initArgs('tsumm',array('mode','season','state','program'));
-        ///$evistypemap = array(
-        ///    'PRAC' => 'Practice',
-        ///    'GAME' => 'Games',
-        ///    'INTE' => 'Tournament',
-        ///    );
 
         $this->title = "USYVL Mobile - Select Date from {$this->args['state']} Program {$this->args['program']} for {$this->args['season']}";
 
@@ -53,9 +51,29 @@ class usyvlMobileSite extends mwfMobileSite {
 
         $b = $this->contentList($this->args['program'] . "<br />Daily Schedule Entries",$m);
 
+        $b .= $this->addPDFMaterialsLinks();
+
         return "$b";
-//         $this->initArgs('gsumm',array('mode','season','state','program','date'));
     }
+    //////////////////////////////////////////////////////////////////////////////////////////
+    function addPDFMaterialsLinks(){
+        $b = '';
+
+        // locate the appropriate instructional PDF
+        $pdfid = $this->sdb->fetchVal("pdid from pdfs left join pr on prbase = pdfbase","prname = ? and pdfcat = ?",array($this->args['program'],'INSTRUCT'));
+        if ($pdfid != ""){
+            $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdfid\">Tournament PDF</a></li>\n";
+        }
+
+        // add in static rules PDF
+        $pdfid = $this->sdb->fetchVal("pdid from pdfs","pdfcat = 'RULES';");
+        if ($pdfid != ""){
+            $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdfid\">Rules PDF</a></li>\n";
+        }
+
+        return $this->contentList('PDF Materials Links',$b);
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////
     function dispISumm(){
         $this->initArgs('tsumm',array('mode','season','state','program','date'));
         $this->title = "USYVL Mobile - Instructional Summary - {$this->args['season']} {$this->args['program']}";
@@ -148,6 +166,4 @@ class usyvlMobileSite extends mwfMobileSite {
         return "$b";
     }
 }
-
-
 ?>

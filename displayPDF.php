@@ -22,6 +22,9 @@ $d = $GLOBALS['sdb']->getKeyedHash('pdid','select * from pdfs where pdid = ?;',a
 if( isset($d[$pdid])){
     $name=$d[$pdid]['pdfbase'];
     //print_pre($d[$id],"Data")
+    header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1.
+    header("Pragma: no-cache"); // HTTP 1.0.
+    header("Expires: 0"); // Proxies.
     header("Content-type:application/pdf");
     header("Content-Disposition:inline;filename=$name");
     print $d[$pdid]['pdfstr'];

@@ -63,7 +63,18 @@ class usyvlMobileSite extends mwfMobileSite {
         $cb .= "<h3>" . $d['lclocation'] . "<br />" . $d['lcaddress'] . "</h3>\n";
         $b .= $this->contentDiv("Game Day",$cb);
 
+        $b .= $this->dispGamesSummaries();   // produce summary of each individual game
 
+        $dc = new digitalClock();
+        $b .= $dc->dateTimeDiv("content");
+
+        $b .= $this->addLinks();
+
+        return "$b";
+    }
+    ////////////////////////////////////////////////////////////////////////////
+    function dispGamesSummaries(){
+        $b = '';
         // Each age division, is, in essence, a pool
         // but we want to get a list of all the matches on this day
         $games = $this->sdb->fetchListNew("select distinct game from gm left join ev on ev.evid = gm.evid where ev.evid = ?",array($this->args['evid']));
@@ -104,14 +115,9 @@ class usyvlMobileSite extends mwfMobileSite {
             }
             $b .= $this->contentDiv("Game $game Matches<br />$time",$bb);
         }
-        $dc = new digitalClock();
-        $b .= $dc->dateTimeDiv("content");
-
-        $b .= $this->addLinks();
-
-        return "$b";
+        return $b;
     }
-    //////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
     function addLinks(){
         //global $sdb;
         $b = '';
@@ -127,17 +133,18 @@ class usyvlMobileSite extends mwfMobileSite {
         if ($pdfid != ""){
             $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdfid\">Rules PDF</a></li>\n";
         }
+        //$b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdfid\">Rules PDF</a></li>\n";
 
-        return $this->contentList('Links',$b);
+        return $this->contentList('PDF Materials Links',$b);
     }
-    ////////////////////////////////////////////////////////////////////////////
-    function awayGameMessage($tournhost = ""){
-        $b = "";
-        $b .= "<p>Because of limitations of the data we have access to, you will need to navigate to the home sites link ";
-        $b .= "to see tournament details.  The link should be provided below.</p>";
-        $b .= "<p>Sorry for the inconvenience.  This problem will be addressed at some point in the future.</p>";
-        return $b;
-    }
+    // ////////////////////////////////////////////////////////////////////////////
+    // function awayGameMessage($tournhost = ""){
+    //     $b = "";
+    //     $b .= "<p>Because of limitations of the data we have access to, you will need to navigate to the home sites link ";
+    //     $b .= "to see tournament details.  The link should be provided below.</p>";
+    //     $b .= "<p>Sorry for the inconvenience.  This problem will be addressed at some point in the future.</p>";
+    //     return $b;
+    // }
 }
 
 ?>

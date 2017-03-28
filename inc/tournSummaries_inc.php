@@ -122,7 +122,7 @@ class mwfMobileSite_tourn extends mwfMobileSite {
         $b .= "</div>\n";
 
         // Add in any pdf links
-        $b .= $this->addLinks();
+        $b .= $this->addPDFMaterialsLinks();
 
         // With a few changes up above, we can just add the pool info below here
         $dc = new digitalClock();
@@ -131,7 +131,7 @@ class mwfMobileSite_tourn extends mwfMobileSite {
         return "$b";
     }
     //////////////////////////////////////////////////////////////////////////////////////////
-    function addLinks(){
+    function addPDFMaterialsLinks(){
         $b = '';
 
         // locate the appropriate tournament PDF
@@ -145,8 +145,8 @@ class mwfMobileSite_tourn extends mwfMobileSite {
         if ($pdfid != ""){
             $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdfid\">Rules PDF</a></li>\n";
         }
-        
-        return $this->contentList('Links',$b);
+
+        return $this->contentList('PDF Materials Links',$b);
     }
     //////////////////////////////////////////////////////////////////////////////////////////
     // this is used by ajax call (pretty sure) to get the single pool summary
