@@ -123,15 +123,16 @@ class usyvlMobileSite extends mwfMobileSite {
         $b = '';
 
         // locate the appropriate tournament PDF
-        $pdfid = $this->sdb->fetchVal("pdid from ev left join pdfs on evbase = pdfbase","evprogram = ? and evistype = ? and evds = ?",array($this->args['program'],'GAME',$this->args['date']));
-        if ($pdfid != ""){
-            $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdfid\">Games PDF</a></li>\n";
+        // A bit uglier for GAMES than for others
+        $pdf_refid = $this->sdb->fetchVal("pdf_refid from ev left join pdfs on evbase = pdfbase","evprogram = ? and pdfcat = ? and evds = ?",array($this->args['program'],'GAMES',$this->args['date']));
+        if ($pdf_refid != ""){
+            $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdf_refid=$pdf_refid&amp;pdfcat=GAMES\">Games PDF</a></li>\n";
         }
 
         // add in static rules PDF
-        $pdfid = $this->sdb->fetchVal("pdid from pdfs","pdfcat = 'RULES';");
-        if ($pdfid != ""){
-            $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdfid\">Rules PDF</a></li>\n";
+        $pdid = $this->sdb->fetchVal("pdid from pdfs","pdfcat = 'RULES';");
+        if ($pdid != ""){
+            $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdid\">Rules PDF</a></li>\n";
         }
         //$b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdfid\">Rules PDF</a></li>\n";
 

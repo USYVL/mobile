@@ -60,9 +60,13 @@ class usyvlMobileSite extends mwfMobileSite {
         $b = '';
 
         // locate the appropriate instructional PDF
-        $pdfid = $this->sdb->fetchVal("pdid from pdfs left join pr on prbase = pdfbase","prname = ? and pdfcat = ?",array($this->args['program'],'INSTRUCT'));
-        if ($pdfid != ""){
-            $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdfid\">Tournament PDF</a></li>\n";
+        // this is not fully working, prclean will not match pdfbase for the actual INSTRUCT type
+        // Hmmmm, this kinda sucks, have to decide what the refid actually represents...
+        // A document ID (ie diff for GAME and INSTRUCT) or referencing an entity SITE/TOURN...
+        // This does kinda narrow in on using the base value for that...  Prepend a fixed string to some (INSTRUCT)
+        $pdf_refid = $this->sdb->fetchVal("pdf_refid from pdfs left join pr on prclean = pdfbase","prname = ? and pdfcat = ?",array($this->args['program'],'GAMES'));
+        if ($pdf_refid != ""){
+            $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdf_refid&pdfcat=INSTRUCT\">Instructional Summary PDF</a></li>\n";
         }
 
         // add in static rules PDF

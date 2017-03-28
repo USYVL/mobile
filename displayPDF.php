@@ -4,33 +4,71 @@ require_once("config.php");
 require_once("dbManagement.php");
 require_once("usyvlDB.php");
 
-// Need to pass in a 'pdid' argument
 if (isset($_GET['pdid'])){
     if ( preg_match("/^[0-9]+$/",$_GET['pdid'])){
         $pdid = $_GET['pdid'];
+        $pdfstr = $GLOBALS['sdb']->fetchVal('pdfstr from pdfs','pdid = ?',array($pdid));
+        $d = $GLOBALS['sdb']->getKeyedHash('pdid','select * from pdfs where pdid = ?',array($pdid));
+        displayPDF($d[$pdid]['pdfstr'],$d['pdid']['pdfbase']);
+        // this is unique, can just display from this
     }
     else {
         print "Sorry we had an error (pdid not an int)";
     }
 }
 else {
-    print "Sorry we had an error (no pdid)<br>\n";
+    // Need to pass in a 'pdf_refid' argument
+    if (isset($_GET['pdf_refid'])){
+        if ( preg_match("/^[0-9]+$/",$_GET['pdf_refid'])){
+            $pdf_refid = $_GET['pdf_refid'];
+        }
+        else {
+            print "Sorry we had an error (pdf_refid not an int)";
+        }
+    }
+    else {
+        print "Sorry we had an error (no pdf_refid)<br>\n";
+    }
+    if (isset($_GET['pdfcat'])){
+        if ( preg_match("/^[A-Z]+$/",$_GET['pdfcat'])){
+            $pdfcat = $_GET['pdfcat'];
+        }
+        else {
+            print "Sorry we had an error (pdcat not all uppercase alpha)";
+        }
+    }
+    else {
+        print "Sorry we had an error (no pdf_refid)<br>\n";
+    }
+
+    $d = $GLOBALS['sdb']->getKeyedHash('pdf_refid','select * from pdfs where pdf_refid = ? and pdfcat = ?;',array($pdf_refid,$pdfcat));
+    displayPDF($d[$pdf_refid]['pdfstr'],$d[$pdf_refid]['pdfbase']);
 }
 
-$d = $GLOBALS['sdb']->getKeyedHash('pdid','select * from pdfs where pdid = ?;',array($pdid));
 
-if( isset($d[$pdid])){
-    $name=$d[$pdid]['pdfbase'];
-    //print_pre($d[$id],"Data")
+
+//if( isset($d[$pdf_refid])){
+//    $name=$d[$pdf_refid]['pdfbase'];
+//    //print_pre($d[$id],"Data")
+//    header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1.
+//    header("Pragma: no-cache"); // HTTP 1.0.
+//    header("Expires: 0"); // Proxies.
+//    header("Content-type:application/pdf");
+//    header("Content-Disposition:inline;filename=$name");
+//    print $d[$pdf_refid]['pdfstr'];
+//}
+//else {
+//    print "Sorry we had an error, no match for pdf_refid:$pdf_refid, pdfcat:$pdfcat<br>\n";
+//    print_pre($_GET,"pdf_refid");
+//}
+function displayPDF($pdfStr = "" , $name = "UnknownName" ){
+    if ( $pdfStr == "" ) return;
+
     header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1.
     header("Pragma: no-cache"); // HTTP 1.0.
     header("Expires: 0"); // Proxies.
     header("Content-type:application/pdf");
     header("Content-Disposition:inline;filename=$name");
-    print $d[$pdid]['pdfstr'];
+    print $pdfStr;
 }
-else {
-    print "Sorry we had an error<br>\n";
-    print_pre($d,"pdid");
-}
- ?>
+?>
