@@ -113,6 +113,7 @@ class usyvlMobileSite extends mwfMobileSite {
     }
     //////////////////////////////////////////////////////////////////////////////////////////
     function addLinks(){
+        //global $sdb;
         $b = '';
 
         // locate the appropriate tournament PDF
