@@ -5,11 +5,13 @@ class mwfMobileSite_tourn extends mwfMobileSite {
     function __construct(){
         parent::__construct();
     }
+    //////////////////////////////////////////////////////////////////////////////////////////
     function registerExtendedFunctions(){
         $this->registerFunc('launch'      , 'dispDates'     );  // use the divisions key, since thats what the core "programs" uses
         $this->registerFunc('tsumm'       , 'dispTSumm'     );
         $this->registerFunc('tpool'       , 'dispTPool'     );
     }
+    //////////////////////////////////////////////////////////////////////////////////////////
     function dispDates(){
         $this->initArgs('tsumm',array('mode','season','state','program','date'));
         $sdb = $GLOBALS['dbh']['sdb'];
@@ -120,14 +122,7 @@ class mwfMobileSite_tourn extends mwfMobileSite {
         $b .= "</div>\n";
 
         // Add in any pdf links
-        $lb = '';
-        //$b .= "<div>\n";
-        $pdfid = $this->sdb->fetchVal("pdid from ev left join pdfs on evbase = pdfbase","evprogram = ? and evistype = ? and evds = ?",array($this->args['program'],'INTE',$this->args['date']));
-        if ($pdfid != ""){
-            $lb .= "<a href=\"displayPDF.php\">Tournament PDF</a>\n";
-        }
-        //$b .= "</div>\n";
-        $b .= $this->contentDiv('Links',$lb);
+        $b .= $this->addLinks();
 
         // With a few changes up above, we can just add the pool info below here
         $dc = new digitalClock();
@@ -135,62 +130,24 @@ class mwfMobileSite_tourn extends mwfMobileSite {
 
         return "$b";
     }
-    ////// because of the way I want to navigate between pools, we may be able to just
-    ////// merge dispTSumm and dispTPool, if we have poolid and poolnum then we have the extra display
-    ////function dispTPool_NOT_USED_ANYMORE(){
-    ////    $this->initArgs('tsumm',array('mode','season','state','program','date','poolid','evid'));
-    ////
-    ////    // I use the pool data in the title, but I can probably get by without that
-    ////    // and then this could get moved down to the pool section
-    ////    $pdata = $this->sdb->getKeyedHash('poolid',"select * from pool where poolid = ?",array($this->args['poolid']));
-    ////    $p = $pdata[$this->args['poolid']];
-    ////    $poolnum = $p['poolnum'];
-    ////
-    ////    $this->title = "USYVL Mobile - Tournament Summary - {$this->args['season']} {$this->args['program']} - {$this->args['date']} - Pool " . $p['poolnum'];
-    ////
-    ////    $b = "";
-    ////
-    ////    // This is really only used for the location stuff, possibly a better way to get it...
-    ////    $evd = $this->sdb->getKeyedHash('gmid',"select * from ev left join lc on ev_lcid = lcid where ev.evds = ? and evprogram = ? and evistype = ?",array($this->args['date'],$this->args['program'],'INTE'));
-    ////    if( count($evd) > 1 ){
-    ////        $b .= "ERROR on getKeyedHash";
-    ////        //print_pre($evd,"event data: should have been a single event");
-    ////    }
-    ////    else                   $d = array_shift($evd);
-    ////
-    ////    $descs = $this->sdb->fetchListNew("select distinct evname from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ?",array($this->args['date'],$this->args['program'],'INTE'));
-    ////    $desc = $descs[0];
-    ////    $cb = "";
-    ////    $cb .= "<h3>";
-    ////    $cb .= "Date: {$this->args['date']}<br />";
-    ////    $cb .= "{$this->args['program']}<br />";
-    ////    $cb .= "$desc<br />";
-    ////    //$cb .= "Host: Host Site<br />";
-    ////    $cb .= "</h3>";
-    ////    $cb .= "<h3>" . $d['lclocation'] . "<br />" . $d['lcaddress'] . "</h3>\n";
-    ////    $b .= $this->contentDiv("Intersite Game Day",$cb);
-    ////
-    ////    //$bb = "";
-    ////    //$b .= $this->contentDiv("Navigation",$bb);
-    ////    if( true ){
-    ////        $this->setArg('mode','tpool');
-    ////        $pdata = $this->sdb->getKeyedHash('poolid',"select * from pool where p_evid = ?",array($this->args['evid']));
-    ////
-    ////        $m = "";
-    ////        foreach($pdata as $pool){
-    ////            $this->setArg('poolid',$pool['poolid']);
-    ////            $this->setArg('poolnum',$pool['poolnum']);
-    ////            $div = $pool['division'];
-    ////            $cts = $pool['courts'];
-    ////            $tmcount = count(explode(",",$pool['tmids']));
-    ////            $m .= $this->buildURL_li($_SERVER['PHP_SELF'],$this->args,"Pool " . $pool['poolnum'] . " ($div div) <br /> $tmcount Teams - Cts. $cts","class=\"nonereally\"");
-    ////        }
-    ////        $b .= $this->contentList("Tourn. Pools",$m);
-    ////    }
-    ////
-    ////    $b .= $this->poolInfo();
-    ////    return $b;
-    ////}
+    //////////////////////////////////////////////////////////////////////////////////////////
+    function addLinks(){
+        $b = '';
+
+        // locate the appropriate tournament PDF
+        $pdfid = $this->sdb->fetchVal("pdid from ev left join pdfs on evbase = pdfbase","evprogram = ? and evistype = ? and evds = ?",array($this->args['program'],'INTE',$this->args['date']));
+        if ($pdfid != ""){
+            $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdfid\">Tournament PDF</a></li>\n";
+        }
+
+        // add in static rules PDF
+        $pdfid = $this->sdb->fetchVal("pdid from pdfs","pdfcat = 'RULES';");
+        if ($pdfid != ""){
+            $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdfid\">Rules PDF</a></li>\n";
+        }
+        
+        return $this->contentList('Links',$b);
+    }
     //////////////////////////////////////////////////////////////////////////////////////////
     // this is used by ajax call (pretty sure) to get the single pool summary
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -295,11 +252,10 @@ class mwfMobileSite_tourn extends mwfMobileSite {
         }
         $b .= $this->contentDiv("Pool " . $p['poolnum'] . " - Game Schedules",$bb);
 
-
         //return "Fake return";
-
         return "$b";
     }
+    //////////////////////////////////////////////////////////////////////////////////////////
     function awayGameMessage($tournhost = ""){
         $b = "";
         $b .= "<p>Because of limitations of the data we have access to, you will need to navigate to the home sites link ";

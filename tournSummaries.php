@@ -19,7 +19,6 @@ $content['css']  .= '<link rel="stylesheet" href="css/usyvl.css" type="text/css"
 
 // Change Tournament Summaries to Tournament Pools
 
-
 $ms = new mwfMobileSite_tourn();
 
 $content['body'] .= $ms->display();
@@ -28,8 +27,9 @@ $content['errs'] .= "";
 
 //ob_start();
 include("tpl/usyvl.tpl");
-//print ob_get_clean();
+//print ob_get_clean(); //
 /*
+// Here there
 select distinct evid from ev where evprogram = 'Goleta' and evistype = 'INTE';
 select * from ev left join gm on ev.evid = gm.evid where ev.evid=262 and evprogram = 'Goleta' and evistype = 'INTE';
 */

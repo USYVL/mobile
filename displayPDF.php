@@ -5,7 +5,18 @@ require_once("dbManagement.php");
 require_once("usyvlDB.php");
 
 // Need to pass in a 'pdid' argument
-$pdid = '71';
+if (isset($_GET['pdid'])){
+    if ( preg_match("/^[0-9]+$/",$_GET['pdid'])){
+        $pdid = $_GET['pdid'];
+    }
+    else {
+        print "Sorry we had an error (pdid not an int)";
+    }
+}
+else {
+    print "Sorry we had an error (no pdid)<br>\n";
+}
+
 $d = $GLOBALS['sdb']->getKeyedHash('pdid','select * from pdfs where pdid = ?;',array($pdid));
 
 if( isset($d[$pdid])){
