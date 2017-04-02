@@ -2,7 +2,7 @@
 require_once("config.php");
 require_once("dbManagement.php");
 require_once("usyvlDB.php");
-require_once("mwfMobileSite.php");
+require_once("mwfMobileSiteClass.php");
 require_once("version.php");
 
 define('DEBUGLEVEL',0);
@@ -32,7 +32,7 @@ class usyvlMobileSite extends mwfMobileSite {
     function dispDivisions(){
         $this->initArgs('teams',array('mode','season','state','program'));
         $this->title = "USYVL Mobile - Select Division from {$this->args['state']} Program {$this->args['program']} for $season";
-        
+
         //$divisions = $this->sdb->fetchList("distinct tmdiv from tm left join so on tmdiv=so_div","( tmprogram='$program' and tmseason='$season' )","so_order");
         //$divisions = $this->sdb->fetchList("distinct tmdiv from tm left join so on tmdiv=so_div","( tmprogram=? and tmseason=? )","so_order",array($program,$season));
         $m = "";
@@ -42,17 +42,17 @@ class usyvlMobileSite extends mwfMobileSite {
             $m .= $this->buildURL_li($_SERVER['PHP_SELF'],$this->args,"$division division","class=\"nonereally\"");
            //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=teams&division=$division&season=$season&state=$state&program={$this->args['program']}\">$division</a></li>\n";
         }
-        
+
         $b = $this->contentList("Select Age Division",$m);
-        
+
         return "$b";
     }
     function dispTeams(){
         $this->initArgs('sched',array('mode','season','state','program','division'));
         $this->title = "USYVL Mobile - Select Team in $division Division from {$this->args['state']} Program {$this->args['program']} for $season";
-        
+
         $data = $this->sdb->getKeyedHash('tmid',"select * from tm where ( tmprogram=? and tmdiv=? and tmseason=? )",array($this->args['program'],$this->args['division'],$this->args['season']));
-        
+
         $m = "";
         foreach( $data as $k => $d){
             $this->args['team'] = $d['tmname'];
@@ -60,16 +60,16 @@ class usyvlMobileSite extends mwfMobileSite {
             $m .= $this->buildURL_li($_SERVER['PHP_SELF'],$this->args,$this->args['team'],"class=\"nonereally\"");
             //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=sched&season=$season&tmid=$tmid&team=$team&division={$this->args['division']}&state=$state&program={$this->args['program']}\">$team</a></li>\n";
         }
-        
+
         $b = $this->contentList("Select Team",$m);
-        
+
         return "$b";
     }
     function dispSched(){
         $sk = array();
         $this->initArgs('sched',array('mode','season','state','program','division','team','tmid'));
         $this->title = "USYVL Mobile - $team Schedule for $season";
-                
+
         $coach = $this->sdb->fetchVal('distinct tmcoach from tm','tmid=?',array($this->args['tmid']));
 
         $b = "";
@@ -79,7 +79,7 @@ class usyvlMobileSite extends mwfMobileSite {
         $b .= "Program: {$this->args['program']}<br />\n";
         $b .= "Coach: $coach<br />\n";
         $b .= "</p>\n";
-       
+
         $b .= "<p id=\"select-schedule-display-container\">\n";
         $b .= "Display: ";
         $b .= "<select id=\"select-schedule-display\">\n";
@@ -89,7 +89,7 @@ class usyvlMobileSite extends mwfMobileSite {
         $b .= "<option>Tournaments</option>\n";
         $b .= "</select>\n";
         $b .= "</p>\n";
-        
+
         // need to get team id
         //$data = $this->sdb->getKeyedHash('gmid',"select * from gm left join ev on gm.evid = ev.evid left join lc on ev.ev_lcid = lcid where ( ( tmid1=$tmid or tmid2=$tmid ) and evseason='$season' ) order by evds");
         //$data = $this->sdb->getKeyedHash('gmid',"select * from gm left join ev on gm.evid = ev.evid left join lc on ev.ev_lcid = lcid where ( ( tmid1=? or tmid2=? ) and evseason=? and evprogram=?) order by evds",array($this->args['tmid'],$this->args['tmid'],$this->args['season'],$this->args['program']));
@@ -118,7 +118,7 @@ class usyvlMobileSite extends mwfMobileSite {
             else {
                 $evtype = "unknown";
             }
-            
+
             // depending on type of event, court may be specified in one of two locations...
             $b .= "<p class=\"$evtype\">\n";
             $b .= "{$this->args['date']} - $time<br />";
@@ -156,14 +156,14 @@ class usyvlMobileSite extends mwfMobileSite {
     ///}
     ///function dispSettings(){
     ///    $this->title = "USYVL Mobile - Settings";
-    ///    
+    ///
     ///    $b = $this->contentDiv("Settings","<p>\nSettings Coming Soon!\n</p>\n");
-    ///    
+    ///
     ///    return "$b";
     ///}
     ///function dispCredits(){
     ///    $this->title = "USYVL Mobile - Credits";
-    ///    
+    ///
     ///    $b = "";
     ///    $b .= $this->contentDiv("Version","<p class=\"credits author\">\nVersion: " . $GLOBALS['version'] . "\n</p>\n");
     ///    $bb .= "<p class=\"credits\">\n";
@@ -195,4 +195,3 @@ $content['errs']  .= "";
 include("tpl/usyvl.tpl");
 //print ob_get_clean();
 ?>
-
