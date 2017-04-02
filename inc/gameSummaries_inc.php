@@ -71,7 +71,8 @@ class usyvlMobileSite extends mwfMobileSite {
         $b .= $dc->dateTimeDiv("content");
 
         //$b .= $this->addLinks();
-        $b .= $this->addPDFMaterialsLinks($this->args['ev_refid'],'GAMES','Games PDF');
+        //$b .= $this->addPDFMaterialsLinks($this->args['ev_refid'],'GAMES','Games PDF');
+        $b .= $this->addPDFMaterialsLinks(array'GAMES','RULES'));
 
         return "$b";
     }

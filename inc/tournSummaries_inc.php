@@ -83,7 +83,7 @@ class mwfMobileSite_tourn extends mwfMobileSite {
 
         // Add in any pdf links
         //$b .= $this->addPDFMaterialsLinks();
-        $b .= $this->addPDFMaterialsLinks($this->args['ev_refid'],'INTERSITE','Tournament PDF');
+        $b .= $this->addPDFMaterialsLinks(array('INTERSITE','RULES'));
 
         // With a few changes up above, we can just add the pool info below here
         $dc = new digitalClock();

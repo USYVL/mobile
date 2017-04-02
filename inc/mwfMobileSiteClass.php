@@ -241,22 +241,39 @@ class mwfMobileSite {
     function getArg($key){
         return $this->args[$key];
     }
-    //////////////////////////////////////////////////////////////////////////////////////////
-    function addPDFMaterialsLinks($refid,$cat,$label){
+    ////////////////////////////////////////////////////////////////////////////
+    function buildPDFMaterialsLink($refid,$cat,$label){
         $b = '';
-
         $pdid = $this->sdb->fetchVal("pdid from pdfs","pdf_refid = ? and pdfcat = ?",array($refid,$cat));
         if ($pdid != ""){
             $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdid\">$label</a></li>\n";
         }
+        return $b;
+    }
+    ////////////////////////////////////////////////////////////////////////////
+    function addPDFMaterialsLinks($pdfMaterialKeys){
+        $b = '';
 
-        // add in static rules PDF
-        $pdfid = $this->sdb->fetchVal("pdid from pdfs","pdfcat = 'RULES';");
-        if ($pdfid != ""){
-            $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdfid\">Rules PDF</a></li>\n";
+        foreach($pdfMaterialKeys as $pdfMaterialKey){
+            if ( $pdfMaterialKey == 'INSTRUCT'){
+                $b .= $this->buildPDFMaterialsLink($this->args['ev_refid'],$pdfMaterialKey,'Instructional Summary PDF');
+            }
+            elseif($pdfMaterialKey == 'GAMES'){
+                $b .= $this->buildPDFMaterialsLink($this->args['ev_refid'],$pdfMaterialKey,'Games PDF');
+            }
+            elseif($pdfMaterialKey == 'INTERSITE'){
+                $b .= $this->buildPDFMaterialsLink($this->args['ev_refid'],$pdfMaterialKey,'Tournament PDF');
+            }
+            elseif($pdfMaterialKey == 'RULES'){
+                $b .= $this->buildPDFMaterialsLink(0,$pdfMaterialKey,'Rules PDF');
+                //$pdfid = $this->sdb->fetchVal("pdid from pdfs","pdfcat = 'RULES';");
+                //if ($pdfid != ""){
+                //    $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdfid\">Rules PDF</a></li>\n";
+                //}
+            }
         }
-
-        return $this->contentList("PDF Materials Links ($refid)",$b);
+        return $this->contentList("PDF Materials Links",$b);
+        //return $this->contentList("PDF Materials Links ({$this->args['ev_refid']})",$b);
     }
 }
 

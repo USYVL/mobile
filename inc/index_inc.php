@@ -84,6 +84,11 @@ class indexMobile extends mwfMobileSite {
         $bb = $this->buildURL_wrapped("./instSummaries.php",$this->args,"Daily Schedules",'li');
         $b .= $this->contentList("$program",$bb);
 
+        $ev_refids = $this->sdb->fetchListNew("SELECT ev_refid FROM ev WHERE evprogram=? AND evistype=?",array($this->args['program'],'GAME'));
+        $this->setArg('ev_refid',$ev_refids[0]);
+        //print "{$this->args['ev_refid']}<br>\n";
+        $b .= $this->addPDFMaterialsLinks(array('INSTRUCT','GAMES','RULES'));
+
         $m = "";
         //$m  = "<p class=\"content nopadding\">Day to Day schedule.</p>\n";
         //$m .= $this->buildURL_li("./instSummaries.php",$this->args,"$season Schedule for<br />$program","class=\"nonereally\"");

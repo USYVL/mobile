@@ -59,7 +59,8 @@ class usyvlMobileSite extends mwfMobileSite {
         }
         $b = $this->contentList($this->args['program'] . "<br />Daily Schedule Entries",$m);
 
-        $b .= $this->addPDFMaterialsLinks($this->args['ev_refid'],'INSTRUCT','Instructional Summary PDF');
+        $b .= $this->addPDFMaterialsLinks(array('INSTRUCT','GAMES','RULES'));
+        //$b .= $this->addPDFMaterialsLinks($this->args['ev_refid'],'INSTRUCT','Instructional Summary PDF');
 
         return "$b";
     }
