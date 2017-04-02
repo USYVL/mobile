@@ -256,7 +256,7 @@ class mwfMobileSite {
             $b .= "<li class=\"nonereally\"><a href=\"displayPDF.php?pdid=$pdfid\">Rules PDF</a></li>\n";
         }
 
-        return $this->contentList('PDF Materials Links',$b);
+        return $this->contentList("PDF Materials Links ($refid)",$b);
     }
 }
 

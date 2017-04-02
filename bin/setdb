@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# get a list of the sched dbs
+files=/tmp/setdb-files.$$
+links=/tmp/setdb-links.$$
+
+dbdir='io/db'
+dblink='sched.sqlite3'
+
+pushd $dbdir
+
+find * -type f -name 'sched*sqlite*' > $files
+find * -type l -name 'sched*sqlite*' > $links
+
+echo "files:"
+cat $files
+
+echo "links:"
+cat $links
+
+#echo "select a file to link in to the default db: $dblink "
+
+if [ $# -eq 1 -a -f "$1" ]; then
+    [ -L "$dblink" ] && { echo "removing current link: $dblink"; sudo rm $dblink; }
+    echo "symlinking $1 to $dblink"
+    sudo ln -s $1 $dblink
+    popd
+    bin/fixperms
+fi
+
+rm -rf /tmp/setdb-*.$$
