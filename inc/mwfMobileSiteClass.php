@@ -123,7 +123,7 @@ class mwfMobileSite {
 
         $this->chain = array('season','state','program','division','team');
 
-        $this->chaindata['seasons'] = $this->sdb->fetchList("distinct evseason from ev");
+        $this->chaindata['seasons'] = $this->sdb->fetchList("DISTINCT evseason FROM ev ORDER BY evseason");
         $k = 'season';
         if( isset($_GET[$k])){
             $v = $_GET[$k];
