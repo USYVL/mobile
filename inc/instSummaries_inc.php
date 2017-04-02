@@ -20,36 +20,43 @@ class usyvlMobileSite extends mwfMobileSite {
 
         $m = "";
         //$dates = $sdb->fetchListNew("select distinct evds from ev where evseason=? and evprogram = ?",array($season,$program));
-        $evh = $this->sdb->getKeyedHash('evds',"select * from ev where evseason=? and evprogram = ? order by evds",array($this->getArg('season'),$this->getArg('program')));
-        $dates = array_keys($evh);
-        $this->setArg('ev_refid',$evh[$dates[0]]['ev_refid']);
-        //print_pre($evh,"Event Hash");
-        foreach($evh as $date => $evd){
-            $this->setArg('date',$date);
-            //foreach( $dates as $date){
-            //$label = "$date - " . $evistypemap[$evd['evistype']];
-            $label = "$date - " . $evd['evname'];
-            // if the event is a tournament/intersite game day, then switch over to the tournament summary page for this day
-            // could do this as a switch possibly
-            if( $evd['evistype'] == 'INTE' ){
-                $this->setArg('mode','tsumm');
-                // this works but pretty sure it is not needed here
-                //$this->setArg('ev_refid',$evd['ev_refid']);
-                //$m .= "  <li><a href=\"./tournSummaries.php?mode=tsumm&date=$date&season=$season&state=$state&program=$program\">$label</a></li>\n";
-                $m .= $this->buildURL_li('./tournSummaries.php',$this->args,$label,"class=\"nonereally\"");
-            }
-            elseif( $evd['evistype'] == 'GAME' ){
-                $this->setArg('mode','gsumm');
-                //$m .= "  <li><a href=\"./tournSummaries.php?mode=tsumm&date=$date&season=$season&state=$state&program=$program\">$label</a></li>\n";
-                $m .= $this->buildURL_li('./gameSummaries.php',$this->args,$label,"class=\"nonereally\"");
-            }
-            else {
-                $this->setArg('mode','isumm');
-                //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=isumm&date=$date&season=$season&state=$state&program=$program\">$label</a></li>\n";
-                $m .= $this->buildURL_li($_SERVER['PHP_SELF'],$this->args,$label,"class=\"nonereally\"");
+        // using evds as key is actually not good - breaks if there are two events same day (ie: Parent Meeting, Coaching Clinic)
+        $dates = $this->sdb->fetchListNew("SELECT DISTINCT evds FROM ev WHERE evseason=? AND evprogram=? ORDER BY evds",array($this->getArg('season'),$this->getArg('program')));
+        //print_pre($dates,"dates");
+        //$dates = array_keys($evh);
+
+        foreach($dates as $date){
+            $evh = $this->sdb->getKeyedHash('evid',"SELECT * FROM ev WHERE evseason=? AND evprogram=? AND evds=? ORDER BY evtime_beg",array($this->getArg('season'),$this->getArg('program'),$date));
+
+            //print_pre($evh,"Event Hash");
+            foreach($evh as $evid => $evd){
+                $this->setArg('ev_refid',$evd['ev_refid']);
+                $date = $evd['evds'];
+                $this->setArg('date',$date);
+                //foreach( $dates as $date){
+                //$label = "$date - " . $evistypemap[$evd['evistype']];
+                $label = "$date - " . $evd['evname'];
+                // if the event is a tournament/intersite game day, then switch over to the tournament summary page for this day
+                // could do this as a switch possibly
+                if( $evd['evistype'] == 'INTE' ){
+                    $this->setArg('mode','tsumm');
+                    // this works but pretty sure it is not needed here
+                    //$this->setArg('ev_refid',$evd['ev_refid']);
+                    //$m .= "  <li><a href=\"./tournSummaries.php?mode=tsumm&date=$date&season=$season&state=$state&program=$program\">$label</a></li>\n";
+                    $m .= $this->buildURL_li('./tournSummaries.php',$this->args,$label,"class=\"nonereally\"");
+                }
+                elseif( $evd['evistype'] == 'GAME' ){
+                    $this->setArg('mode','gsumm');
+                    //$m .= "  <li><a href=\"./tournSummaries.php?mode=tsumm&date=$date&season=$season&state=$state&program=$program\">$label</a></li>\n";
+                    $m .= $this->buildURL_li('./gameSummaries.php',$this->args,$label,"class=\"nonereally\"");
+                }
+                else {
+                    $this->setArg('mode','isumm');
+                    //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=isumm&date=$date&season=$season&state=$state&program=$program\">$label</a></li>\n";
+                    $m .= $this->buildURL_li($_SERVER['PHP_SELF'],$this->args,$label,"class=\"nonereally\"");
+                }
             }
         }
-
         $b = $this->contentList($this->args['program'] . "<br />Daily Schedule Entries",$m);
 
         $b .= $this->addPDFMaterialsLinks($this->args['ev_refid'],'INSTRUCT','Instructional Summary PDF');
