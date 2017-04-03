@@ -66,6 +66,7 @@ class usyvlMobileSite extends mwfMobileSite {
     }
     //////////////////////////////////////////////////////////////////////////////////////////
     function dispISumm(){
+        $keyError = false;
         $this->initArgs('tsumm',array('mode','season','state','program','date'));
         $this->title = "USYVL Mobile - Instructional Summary - {$this->args['season']} {$this->args['program']}";
 
@@ -77,7 +78,15 @@ class usyvlMobileSite extends mwfMobileSite {
         // could get the isdays above from this
         $evd = $this->sdb->getKeyedHash('evid',"select * from ev left join lc on ev_lcid = lcid where evds=? and evprogram=?",array($this->args['date'],$this->args['program']));
         if( count($evd) > 1 ) {
-            $b .= "ERROR on getKeyedHash";
+            $keyError = true;
+            $evd = $this->sdb->getKeyedHash('evid',"select * from ev where evds=? and evprogram=?",array($this->args['date'],$this->args['program']));
+            if( count($evd) > 1 ) {
+                // maybe completely bail
+            }
+            {
+                $d = array_shift($evd);
+            }
+//$b .= "ERROR on getKeyedHash";
         }
         else {
             $d = array_shift($evd);
@@ -88,11 +97,11 @@ class usyvlMobileSite extends mwfMobileSite {
 
         $t  = "";
         $t .= "Instructional Summary<br />\n{$this->args['program']}<br />\n{$this->args['date']}<br />\n";
-        $t .= $d['evname'] . "<br />\n" . $d['evtime_beg'] . " to " .  $d['evtime_end'] . "\n";
+        $t .= ($keyError) ? "{$d['evname']}" : $d['evname'] . "<br />\n" . $d['evtime_beg'] . " to " .  $d['evtime_end'] . "\n";
         $t .= "</h2>\n";
 
         $c  = "";
-        $c .= "<h3>" . $d['lclocation'] . "<br />" . $d['lcaddress'] . "</h3>\n";
+        $c .= ($keyError) ? "" : "<h3>" . $d['lclocation'] . "<br />" . $d['lcaddress'] . "</h3>\n";
 
         foreach( $isdays as $isday){
             if( $isday == "" ){
@@ -147,9 +156,9 @@ class usyvlMobileSite extends mwfMobileSite {
             }
         }
         $b .= $this->contentDiv($t,$c);
-        $b .= $this->contentDiv("Net Heights",$nh);
-        $b .= $this->contentDiv("Drill Schedule (Day $isday)",$bl);
-        $b .= $this->contentDiv("Drill Details/Notes",$dl);
+        $b .= ($keyError) ? "" : $this->contentDiv("Net Heights",$nh);
+        $b .= ($keyError) ? "" : $this->contentDiv("Drill Schedule (Day $isday)",$bl);
+        $b .= ($keyError) ? "" : $this->contentDiv("Drill Details/Notes",$dl);
 
         $dc = new digitalClock();
         $b .= $dc->dateTimeDiv("content");
