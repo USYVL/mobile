@@ -148,7 +148,7 @@ class usyvlMobileSite extends mwfMobileSite {
         }
         $b .= $this->contentDiv($t,$c);
         $b .= $this->contentDiv("Net Heights",$nh);
-        $b .= $this->contentDiv("Drill Schedule",$bl);
+        $b .= $this->contentDiv("Drill Schedule (Day $isday)",$bl);
         $b .= $this->contentDiv("Drill Details/Notes",$dl);
 
         $dc = new digitalClock();
