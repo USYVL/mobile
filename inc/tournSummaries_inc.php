@@ -29,22 +29,24 @@ class mwfMobileSite_tourn extends mwfMobileSite {
         return "$b";
     }
     //////////////////////////////////////////////////////////////////////////////////////////
+    // Main tournament summary page
+    //////////////////////////////////////////////////////////////////////////////////////////
     function dispTSumm(){
         //print "WhatEvs<br/>\n";
-        $this->initArgs('tsumm',array('mode','season','state','program','date'));
-        $this->title = "USYVL Mobile - Tournament Summary - {$this->args['season']} {$this->args['program']} - {$this->args['date']}";
+        $this->initArgs('tsumm',array('mode','season','state','program','evds','evid','ev_refid'));
+        $this->title = "USYVL Mobile - Tournament Summary - {$this->args['season']} {$this->args['program']} - {$this->args['evds']}";
 
         // We need the particular evid for this event...
-        $this->args['evid'] = $this->sdb->fetchVal("evid from ev","evprogram = ? and evistype = ? and evds = ?",array($this->args['program'],'INTE',$this->args['date']));
+        //$this->args['evid'] = $this->sdb->fetchVal("evid from ev","evprogram = ? and evistype = ? and evds = ?",array($this->args['program'],'INTE',$this->args['evds']));
         $b = "";
 
         // Get location info, possibly a better way to get it than this larger query
-        $evd = $this->sdb->getKeyedHash('evid',"select * from ev left join lc on ev_lcid = lcid where evds=? and evprogram=?",array($this->args['date'],$this->args['program']));
+        $evd = $this->sdb->getKeyedHash('evid',"select * from ev left join lc on ev_lcid = lcid where evds=? and evprogram=?",array($this->args['evds'],$this->args['program']));
         if( count($evd) > 1 )  $b .= "ERROR on getKeyedHash";
         else                   $d = array_shift($evd);
 
         // get event description, this is not based on the evid
-        $descs = $this->sdb->fetchListNew("select distinct evname from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ?",array($this->args['date'],$this->args['program'],'INTE'));
+        $descs = $this->sdb->fetchListNew("select distinct evname from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ?",array($this->args['evds'],$this->args['program'],'INTE'));
         $desc = $descs[0];
 
         // start building the page
@@ -52,7 +54,7 @@ class mwfMobileSite_tourn extends mwfMobileSite {
         $cb .= "<h3>";
         $cb .= "Date: {$this->args['date']}<br />";
         $cb .= "{$this->args['program']}<br />";
-        $cb .= "$desc<br />";
+        $cb .= "$desc ({$d['evid']}-{$d['ev_refid']})<br />";
         //$cb .= "Host: Host Site<br />";
         $cb .= "</h3>";
         $cb .= "<h3>" . $d['lclocation'] . "<br />" . $d['lcaddress'] . "</h3>\n";
@@ -69,13 +71,16 @@ class mwfMobileSite_tourn extends mwfMobileSite {
             $this->setArg('program',$tournhost);
 
             //Hmmmm, at this point we might be able to just get the updated evid and proceed as normal
-            $this->args['ev_refid'] = $this->sdb->fetchVal("ev_refid from ev","evprogram = ? and evistype = ? and evds = ?",array($this->args['program'],'INTE',$this->args['date']));
+            /**
+             Double Hmmmmm, we are now passing in the ev_refid, may not even need this check
+             **/
+            $this->args['ev_refid'] = $this->sdb->fetchVal("ev_refid from ev","evprogram = ? and evistype = ? and evds = ?",array($this->args['program'],'INTE',$this->args['evds']));
         }
         else {  // Home Game
             //$this->setArg('mode','tpool');
             $this->setArg('ev_refid',$this->args['evid']);
         }
-
+        //print_pre($this->args,"arguments");
         $b .= $this->contentList("Tourn. Pools",$this->dispPoolSummaryFromRefID());
 
         // div wrapper for ajax provided html prepped by $this->dispPoolSummaryFromRefID()

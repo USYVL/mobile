@@ -13,6 +13,8 @@ class usyvlMobileSite extends mwfMobileSite {
         $this->registerFunc('isumm'    , 'dispISumm'     );
     }
     //////////////////////////////////////////////////////////////////////////////////////////
+    // This is the list of events for the season for a given site
+    //////////////////////////////////////////////////////////////////////////////////////////
     function dispDates(){
         $this->initArgs('tsumm',array('mode','season','state','program'));
 
@@ -31,8 +33,9 @@ class usyvlMobileSite extends mwfMobileSite {
             //print_pre($evh,"Event Hash");
             foreach($evh as $evid => $evd){
                 $this->setArg('ev_refid',$evd['ev_refid']);
+                $this->setArg('evid',$evd['evid']);
                 $date = $evd['evds'];
-                $this->setArg('date',$date);
+                $this->setArg('evds',$date);
                 //foreach( $dates as $date){
                 //$label = "$date - " . $evistypemap[$evd['evistype']];
                 $label = "$date - " . $evd['evname'];
@@ -65,87 +68,113 @@ class usyvlMobileSite extends mwfMobileSite {
         return "$b";
     }
     //////////////////////////////////////////////////////////////////////////////////////////
+    // this is the daily summary
+    //////////////////////////////////////////////////////////////////////////////////////////
     function dispISumm(){
         $keyError = false;
-        $this->initArgs('tsumm',array('mode','season','state','program','date'));
+        $this->initArgs('tsumm',array('mode','season','state','program','evds','evid'));
         $this->title = "USYVL Mobile - Instructional Summary - {$this->args['season']} {$this->args['program']}";
 
         $b = "";
 
         // so we need to get evisday - this is the number of the day in the manual
-        $isdays = $this->sdb->fetchListNew("select evisday from ev where evprogram=? and evds=?",array($this->args['program'],$this->args['date']));
+        $isdays = $this->sdb->fetchListNew("select evisday from ev where evid = ? and evprogram=? and evds=?",array($this->args['evid'],$this->args['program'],$this->args['evds']));
+        //print_pre($isdays,"IS Day List");
 
         // could get the isdays above from this
-        $evd = $this->sdb->getKeyedHash('evid',"select * from ev left join lc on ev_lcid = lcid where evds=? and evprogram=?",array($this->args['date'],$this->args['program']));
-        if( count($evd) > 1 ) {
+        // since we are now passing in evid, the extra fields should be redundant
+        $evd = $this->sdb->getKeyedHash('evid',"select * from ev left join lc on ev_lcid = lcid where evid = ? and evds=? and evprogram=?",array($this->args['evid'],$this->args['evds'],$this->args['program']));
+        //$evd = $this->sdb->getKeyedHash('evid',"select * from ev left join lc on ev_lcid = lcid where evid = ?",array($this->args['evid']));
+        //print_pre($evd,"Raw data");
+        // Not sure where these checks are at now.... Pretty sure
+        // the multiple events per days are now handled gracefully...
+        $evcount = count($evd);
+        if ($evcount < 1){
+            // need to bail
             $keyError = true;
-            $evd = $this->sdb->getKeyedHash('evid',"select * from ev where evds=? and evprogram=?",array($this->args['date'],$this->args['program']));
-            if( count($evd) > 1 ) {
-                // maybe completely bail
-            }
-            {
-                $d = array_shift($evd);
-            }
-//$b .= "ERROR on getKeyedHash";
         }
         else {
             $d = array_shift($evd);
         }
+        //// shouldn't really get keyErrors any more since the addition of the evid argument.
+        //if( count($evd) > 1 ) {
+        //    $keyError = true;
+        //    $evd = $this->sdb->getKeyedHash('evid',"select * from ev where evds=? and evprogram=?",array($this->args['evds'],$this->args['program']));
+        //    if( count($evd) > 1 ) {
+        //        // maybe completely bail
+        //    }
+        //    else {
+        //        $d = array_shift($evd);
+        //    }
+        //    //$b .= "ERROR on getKeyedHash";
+        //}
+        //else {
+        //    $d = array_shift($evd);
+        //}
+
+        //$d = array_shift($evd);
 
         //$b .= "<div class=\"content content-full\">\n";
         //$b .= "<h2 class=\"light\">\n";
 
         $t  = "";
-        $t .= "Instructional Summary<br />\n{$this->args['program']}<br />\n{$this->args['date']}<br />\n";
+        $t .= "Instructional Summary<br />\n{$this->args['program']}<br />\n{$d['evdate']}<br />\n";
         $t .= ($keyError) ? "{$d['evname']}" : $d['evname'] . "<br />\n" . $d['evtime_beg'] . " to " .  $d['evtime_end'] . "\n";
         $t .= "</h2>\n";
 
         $c  = "";
-        $c .= ($keyError) ? "" : "<h3>" . $d['lclocation'] . "<br />" . $d['lcaddress'] . "</h3>\n";
+        $c .= ($keyError) ? "EVD $evcount" : "<h3>" . $d['lclocation'] . "<br />" . $d['lcaddress'] . "</h3>\n";
 
         foreach( $isdays as $isday){
             if( $isday == "" ){
                 // So we have something going on, should be OFF, SKIP or INTE type
             }
             else {
-                $divisions = $this->sdb->fetchListNew("select distinct tmdiv from tm left join so on tmdiv=so_div order by so_order");
+                $divisions = $this->sdb->fetchListNew("select distinct tmdiv from tm left join so on tmdiv=so_div where tmprogram not like '%Advanced Juniors%' order by so_order");
 
+                $isd = $this->mdb->getKeyedHash('ddday',"select * from dd where ddday = ?",array($isday));
                 $isd = $this->mdb->getKeyedHash('ddid',"select * from dd where ddday = ?",array($isday));
-
+                //print_pre($isd,"Data from redbook.dd");
                 // Build the Net Heights block
                 $netheights = explode(",",$isd[$isday]['ddneth']);
+                //print_pre($netheights,"netheights from redbook.dd");
                 $nh  = "";
-                $nh .= "<table class=\"isumm\">";
-                $nh .= "<tr class=\"isumm\">";
-                $nh .= "<td class=\"isumm isummtime\"><strong>Division</strong></td>\n";
-                $nh .= "<td class=\"isumm isummdesc\"><strong>Setting</strong></td>\n";
-                $nh .= "</tr>";
-                foreach( $divisions as $k => $di){
+                if(count($netheights) > 0 && ( $netheights[0] != '' && $netheights[0] != 'NA' )){
+                    $nh .= "<table class=\"isumm\">";
                     $nh .= "<tr class=\"isumm\">";
-                    $nh .= "<td class=\"isumm isummtime\">" . $di . "</td>\n";
-                    $nh .= "<td class=\"isumm isummdesc\">" . $netheights[$k] . "</td>\n";
+                    $nh .= "<td class=\"isumm isummtime\"><strong>Division</strong></td>\n";
+                    $nh .= "<td class=\"isumm isummdesc\"><strong>Setting</strong></td>\n";
                     $nh .= "</tr>";
+                    foreach( $divisions as $k => $di){
+                        $nh .= "<tr class=\"isumm\">";
+                        $nh .= "<td class=\"isumm isummtime\">" . $di . "</td>\n";
+                        $nh .= "<td class=\"isumm isummdesc\">" . $netheights[$k] . "</td>\n";
+                        $nh .= "</tr>";
+                    }
+                    $nh .= "</table>";
                 }
-                $nh .= "</table>";
                 //$nh .= "<p>Net Heights: " . $isd[$isday]['ddneth'] . "</p>\n";
 
                 // Build the drill/instructional Schedule
                 $drills = $this->mdb->getKeyedHash('drid',"select * from dr where drday = ? and drtype = 'DRILL' order by drweight",array($isday));
                 $bl  = "";
-                $bl .= "<table class=\"isumm\">";
-                $bl .= "<tr class=\"isumm\">";
-                $bl .= "<td class=\"isumm isummtime\"><strong>Min.</strong></td>\n";
-                $bl .= "<td class=\"isumm isummdesc\"><strong>Drill Description</strong></td>\n";
-                $bl .= "</tr>";
-                foreach( $drills as $drill){
+                if(count($drills) > 0){
+                    $bl .= "<table class=\"isumm\">";
                     $bl .= "<tr class=\"isumm\">";
-                    $bl .= "<td class=\"isumm isummtime\">" . $drill['drtime'] . "</td>\n";
-                    $bl .= "<td class=\"isumm isummdesc\">" . $drill['drcontent'] . "</td>\n";
+                    $bl .= "<td class=\"isumm isummtime\"><strong>Min.</strong></td>\n";
+                    $bl .= "<td class=\"isumm isummdesc\"><strong>Drill Description</strong></td>\n";
                     $bl .= "</tr>";
+                    foreach( $drills as $drill){
+                        $bl .= "<tr class=\"isumm\">";
+                        $bl .= "<td class=\"isumm isummtime\">" . $drill['drtime'] . "</td>\n";
+                        $bl .= "<td class=\"isumm isummdesc\">" . $drill['drcontent'] . "</td>\n";
+                        $bl .= "</tr>";
+                    }
+                    $bl .= "</table>";
                 }
-                $bl .= "</table>";
 
                 // Build the drill/instructional details block
+                //print_pre($isday,"IS Day");
                 $dl = "";
                 $descs = $this->mdb->getKeyedHash('drid',"select * from dr where drday = ? and drtype = 'DRILLDESC' order by drweight",array($isday));
                 foreach( $descs as $desc){
@@ -156,9 +185,9 @@ class usyvlMobileSite extends mwfMobileSite {
             }
         }
         $b .= $this->contentDiv($t,$c);
-        $b .= ($keyError) ? "" : $this->contentDiv("Net Heights",$nh);
-        $b .= ($keyError) ? "" : $this->contentDiv("Drill Schedule (Day $isday)",$bl);
-        $b .= ($keyError) ? "" : $this->contentDiv("Drill Details/Notes",$dl);
+        $b .= ($keyError || $nh == "") ? "" : $this->contentDiv("Net Heights",$nh);
+        $b .= ($keyError || $bl == "") ? "" : $this->contentDiv("Drill Schedule (Day $isday)",$bl);
+        $b .= ($keyError || $dl == "") ? "" : $this->contentDiv("Drill Details/Notes",$dl);
 
         $dc = new digitalClock();
         $b .= $dc->dateTimeDiv("content");
