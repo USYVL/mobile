@@ -50,7 +50,7 @@ version_prep(){
 }
 ################################################################################
 create_version_file(){
-    yfile=`/bin/ls -rt *.php | grep -v version.php | tail -1`
+    yfile=`/bin/ls -rt *.php inc/*.php | grep -v version.php | tail -1`
     echo "using command to generate: bin/datestamp-from-file $yfile"
     versds=`bin/datestamp-from-file $yfile`
     echo "got the following date string from $yfile: $versds"

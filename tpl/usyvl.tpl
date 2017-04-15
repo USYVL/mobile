@@ -6,7 +6,7 @@
 $mwf = "http://localhost/usryl/mwf/root/assets";
 $mwf = "http://localhost/usyvl/mwf-local/root/assets";
 $mwf = "http://mwf.usyvl.org/assets";
-$mwf = "http://mwf.eri.ucsb.edu";
+$mwf = "//mwf.eri.ucsb.edu";
 ?>
 
 <head>
@@ -17,7 +17,7 @@ $mwf = "http://mwf.eri.ucsb.edu";
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 
 <!-- <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script> -->
-<script src="http://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="//code.jquery.com/jquery-3.2.1.min.js"></script>
 <script type="text/javascript" src="js/digitalClock.js"></script>
 <script type="text/javascript" src="js/qlib.js"></script>
 <?php  print $content['scripts']; ?>
@@ -53,7 +53,7 @@ fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</scri
   if (d.getElementById(id)) return t;
   js = d.createElement(s);
   js.id = id;
-  js.src = "http://platform.twitter.com/widgets.js";
+  js.src = "//platform.twitter.com/widgets.js";
   fjs.parentNode.insertBefore(js, fjs);
 
   t._e = [];
@@ -96,7 +96,7 @@ fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</scri
         <!-- facebook follow -->
         <div class="social">
             <!-- <div class="fb-follow" data-href="//www.facebook.com/usyvl" data-width="The pixel width of the plugin" data-height="The pixel height of the plugin" data-colorscheme="light" data-layout="button_count" data-kid-directed-site="true" data-show-faces="false"></div> -->
-            <div class="fb-follow" data-href="https://www.facebook.com/usyvl" data-layout="standard" data-size="small" data-show-faces="true"></div>
+            <div class="fb-follow" data-href="//www.facebook.com/usyvl" data-layout="standard" data-size="small" data-show-faces="true"></div>
         </div>
     </div>
 </div>
@@ -104,8 +104,8 @@ fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</scri
 
 <div id="footer">
     <p>United States Youth Volleyball League &copy; 2013 USYVL<br />
-    <a href="http://www.usyvl.org/about-united-states-youth-volleyball-league/contact-us">Contact USYVL</a> |
-    <a href="http://www.usyvl.org">View USYVL Main Site</a><br />
+    <a href="//www.usyvl.org/about-united-states-youth-volleyball-league/contact-us">Contact USYVL</a> |
+    <a href="//www.usyvl.org">View USYVL Main Site</a><br />
     <a href="./?mode=indev">In Development</a>
     </p>
 </div>
