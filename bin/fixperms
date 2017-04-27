@@ -32,7 +32,7 @@ if test ! -d bin -o ! -d io  ; then
 fi
 
 # determine http user
-httpuser=`ps ax -o user,command | grep http | grep -v grep | grep -v Applications | awk '{ print $1}' | grep -v root | uniq`
+httpuser=`ps ax -o user,command | grep http | egrep -v '(grep|open|Applications)' | awk '{ print $1}' | grep -v root | uniq | tr '\n' ' '`
 printf "found http user $httpuser\n"
 
 if [ ! "$httpuser" ]; then
