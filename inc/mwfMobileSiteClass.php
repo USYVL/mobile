@@ -264,6 +264,9 @@ class mwfMobileSite {
             elseif($pdfMaterialKey == 'INTERSITE'){
                 $b .= $this->buildPDFMaterialsLink($this->args['ev_refid'],$pdfMaterialKey,'Tournament PDF');
             }
+            elseif($pdfMaterialKey == 'NETLABELS'){
+                $b .= $this->buildPDFMaterialsLink($this->args['ev_refid'],$pdfMaterialKey,'NetLabel Tourn PDF');
+            }
             elseif($pdfMaterialKey == 'RULES'){
                 $b .= $this->buildPDFMaterialsLink(0,$pdfMaterialKey,'Rules PDF');
                 //$pdfid = $this->sdb->fetchVal("pdid from pdfs","pdfcat = 'RULES';");

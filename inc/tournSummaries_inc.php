@@ -88,7 +88,7 @@ class mwfMobileSite_tourn extends mwfMobileSite {
 
         // Add in any pdf links
         //$b .= $this->addPDFMaterialsLinks();
-        $b .= $this->addPDFMaterialsLinks(array('INTERSITE','RULES'));
+        $b .= $this->addPDFMaterialsLinks(array('INTERSITE','RULES','NETLABELS'));
 
         // With a few changes up above, we can just add the pool info below here
         $dc = new digitalClock();

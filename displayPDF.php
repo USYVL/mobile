@@ -4,13 +4,21 @@ require_once("config.php");
 require_once("dbManagement.php");
 require_once("usyvlDB.php");
 
+// most of our posts will use PDID
 if (isset($_GET['pdid'])){
     if ( preg_match("/^[0-9]+$/",$_GET['pdid'])){
         $pdid = $_GET['pdid'];
         $pdfstr = $GLOBALS['sdb']->fetchVal('pdfstr from pdfs','pdid = ?',array($pdid));
         $d = $GLOBALS['sdb']->getKeyedHash('pdid','select * from pdfs where pdid = ?',array($pdid));
-        displayPDF($d[$pdid]['pdfstr'],$d['pdid']['pdfbase']);
-        // this is unique, can just display from this
+        if( $d[$pdid]['pdfcat'] == 'NETLABELS'){
+            print "gzuncompress<br>\n";
+            $pdfstr = gzuncompress($d[$pdid]['pdfstr']);
+            displayPDF($pdfstr,$d[$pdid]['pdfbase']);
+        }
+        else {
+            displayPDF($d[$pdid]['pdfstr'],$d[$pdid]['pdfbase']);
+            // this is unique, can just display from this
+        }
     }
     else {
         print "Sorry we had an error (pdid not an int)";
@@ -42,7 +50,15 @@ else {
     }
 
     $d = $GLOBALS['sdb']->getKeyedHash('pdf_refid','select * from pdfs where pdf_refid = ? and pdfcat = ?;',array($pdf_refid,$pdfcat));
-    displayPDF($d[$pdf_refid]['pdfstr'],$d[$pdf_refid]['pdfbase']);
+    if( $d[$pdf_refid]['pdfcat'] == 'NETLABELS'){
+        $pdfstr = gzuncompress($d[$pdf_refid]['pdfstr']);
+        displayPDF($pdfstr,$d[$pdf_refid]['pdfbase']);
+    }
+    else {
+        displayPDF($d[$pdf_refid]['pdfstr'],$d[$pdf_refid]['pdfbase']);
+        // this is unique, can just display from this
+    }
+    //displayPDF($d[$pdf_refid]['pdfstr'],$d[$pdf_refid]['pdfbase']);
 }
 
 
