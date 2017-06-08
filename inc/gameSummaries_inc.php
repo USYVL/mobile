@@ -46,7 +46,8 @@ class usyvlMobileSite extends mwfMobileSite {
         // Get location info, possibly a better way to get it than this larger query
         //$evd = $this->sdb->getKeyedHash('evid',"select * from ev left join lc on ev_lcid = lcid where evds=? and evprogram=?",array($this->args['ds'],$this->args['program']));
         $evd = $this->sdb->getKeyedHash('evid',"select * from ev left join lc on ev_lcid = lcid where evid=? and evprogram=?",array($this->args['evid'],$this->args['program']));
-        if( count($evd) > 1 )  $b .= "ERROR on getKeyedHash";
+        if( count($evd) > 1 )  $b .= "ERROR on getKeyedHash (" . count($evd) . ")";
+        if( count($evd) == 0 )  $b .= "ERROR on getKeyedHash (0)";
         else                   $d = array_shift($evd);
         $this->args['ev_refid'] = $d['ev_refid'];
         //print_pre($this->args,"Incoming args");
@@ -55,15 +56,20 @@ class usyvlMobileSite extends mwfMobileSite {
         // get event description, this is not based on the evid
         $descs = $this->sdb->fetchListNew("select distinct evname from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ?",array($this->args['evds'],$this->args['program'],'GAME'));
         $desc = $descs[0];
+        // seems like this could be done just using $d['evname']
 
+        $label = ( $d['evname'] == $d['evtype']) ? "{$d['evname']}" : "{$d['evtype']} - {$d['evname']}";
+        $label .= " ({$d['evid']})";
         // start building the page
         $cb = "";
         $cb .= "<h3>";
         //$cb .= "Date: {$this->args['date']}<br />";
-        $cb .= "Date: {$d['date']}<br />";
+        $cb .= "Date: {$this->args['evds']}<br />";
+        $cb .= "Times: {$d['evtime_beg']} to {$d['evtime_end']}<br />";
+        //$cb .= "Junk";
+        //$cb .= d['evtime_beg'] . " to " .  $d['evtime_end']
         $cb .= "{$this->args['program']}<br />";
-        $cb .= "$desc ({$d['evid']})<br />";
-        //$cb .= "Host: Host Site<br />";
+        $cb .= "$label<br />";
         $cb .= "</h3>";
         $cb .= "<h3>" . $d['lclocation'] . "<br />" . $d['lcaddress'] . "</h3>\n";
         $b .= $this->contentDiv("Game Day",$cb);

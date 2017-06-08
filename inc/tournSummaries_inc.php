@@ -52,7 +52,8 @@ class mwfMobileSite_tourn extends mwfMobileSite {
         // start building the page
         $cb = "";
         $cb .= "<h3>";
-        $cb .= "Date: {$this->args['date']}<br />";
+        $cb .= "Date: {$d['evdate']}<br />";
+        $cb .= "Times: {$d['evtime_beg']} to {$d['evtime_end']}<br />";
         $cb .= "{$this->args['program']}<br />";
         $cb .= "$desc ({$d['evid']}-{$d['ev_refid']})<br />";
         //$cb .= "Host: Host Site<br />";
