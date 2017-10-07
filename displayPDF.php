@@ -16,16 +16,7 @@ if (isset($_GET['pdid'])){
         else {
             $pdfstr = $d[$pdid]['pdfstr'];
         }
-        displayPDF($pdfstr,$d[$pdid]['pdfbase']);
-        ///
-        ///    if( $d[$pdid]['pdfcat'] == 'NETLABELS'){
-        ///    print "gzuncompress<br>\n";
-        ///    $pdfstr = gzuncompress($d[$pdid]['pdfstr']);
-        ///}
-        ///else {
-        ///    displayPDF($d[$pdid]['pdfstr'],$d[$pdid]['pdfbase']);
-        ///    // this is unique, can just display from this
-        ///}
+        displayPDF($pdfstr,$d[$pdid]['pdfbase'] . ".pdf");
     }
     else {
         print "Sorry we had an error (pdid not an int)";
@@ -63,35 +54,13 @@ else {
     else {
         $pdfstr = $d[$pdf_refid]['pdfstr'];
     }
-    displayPDF($pdfstr,$d[$pdf_refid]['pdfbase']);
-
-    ///if( $d[$pdf_refid]['pdfcat'] == 'NETLABELS'){
-    ///    $pdfstr = gzuncompress($d[$pdf_refid]['pdfstr']);
-    ///    displayPDF($pdfstr,$d[$pdf_refid]['pdfbase']);
-    ///}
-    ///else {
-    ///    displayPDF($d[$pdf_refid]['pdfstr'],$d[$pdf_refid]['pdfbase']);
-    ///    // this is unique, can just display from this
-    ///}
-    //displayPDF($d[$pdf_refid]['pdfstr'],$d[$pdf_refid]['pdfbase']);
+    displayPDF($pdfstr,$d[$pdf_refid]['pdfbase'] . ".pdf");
 }
-
-
-
-//if( isset($d[$pdf_refid])){
-//    $name=$d[$pdf_refid]['pdfbase'];
-//    //print_pre($d[$id],"Data")
-//    header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1.
-//    header("Pragma: no-cache"); // HTTP 1.0.
-//    header("Expires: 0"); // Proxies.
-//    header("Content-type:application/pdf");
-//    header("Content-Disposition:inline;filename=$name");
-//    print $d[$pdf_refid]['pdfstr'];
-//}
-//else {
-//    print "Sorry we had an error, no match for pdf_refid:$pdf_refid, pdfcat:$pdfcat<br>\n";
-//    print_pre($_GET,"pdf_refid");
-//}
+////////////////////////////////////////////////////////////////////////////////
+//
+// During initial deployment, the name was introduced WITHOUT the .pdf suffix
+// Am taking the easy way out here
+////////////////////////////////////////////////////////////////////////////////
 function displayPDF($pdfStr = "" , $name = "UnknownName" ){
     if ( $pdfStr == "" ) return;
 
@@ -99,7 +68,7 @@ function displayPDF($pdfStr = "" , $name = "UnknownName" ){
     header("Pragma: no-cache"); // HTTP 1.0.
     header("Expires: 0"); // Proxies.
     header("Content-type:application/pdf");
-    header("Content-Disposition:inline;filename=$name");
+    header("Content-Disposition:inline;filename=${name}");
     print $pdfStr;
 }
 ?>
