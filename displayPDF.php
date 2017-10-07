@@ -59,7 +59,7 @@ else {
 ////////////////////////////////////////////////////////////////////////////////
 //
 // During initial deployment, the name was introduced WITHOUT the .pdf suffix
-// Am taking the easy way out here
+// Took the easy way out on first pass, but improved on second pass.
 ////////////////////////////////////////////////////////////////////////////////
 function displayPDF($pdfStr = "" , $name = "UnknownName" ){
     if ( $pdfStr == "" ) return;
