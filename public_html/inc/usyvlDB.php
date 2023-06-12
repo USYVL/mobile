@@ -27,11 +27,11 @@ $s_key = ( isset($_SESSION['s_key']) ) ?  "{$_SESSION['s_key']}" : "unset" ;
 // since we dont actually create any of these here, the particulars of the table definitions
 // dont matter, although it does look like we have to declare them, probably so that
 // things get initialized correctly.
-$sdb = new dbMgmt('sdb','sqlite:' . __DIR__ . '/../io/db/sched.sqlite3','Scheduling Database',$logdb);
+$sdb = new dbMgmt('sdb','sqlite:' . MOBILE_SCHED_DB,'Scheduling Database',$logdb);
 $evtable = new dbMgmtTable("ev");                                     // should probably add a u_id
 $sdb->addTable($evtable);
 
-$mdb = new dbMgmt('mdb','sqlite:' . __DIR__ . '/../io/db/redbook.sqlite3','Instructional Summary Database',$logdb);
+$mdb = new dbMgmt('mdb','sqlite:' . REDBOOK_MANUAL_DB,'Instructional Summary Database',$logdb);
 $ist = new dbMgmtTable("dd");                            // drill day table, wanted to use is for instructional summary, but "is" is a reserved word in sql
 $mdb->addTable($ist);
 
