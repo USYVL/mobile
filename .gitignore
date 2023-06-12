@@ -1,4 +1,5 @@
 *~
 .DS_Store
+public_html/config.php
 public_html/io
 public_html/z-untracked
