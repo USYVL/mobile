@@ -1,5 +1,7 @@
 <?php
-
+// make a copy of this file to config.php 
+// modify the two definitions to point at the appropriate sqlite3 dbs
+// the db paths must be local and be writable by the web server
 define('MOBILE_SCHED_DB','/var/www/usyvl-repos/scheduling/public_html/io-data/db/sched.sqlite3');
 define('REDBOOK_MANUAL_DB','/var/www/usyvl-repos/scheduling/public_html/io-data/db/redbook.sqlite3');
 
