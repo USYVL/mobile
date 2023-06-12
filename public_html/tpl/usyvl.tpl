@@ -7,6 +7,7 @@ $mwf = "http://localhost/usryl/mwf/root/assets";
 $mwf = "http://localhost/usyvl/mwf-local/root/assets";
 $mwf = "http://mwf.usyvl.org/assets";
 $mwf = "//mwf.eri.ucsb.edu";
+$mwf = "//mwf8.usyvl.org";
 ?>
 
 <head>
