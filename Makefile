@@ -6,7 +6,7 @@ version:
 	echo "making version"
 	bin/version-gen
 	echo "new version file"
-	cat version.php
+	cat public/version.php
 	# Hmmm, the eval below is done before the new file is created, need to figure
 	# out how to make it happen at runtime, after the new version file is created
 	# currently have to run this twice after getting an error on first pass

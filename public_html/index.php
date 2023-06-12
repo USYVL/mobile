@@ -1,9 +1,5 @@
 <?php
-require_once("config.php");
-require_once("dbManagement.php");
-require_once("usyvlDB.php");
-require_once("version.php");
-require_once("index_inc.php");
+require_once "./inc/init.php";
 
 define('DEBUGLEVEL',0);
 

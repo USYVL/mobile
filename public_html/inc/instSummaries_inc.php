@@ -3,6 +3,7 @@ require_once("mwfMobileSiteClass.php");
 require_once("digitalClock.php");
 
 class usyvlMobileSite extends mwfMobileSite {
+    public   string   $title;
     //////////////////////////////////////////////////////////////////////////////////////////
     function __construct(){
         parent::__construct();

@@ -27,16 +27,29 @@ $s_key = ( isset($_SESSION['s_key']) ) ?  "{$_SESSION['s_key']}" : "unset" ;
 // since we dont actually create any of these here, the particulars of the table definitions
 // dont matter, although it does look like we have to declare them, probably so that
 // things get initialized correctly.
-$sdb = new dbMgmt('sdb','sqlite:' . MOBILE_SCHED_DB,'Scheduling Database',$logdb);
-$evtable = new dbMgmtTable("ev");                                     // should probably add a u_id
-$sdb->addTable($evtable);
+$logdb = new stdClass();    // not logging for this case
+if(file_exists(MOBILE_SCHED_DB)){
+    $sdb = new dbMgmt('sdb','sqlite:' . MOBILE_SCHED_DB,'Scheduling Database',$logdb);
+    $evtable = new dbMgmtTable("ev");                                     // should probably add a u_id
+    $sdb->addTable($evtable);
+}
+else {
+    print "# Required SQLite database (" . MOBILE_SCHED_DB . ") does not exist.  Please adjust path in config.php (see instructions in config.php.default if config.php doesn't exist.<br>\n";
+    exit(0);
+}
 
-$mdb = new dbMgmt('mdb','sqlite:' . REDBOOK_MANUAL_DB,'Instructional Summary Database',$logdb);
-$ist = new dbMgmtTable("dd");                            // drill day table, wanted to use is for instructional summary, but "is" is a reserved word in sql
-$mdb->addTable($ist);
-
-$drt = new dbMgmtTable("dr");                            // drill day table, wanted to use is for instructional summary, but "is" is a reserved word in sql
-$mdb->addTable($drt);
+if (file_exists(REDBOOK_MANUAL_DB)){
+    $mdb = new dbMgmt('mdb','sqlite:' . REDBOOK_MANUAL_DB,'Instructional Summary Database',$logdb);
+    $ist = new dbMgmtTable("dd");                            // drill day table, wanted to use is for instructional summary, but "is" is a reserved word in sql
+    $mdb->addTable($ist);
+    
+    $drt = new dbMgmtTable("dr");                            // drill day table, wanted to use is for instructional summary, but "is" is a reserved word in sql
+    $mdb->addTable($drt);
+}
+else {
+    print "# Required SQLite database (" . REDBOOK_MANUAL_DB . ") does not exist.  Please adjust path in config.php (see instructions in config.php.default if config.php doesn't exist.<br>\n";
+	exit(0);
+}
 
 
 ?>

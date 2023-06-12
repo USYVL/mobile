@@ -1,7 +1,9 @@
 <?php
-require_once("mwfMobileSiteClass.php");
+require_once 'init.php';
 
 class indexMobile extends mwfMobileSite {
+    public   array   $args;
+    public   string  $title;
     function __construct(){
         parent::__construct();
     }
@@ -42,6 +44,7 @@ class indexMobile extends mwfMobileSite {
         $b = $this->contentList("Main Menu",$m);
         return "$b";
     }
+    ////////////////////////////////////////////////////////////////////////////
     function dispStates(){
         $this->initArgs('programs',array('mode','season'));
         $this->title = "USYVL Mobile - Select State {$this->args['season']}";
@@ -59,6 +62,7 @@ class indexMobile extends mwfMobileSite {
         $b = $this->contentList("Select State",$m);
         return "$b";
     }
+    ////////////////////////////////////////////////////////////////////////////
     function dispPrograms(){
         $this->initArgs('program_info',array('mode','season','state'));
         $this->title = "USYVL Mobile - Select Program from {$this->args['state']} for {$this->args['season']}";
@@ -75,6 +79,7 @@ class indexMobile extends mwfMobileSite {
         $b = $this->contentList("Select Program",$m);
         return "$b";
     }
+    ////////////////////////////////////////////////////////////////////////////
     function dispProgramInfo(){
         $this->initArgs('launch',array('mode','season','state','program'));
         $this->title = "USYVL Mobile - {$this->args['state']} Program {$this->args['program']} information for {$this->args['season']}";
@@ -141,12 +146,14 @@ class indexMobile extends mwfMobileSite {
         // Now we split out the various functions
     }
     // Most of this is actually done with javascript/jquery
+    ////////////////////////////////////////////////////////////////////////////
     function dispAuto(){
         $b = "Location:";
         $b .= "<div id=\"device_location\">NA</div>";
         $b .= "<div id=\"proximal_events\">Proximal Events: NA</div>";
         return $b;
     }
+    ////////////////////////////////////////////////////////////////////////////
     function dispSettings(){
         $this->title = "USYVL Mobile - Settings";
 
@@ -154,10 +161,11 @@ class indexMobile extends mwfMobileSite {
 
         return "$b";
     }
+    ////////////////////////////////////////////////////////////////////////////
     function dispCredits(){
         $this->title = "USYVL Mobile - Credits";
-
-        $b = "";
+        $bb = '';
+        $b  = '';
         $b .= $this->contentDiv("Version","<p class=\"credits author\">\nVersion: " . $GLOBALS['version'] . "\n</p>\n");
         $bb .= "<p class=\"credits\">\n";
         $bb .= "HTML 5\n";
@@ -178,6 +186,7 @@ class indexMobile extends mwfMobileSite {
         $b .= $this->contentDiv("Art/Graphics","<p class=\"credits\">\nProvided by USYVL</p>\n");
         return "$b";
     }
+    ////////////////////////////////////////////////////////////////////////////
     function dispAbout(){
         $b = "";
         $bb = "<p>The United States Youth Volleyball League's mission is to provide ";
@@ -208,6 +217,7 @@ class indexMobile extends mwfMobileSite {
 
         return $b;
     }
+    ////////////////////////////////////////////////////////////////////////////
     function dispInDev(){
         $b = "";
         $bb = "<p>The links on this page are to items under development</p>";
@@ -225,6 +235,7 @@ class indexMobile extends mwfMobileSite {
         $b .= $this->contentList("In Dev Menu",$m);
         return "$b";
     }
+    ////////////////////////////////////////////////////////////////////////////
     function dispRules(){
         $b = "";
         $bb  = "<p>The following describes the game rules for USYVL matches.</p>";
@@ -272,6 +283,7 @@ long whistle ends the game.";
 
         return "$b";
     }
+    ////////////////////////////////////////////////////////////////////////////
     function dispDiagram(){
         $b = "";
         //$b .= "<canvas id=\"myCanvas\" width=\"200\" height=\"200\" class=\"myCanvasClass\"></canvas>";

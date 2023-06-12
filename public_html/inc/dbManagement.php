@@ -2,7 +2,20 @@
 require_once("csvUtils.php");
 require_once("printUtils.php");
 class dbMgmt {
-    function __construct($key,$dsn,$desc,&$log = null){
+    public    object   $dbh;
+    private   string   $db;
+    private   string   $dsn;
+    private   string   $type;
+    private   string   $path;
+    private   object   $log;
+    private   int      $counter;
+    private   string   $mesgs;
+    private   array    $tables;
+    private   object   $pdos;
+    private   array    $tableCreated;
+    private   bool     $tablesCreated;
+
+    function __construct($key,$dsn,$desc,&$log = new stdClass()){
         $this->db = $key;
         $this->dsn = $dsn;
         // type is not really used as I expect this to remain sqlite
@@ -12,7 +25,7 @@ class dbMgmt {
         $this->counter = 0;
         $this->mesgs = "";
         $this->tables = array();
-        $this->pdos = null; // pdo statement for queries
+        $this->pdos = new stdClass(); // pdo statement for queries
         
         $this->myTables();
         
@@ -120,7 +133,7 @@ class dbMgmt {
     ////////////////////////////////////////////////////////////////////////////
     function addTable($table){
         $this->tables[$table->name] = $table;
-        $this->tableCreated[$table->name] = false;
+        $this->tableCreated[$table->name] = FALSE;
         
         // maybe should create tables here?
     }
@@ -133,11 +146,11 @@ class dbMgmt {
         // original method before refined the prepare/execute options
         //$this->pdos = $this->dbh->query("$qstr");
         
-        if( is_object($this->result)){
-            //dprint("having to closeCursor on non-empty result before query",1,0,"");
-            //print_pre($this->result,"remaining result");
-            $this->result->closeCursor();
-        }
+        // if( is_object($this->result)){
+        //     //dprint("having to closeCursor on non-empty result before query",1,0,"");
+        //     //print_pre($this->result,"remaining result");
+        //     $this->result->closeCursor();
+        // }
         
         if( is_string($qstr) && is_null($values)){
             //print "running straight query<br />";
@@ -201,7 +214,7 @@ class dbMgmt {
 
         }
         else {
-            if( 1 && $this->log && ! preg_match("/^select/",$qstr)){
+            if( ! $this->log instanceof stdClass && ! preg_match("/^select/",$qstr)){
                 // log this entry
                 // would be nice to somehow pull the prog_coord for the given site....
                 // options: use a SESSION var that would be set before a query (relies on programming)
@@ -588,6 +601,8 @@ class dbMgmt {
 }
 ////////////////////////////////////////////////////////////////////////////////
 class dbMgmtTable {
+    public   string  $name;
+    private   array   $tableCreated;
     ////////////////////////////////////////////////////////////////////////////
     function __construct($tablename){
         $this->name = $tablename;

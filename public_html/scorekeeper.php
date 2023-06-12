@@ -30,6 +30,7 @@ $content['scripts'] = "";
 $content['css']      .= '<link rel="stylesheet" href="css/scorekeeper.css" type="text/css">' . "\n";
 $content['scripts']  .= '<script type="text/javascript" src="js/scorekeeper.js"></script>' . "\n";
 
+$b = '';
 $b .= '<div id="skwrapper">';
 $htb = '
 
@@ -43,7 +44,7 @@ $htb .= "        <span id=\"tmA_service\" class=\"service\">Serving</span>  \n";
 $htb .= "    </div>\n";
 $htb .= "  </div> \n";
   
-  
+$atb = '';
 $atb .= '<div id="c2_wrapper" class="rfloat">
     <div class="section_style">
     ';

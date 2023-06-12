@@ -1,17 +1,24 @@
 <?php
 class mwfMobileSite {
+    private   string   $mode;
+    private   string   $title;
+    public    object   $sdb;
+    public    object   $mdb;
+    private   array    $registeredFunctions;
+    private   array    $regFunctionsArgs;
+    public    array    $args;
     ////////////////////////////////////////////////////////////////////////////
     function __construct(){
         $this->mode = "";
         $this->title = "Main Menu";
-        $this->regsiteredFunctions = array();
+        $this->registeredFunctions = array();
         $this->regFunctionsArgs = array();
 
         $this->registerCoreFunctions();
         $this->registerExtendedFunctions();
         $this->processGET();
-        $this->sdb = $GLOBALS['dbh']['sdb'];
-        $this->mdb = $GLOBALS['dbh']['mdb'];
+        isset($GLOBALS['dbh']['sdb']) and $this->sdb = $GLOBALS['dbh']['sdb'];
+        isset($GLOBALS['dbh']['mdb']) and $this->mdb = $GLOBALS['dbh']['mdb'];
     }
     ////////////////////////////////////////////////////////////////////////////
     function getTitle(){
@@ -64,14 +71,14 @@ class mwfMobileSite {
     }
     ////////////////////////////////////////////////////////////////////////////
     function registerFunc($key,$method,$args = null){
-        $this->regsiteredFunctions[$key] = $method;
+        $this->registeredFunctions[$key] = $method;
         $this->regFunctionsArgs[$key] = $args;
     }
     ////////////////////////////////////////////////////////////////////////////
     function display(){
         // possibly use disp or page instead of mode
         $b = "";
-        foreach( $this->regsiteredFunctions as $mode => $method){
+        foreach( $this->registeredFunctions as $mode => $method){
             if( $this->mode == $mode ){
                 if( method_exists($this,$method)){
                     if( is_callable(array($this,$method))){
