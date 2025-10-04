@@ -68,7 +68,7 @@ function displayPDF($pdfStr = "" , $name = "UnknownName" ){
     header("Pragma: no-cache"); // HTTP 1.0.
     header("Expires: 0"); // Proxies.
     header("Content-type:application/pdf");
-    header("Content-Disposition:inline;filename=${name}");
+    header("Content-Disposition:inline;filename={$name}");
     print $pdfStr;
 }
 ?>

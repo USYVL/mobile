@@ -1,7 +1,7 @@
 <?php
 class mwfMobileSite {
     private   string   $mode;
-    private   string   $title;
+    public    string   $title = "Main Menu";
     public    object   $sdb;
     public    object   $mdb;
     private   array    $registeredFunctions;

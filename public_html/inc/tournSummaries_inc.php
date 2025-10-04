@@ -13,14 +13,20 @@ class mwfMobileSite_tourn extends mwfMobileSite {
     }
     //////////////////////////////////////////////////////////////////////////////////////////
     function dispDates(){
-        $this->initArgs('tsumm',array('mode','season','state','program','date'));
+        $this->initArgs('tsumm',array('mode','season','state','program'));
         $sdb = $GLOBALS['dbh']['sdb'];
         $this->title = "USYVL Mobile - Select Tournament Date from {$this->args['state']} Program {$this->args['program']} for {$this->args['season']}";
 
         $m = "";
-        $dates = $this->sdb->fetchListNew("select distinct evds from ev where evprogram = ? and evistype=?",array($this->args['program'],'INTE'));
-        foreach( $dates as $date){
-                $this->setArg('date',$date);
+        // $dates = $this->sdb->fetchListNew("SELECT DISTINCT evds FROM ev WHERE evprogram = ? AND evistype=? ORDER BY evds",array($this->args['program'],'INTE'));
+        $hash = $this->sdb->getKeyedHash('evds',"SELECT * FROM ev WHERE evprogram = ? AND evistype=? ORDER BY evds",array($this->args['program'],'INTE'));
+        $dates = array_keys($hash);
+        // print_pre($dates,"Dates");
+        foreach( $hash as $date => $data){
+            // need to get evid and ev_refid for this event
+                $this->setArg('ev_refid',$data['ev_refid']);
+                $this->setArg('evid',$data['evid']);
+                $this->setArg('evds',$date);
            //$m .= "  <li><a href=\"" . $_SERVER['PHP_SELF'] . "?mode=tsumm&date=$date&season=$season&state={$this->args['state']}&program=$program\">$date</a></li>\n";
                 $m .= $this->buildURL_li($_SERVER['PHP_SELF'],$this->args,$date,"class=\"nonereally\"");
         }
@@ -46,7 +52,15 @@ class mwfMobileSite_tourn extends mwfMobileSite {
         else                   $d = array_shift($evd);
 
         // get event description, this is not based on the evid
-        $descs = $this->sdb->fetchListNew("select distinct evname from ev left join gm on ev.evid = gm.evid where ev.evds = ? and evprogram = ? and evistype = ?",array($this->args['evds'],$this->args['program'],'INTE'));
+        $descs = $this->sdb->fetchListNew("SELECT DISTINCT evname FROM ev LEFT JOIN gm ON ev.evid = gm.evid WHERE ev.evds = ? AND evprogram = ? AND evistype = ?",array($this->args['evds'],$this->args['program'],'INTE'));
+        if (count($descs) == 0 ){
+            // mode=tsumm&season=Fall%202025&state=CA&program=Goleta   date=2025-10-04
+            // mode=tsumm&season=Fall%202025&state=CA&program=Goleta  ev_refid=366 &evid=373  &evds=2025-10-04
+            // mode=tsumm&season=Fall%202025&state=CA&program=Goleta  ev_refid=366 &evid=373 &evds=2025-10-04
+            // mode=tsumm&season=Fall%202025&state=CA&program=Goleta  ev_refid=366&ev_id=373&evds=2025-10-04
+            // mode=tsumm&season=Fall%202025&state=CA&program=Goleta   &evds= &ev_refid=4569&evid=&date=2025-10-04
+            print "No Records Returned by db search";
+        } 
         $desc = $descs[0];
 
         // start building the page
@@ -75,7 +89,7 @@ class mwfMobileSite_tourn extends mwfMobileSite {
             /**
              Double Hmmmmm, we are now passing in the ev_refid, may not even need this check
              **/
-            $this->args['ev_refid'] = $this->sdb->fetchVal("ev_refid from ev","evprogram = ? and evistype = ? and evds = ?",array($this->args['program'],'INTE',$this->args['evds']));
+            $this->args['ev_refid'] = $this->sdb->fetchVal("ev_refid FROM ev","evprogram = ? AND evistype = ? AND evds = ?",array($this->args['program'],'INTE',$this->args['evds']));
         }
         else {  // Home Game
             //$this->setArg('mode','tpool');
@@ -99,8 +113,12 @@ class mwfMobileSite_tourn extends mwfMobileSite {
     }
     //////////////////////////////////////////////////////////////////////////////////////////
     function dispPoolSummaryFromRefID(){
+        // The pool table is currently completely empty, so not sure where that is falling through...
+        // So this call will return nothing at the moment
+        
+        // will need to poke at that a bit
         $poolinfo_script = ( false ) ? $_SERVER['PHP_SELF'] : 'ajax/getPoolInfoAjax.php' ;
-        $pdata = $this->sdb->getKeyedHash('poolid',"select * from pool where p_evid = ?",array($this->args['ev_refid']));
+        $pdata = $this->sdb->getKeyedHash('poolid',"SELECT * FROM pool WHERE p_evid = ?",array($this->args['ev_refid']));
         //print "Home Game: {$this->args['evid']}<br>\n";
         //print_pre($pdata,"Away game data");
 

@@ -64,7 +64,7 @@ function array2table($data,$cols = 4){
     $buf .= "<table style='border: solid 0px; width: 100%; text-align: center; margin-left: auto; margin-right: auto;'>";
     $buf .= "<tr>\n";
     for( $i = 0; $i < $cols ; $i++){
-        $buf .= "<td style='text-align: left; vertical-align: top; width: ${width}%'>\n";
+        $buf .= "<td style='text-align: left; vertical-align: top; width: {$width}%'>\n";
         $coldata = array_slice($data,$i * $rows,$rows);
         foreach( $coldata as $d){
             $buf .= "$d<br />\n";
